@@ -40,8 +40,8 @@ while True:
             angle = np.arctan2(vec[1], vec[0]) * 180 / np.pi
 
             # print angle
-            print(f"Calculating angle between markers {ids[0]} and {ids[1]}")
-
+            # print(f"Calculating angle between markers {ids[0]} and {ids[1]}")
+            print('aa')
             print(f"Angle of vector connecting first two markers {ids[0]} and {ids[1]} is: {angle} degrees")
 
 
