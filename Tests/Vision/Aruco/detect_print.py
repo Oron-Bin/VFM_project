@@ -37,6 +37,7 @@ while cam.isOpened():
         if ids is not None:
             # Print corners and ids to the console
             print(find_center_of_marker(corners[0]))
+
             # for i, corner in zip(ids, corners):
             #     print('ID: {}; Corners: {}'.format(i, corner))
 
