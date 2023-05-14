@@ -93,8 +93,8 @@ while cam.isOpened():
 
     center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
     # print(tuple(center))
-    orientation = algo.find_card_orientation(Img) ## Update the orientation
-    print(orientation) #for me to check if the cam find and update the orientaion
+    # orientation = algo.find_card_orientation(Img) ## Update the orientation
+    # print(orientation) #for me to check if the cam find and update the orientaion
     algo.finger_position(Img,calibration=False) ## If Main axis system need calibartion change to True and calibrate the xy point
     # algo.plot_desired_path(Img,(-30,30),(-30,30)) ##TODO check this what its doing?
     # Capturing each frame of our video stream
@@ -112,14 +112,14 @@ while cam.isOpened():
         ######For User input#########
 
         # algo.position_user_input()
-        algo.y_d = 220 ## 220
-        algo.x_d = 642
+        algo.y_d = 227 ## 220
+        algo.x_d = 668
         start = time.perf_counter()
         ##############################
 
         #######################################
         ######For Rectangle Path Tracking######
-
+        #
         # algo.x_d = rectangle[0][0]
         # print(algo.x_d)
         # algo.y_d = rectangle[0][1]
@@ -183,10 +183,10 @@ while cam.isOpened():
                 mycard.send_data('vibrate')
                 set_des = 3
         if set_des == 3:
-            # time.sleep(1)
+            time.sleep(1) # a delay of a sec between each iteration
 
             for i in range(10):
-                mycard.send_data('st')
+                mycard.send_data('st') # or set des 3 or this is stop the vibration
 
             # time.sleep(1)
             algo.next_iteration()
@@ -238,8 +238,8 @@ while cam.isOpened():
             # else:
             #
             #     # algo.random_input()
-            #     algo.y_d = 358
-            #     algo.x_d = 642
+            #     algo.y_d = 227
+            #     algo.x_d = 668
             #     algo.clear()
             #     flag = 1
 
@@ -263,8 +263,8 @@ while cam.isOpened():
             set_des = 2
         # time.sleep(0.1)
         algo.draw_circle(Img, center)
-        # print(output)
-        print(set_des)
+        # print("output")
+        print("set des is" , set_des)
     # out.write(Img)
     cv2.imshow('QueryImage', Img)
 
@@ -274,5 +274,6 @@ while cam.isOpened():
     if cv2.waitKey(1) & 0xFF == ord('i'):
         algo.position_user_input(Img)
 #
-# cv2.destroyAllWindows()
-# plt.show()
+cv2.destroyAllWindows()
+plt.show()
+

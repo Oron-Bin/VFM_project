@@ -20,6 +20,7 @@ while cam.isOpened():
             circles = np.round(circles[0, :]).astype("int")
             # loop over the (x, y) coordinates and radius of the circles
             for (x, y, r) in circles:
+                print("x is",x,"y is", y,"radius is", r)
                 # draw the circle in the output image, then draw a rectangle
                 # corresponding to the center of the circle
                 cv2.circle(Img, (x, y), r, (0, 255 ,0), 4) # the color is in RGB and the last parameter is the thickness

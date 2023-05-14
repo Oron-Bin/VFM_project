@@ -26,24 +26,28 @@ while True:
     # if at least two markers detected
     if len(corners) >= 2:
         # draw marker borders
+
         aruco.drawDetectedMarkers(frame, corners, ids)
 
         # get position of first two markers
         curr_marker_pos = np.squeeze(corners[:2])
+        center = np.mean(curr_marker_pos, axis=0)
+
 
         # if this is not the first iteration
         if prev_marker_pos is not None:
             # calculate vector connecting first two markers
-            vec = curr_marker_pos[1] - curr_marker_pos[0]
-
+            vec = center - np.mean(prev_marker_pos, axis=0)
+            # print(vec)
             # calculate angle of vector
             angle = np.arctan2(vec[1], vec[0]) * 180 / np.pi
 
-            # print angle
-            # print(f"Calculating angle between markers {ids[0]} and {ids[1]}")
-            print('aa')
-            print(f"Angle of vector connecting first two markers {ids[0]} and {ids[1]} is: {angle} degrees")
+            # print ids of markers
 
+            # print angle
+            print(f"Angle of vector connecting first two markers {ids[0]} and {ids[1]} is: {angle} degrees")
+            print(vec)
+            print(center)
 
         # update previous marker position
         prev_marker_pos = curr_marker_pos
