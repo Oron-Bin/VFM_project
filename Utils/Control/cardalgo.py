@@ -199,8 +199,10 @@ class card_algorithms:
 
     def random_input(self):
         """ Random new input inside the rectangle area"""
-        x = random.randint(-70, 70)
-        y = random.randint(-70, 0)
+        x = random.randint(-30, 30)
+        y = random.randint(-30, 0)
+        # x = random.randint(-70, 70)
+        # y = random.randint(-70, 0)q
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y
         return [self.x_d, self.y_d]

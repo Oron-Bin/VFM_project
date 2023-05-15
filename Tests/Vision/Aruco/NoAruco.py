@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime
 
 sys.path.insert(1, r'/')
 
@@ -7,11 +8,10 @@ from Utils.Control.cardalgo import *
 
 initial_flag = 0
 
-
 """This Code is use to record a video"""
-
-filename = '../../../../video.avi'
-frames_per_second = 60
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+# frames_per_second = 60
 res = '720p'
 
 
@@ -30,8 +30,6 @@ STD_DIMENSIONS =  {
 }
 
 # grab resolution dimensions and set video capture to it.
-
-
 def get_dims(cap, res='1080p'):
     width, height = STD_DIMENSIONS["480p"]
     if res in STD_DIMENSIONS:
@@ -44,13 +42,11 @@ def get_dims(cap, res='1080p'):
 # Video Encoding, might require additional installs
 # Types of Codes: http://www.fourcc.org/codecs.php
 
-
 VIDEO_TYPE = {
     'avi': cv2.VideoWriter_fourcc(*'XVID'),
     #'mp4': cv2.VideoWriter_fourcc(*'H264'),
-    'mp4': cv2.VideoWriter_fourcc(*'XVID'),
+    # 'mp4': cv2.VideoWriter_fourcc(*'XVID'),
 }
-
 
 def get_video_type(filename):
     filename, ext = os.path.splitext(filename)
@@ -64,10 +60,14 @@ def get_video_type(filename):
 #Defines camera parameters#
 #==========================
 cam = cv2.VideoCapture(0)
-# out = cv2.VideoWriter(filename, get_video_type(filename), 25, get_dims(cam, res))
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = cv2.VideoWriter(filename, fourcc, 5, (640, 480))
+out = cv2.VideoWriter(filename, get_video_type(filename), 5, get_dims(cam, res))
+
 cam.set(3,1280)
 cam.set(4,720)
 # cam.set(cv2.CAP_PROP_AUTOFOCUS,0)
+
 
 ## Set the card class and open the serial communication
 mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
@@ -83,27 +83,20 @@ set_des = 0
 #     mycard.set_encoder_angle(algo.output_calibrate()) ## algo.output_calibrate()
 #     mycard.send_data('encoder')
 
-
 flag = 0
-
-
 
 j = 0
 while cam.isOpened():
 
     center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
-    # print(tuple(center))
-    # orientation = algo.find_card_orientation(Img) ## Update the orientation
-    # print(orientation) #for me to check if the cam find and update the orientaion
     algo.finger_position(Img,calibration=False) ## If Main axis system need calibartion change to True and calibrate the xy point
-    # algo.plot_desired_path(Img,(-30,30),(-30,30)) ##TODO check this what its doing?
     # Capturing each frame of our video stream
 
     if set_des == 0: ## If user didnt input a value yet
         print("No des yet")
+
         ##############################
         #########Generate Structure paths############
-        #
         # rectangle = algo.generate_path()
         # circle = algo.generate_circle()
         # heart = algo.generate_heart()
@@ -140,7 +133,6 @@ while cam.isOpened():
         # print(algo.x_d)
         # algo.y_d = heart[0][1]
         # print(algo.y_d)
-
         set_des = 1
         print(set_des)
 
@@ -161,9 +153,7 @@ while cam.isOpened():
         #     algo.clear()
 
         if algo.check_distance(epsilon=5) is not True and set_des == 2:
-
             ## If you want to choose control law number 1
-
             output = algo.law_1()
 
             ###############################################
@@ -259,13 +249,13 @@ while cam.isOpened():
             # if algo.iteration == 10:
             #     algo.export_data()
             #     break
-
             set_des = 2
+
         # time.sleep(0.1)
         algo.draw_circle(Img, center)
         # print("output")
         print("set des is" , set_des)
-    # out.write(Img)
+    out.write(Img)
     cv2.imshow('QueryImage', Img)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -273,7 +263,8 @@ while cam.isOpened():
         break
     if cv2.waitKey(1) & 0xFF == ord('i'):
         algo.position_user_input(Img)
-#
-cv2.destroyAllWindows()
-plt.show()
 
+cam.release()
+out.release()
+cv2.destroyAllWindows()
+# plt.show()
