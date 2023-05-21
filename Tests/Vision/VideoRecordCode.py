@@ -29,6 +29,8 @@ out.release()
 
 # Close the display window
 cv2.destroyAllWindows()
+
+
 # import os
 # import cv2
 #

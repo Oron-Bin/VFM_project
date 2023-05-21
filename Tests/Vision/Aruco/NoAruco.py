@@ -11,6 +11,7 @@ initial_flag = 0
 """This Code is use to record a video"""
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+# filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.mp4"
 # frames_per_second = 60
 res = '720p'
 
@@ -45,13 +46,14 @@ def get_dims(cap, res='1080p'):
 VIDEO_TYPE = {
     'avi': cv2.VideoWriter_fourcc(*'XVID'),
     #'mp4': cv2.VideoWriter_fourcc(*'H264'),
-    # 'mp4': cv2.VideoWriter_fourcc(*'XVID'),
+    'mp4': cv2.VideoWriter_fourcc(*'XVID'),
 }
 
 def get_video_type(filename):
     filename, ext = os.path.splitext(filename)
     if ext in VIDEO_TYPE:
       return  VIDEO_TYPE[ext]
+    # return VIDEO_TYPE['mp4']
     return VIDEO_TYPE['avi']
 
 
