@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+import matplotlib.pyplot as plt
 
 cam = cv2.VideoCapture(0)
 cam.set(3,1280)
