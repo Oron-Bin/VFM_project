@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 
 cam = cv2.VideoCapture(0)
 cam.set(3,1280)
@@ -75,34 +74,12 @@ while cam.isOpened():
                             tipLength=0.2
                         )
 
-                        # matplotlib.pyplot.arrow(circle_center[0], circle_center[1], dx_43, dy_43, **kwargs) #to do - fill the arrow
                     elif ids[-1] == 44:
-                        # dx = circle_center[0] - aruco_center[0]
-                        # dy = circle_center[1] - aruco_center[1]
                         angle += 180
-                        # arrow_head_y = (round(aruco_center[0]), round(aruco_center[1] - 110))
-                        # cv2.arrowedLine(
-                        #     Img,
-                        #     tuple(circle_center),
-                        #     arrow_head_y,
-                        #     (0, 0, 255),  # Red color
-                        #     3,  # Thickness of the arrowed line
-                        #     tipLength=0.2
-                        # )
-                        # angle = np.degrees(np.arctan2(dy, dx)) +180
+
                     elif ids[-1] == 45:
-                        # dx = circle_center[0] - aruco_center[0]
-                        # dy = circle_center[1] - aruco_center[1]
                         angle += 90
-                        # arrow_head_y = (round(aruco_center[0]), round(aruco_center[1]))
-                        # cv2.arrowedLine(
-                        #     Img,
-                        #     tuple(circle_center),
-                        #     arrow_head_y,
-                        #     (0, 0, 255),  # Red color
-                        #     3,  # Thickness of the arrowed line
-                        #     tipLength=0.2
-                        # )
+
                     elif ids[-1] == 46:
                         angle -= 90
 
@@ -121,9 +98,6 @@ while cam.isOpened():
         cv2.imshow('QueryImage', Img)
         cv2.waitKey(1) #shows continuous live video
 
-        # plt.imshow(cv2.cvtColor(Img, cv2.COLOR_BGR2RGB))
-        # plt.axis('off')
-        # plt.show()
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print('Interupt by user')
             break

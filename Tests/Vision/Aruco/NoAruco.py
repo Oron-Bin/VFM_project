@@ -89,8 +89,8 @@ flag = 0
 
 j = 0
 while cam.isOpened():
-
-    center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
+    center, Img = algo.filter_camera(cam=cam, filter=3)
+    # center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
     algo.finger_position(Img,calibration=False) ## If Main axis system need calibartion change to True and calibrate the xy point
     # Capturing each frame of our video stream
 
@@ -179,7 +179,7 @@ while cam.isOpened():
 
             for i in range(10):
                 mycard.send_data('st') # or set des 3 or this is stop the vibration
-
+            # mycard.send_data('st')
             # time.sleep(1)
             algo.next_iteration()
             j = j + 1
@@ -254,7 +254,9 @@ while cam.isOpened():
             set_des = 2
 
         # time.sleep(0.1)
+        # algo.draw_circle(self,Img,ret)
         algo.draw_circle(Img, center)
+        # algo.detect_circle(self,Img,ret)
         # print("output")
         print("set des is" , set_des)
     out.write(Img)

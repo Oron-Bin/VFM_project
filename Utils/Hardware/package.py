@@ -109,6 +109,7 @@ class Card:
 
 
 
+
 # Format: json:{"name": "dsp", "mode": "off"}\r\n
 
 # def int_to_bytes(number: int) -> bytes:
