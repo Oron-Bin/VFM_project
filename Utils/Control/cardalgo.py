@@ -1,4 +1,3 @@
-
 import cv2
 import numpy as np
 import random
@@ -45,10 +44,10 @@ class card_algorithms:
 
         """Update card and path position and time of position"""
         self.time_list.append(time.perf_counter()) ## Update the time
+        # self.center = center ## update the center
+        # self.path.append(center) ## update the path
         self.center = center ## update the center
         self.path.append(center) ## update the path
-        # self.center = tuple(center[:-1]) ## update the center
-        # self.path.append(tuple(center[:-1])) ## update the path
         self.orientation_list.append(self.orientation) ## update the orientation
 
 
@@ -91,7 +90,6 @@ class card_algorithms:
     def law_1(self):
 
         """ Function for calculating the first control loop law"""
-
         dx = self.filter(self.last_dx,self.x_d - self.center[0])
         dy = self.filter(self.last_dy,self.y_d - self.center[1])
         new_angle = round(np.degrees(np.arctan2(dx,dy)))
@@ -152,8 +150,8 @@ class card_algorithms:
 
     def random_input(self):
         """ Random new input inside the rectangle area"""
-        x = random.randint(-30, 30)
-        y = random.randint(-30, 0)
+        x = random.randint(-50, 50)
+        y = random.randint(-50, 0)
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y
         return [self.x_d, self.y_d]

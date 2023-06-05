@@ -119,7 +119,7 @@ while cam.isOpened():
             # algo.update(circle_center.tolist())
             algo.plot_path(img)
 
-            if algo.check_distance(epsilon=5) is not True and set_des == 2: #there is a problem
+            if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1
                 output = algo.law_1()
 
@@ -130,17 +130,17 @@ while cam.isOpened():
                 mycard.send_data('encoder') ## Send the motor output to the hardware
 
                 time.sleep(0.1)
-            elif algo.check_distance(15) is True:
-                for i in range(10):
+            elif algo.check_distance(10) is True:
+                for i in range(30):
                     mycard.send_data('vibrate')
                     set_des = 3
             if set_des == 3:
-                time.sleep(5) # a delay of a sec between each iteration
+                time.sleep(3) # a delay of a sec between each iteration
 
-                # for i in range(10):
+                for i in range(30):
 
-                    # mycard.send_data('st') # or set des 3 or this is stop the vibration
-                mycard.send_data('st')
+                    mycard.send_data('st') # or set des 3 or this is stop the vibration
+                # mycard.send_data('st')
                 # time.sleep(1)
                 algo.next_iteration()
                 j = j + 1
