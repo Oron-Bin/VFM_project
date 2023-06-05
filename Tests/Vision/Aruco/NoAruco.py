@@ -11,10 +11,8 @@ initial_flag = 0
 """This Code is use to record a video"""
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
-# filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.mp4"
 # frames_per_second = 60
 res = '720p'
-
 
 def change_res(cap, width, height):
     cap.set(3, width)
@@ -88,7 +86,8 @@ while cam.isOpened():
     if ret:
 
         circle_center, circle_radius = algo.detect_circle_info(img)
-        print(circle_center, circle_radius)
+        # print(circle_center, circle_radius)
+
         # algo.display_image(img, circle_center, circle_radius)
         # center, Img = algo.filter_camera(cam=cam, filter=3)
         # center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
@@ -103,19 +102,19 @@ while cam.isOpened():
             start = time.perf_counter()
 
             set_des = 1
-            print(set_des)
+            # print(set_des)
 
         elif circle_center is not None and set_des == 1: ## If the first card_center is not updated yet
             if (algo.card_initialize(circle_center)) == 1:
             # if (algo.card_initialize(circle_center[:-1], )) == 1:
                 set_des = 2
-                print(set_des)
+                # print(set_des)
                 mycard.vibrate_on()
 
         elif circle_center is not None:
             algo.plot_desired_position(img)
             algo.update(circle_center)
-            print('a',circle_center)
+            # print('a',circle_center)
             # algo.update(circle_center.tolist())
             algo.plot_path(img)
 
@@ -144,6 +143,7 @@ while cam.isOpened():
                 # time.sleep(1)
                 algo.next_iteration()
                 j = j + 1
+                # print(j)
                 algo.package_data()
 
 
@@ -159,7 +159,7 @@ while cam.isOpened():
             # algo.draw_circle(Img, center)
             # algo.detect_circle(self,Img,ret)
             # print("output")
-            print("set des is" , set_des)
+            # print("set des is" , set_des)
             out.write(img)
             algo.display_image(img, circle_center, circle_radius)
         # cv2.imshow('QueryImage', img)

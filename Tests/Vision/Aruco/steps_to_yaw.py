@@ -60,14 +60,14 @@ def ids_to_angle(ids,circle_center):
         if ids[-1] == 43:
             # angle = calculate_angle(circle_center, last_aruco_center)
             angle = angle
-            cv2.arrowedLine(
-                img,
-                tuple(circle_center),
-                tuple(last_aruco_center),
-                (0, 0, 255),
-                2,
-                tipLength=0.2
-            )
+            # cv2.arrowedLine(
+            #     img,
+            #     tuple(circle_center),
+            #     tuple(last_aruco_center),
+            #     (0, 0, 255),
+            #     2,
+            #     tipLength=0.2
+            # )
         elif ids[-1] == 44:
             angle += 180
             # angle = calculate_angle(circle_center, last_aruco_center) + 180
@@ -112,24 +112,24 @@ while cam.isOpened():
     if ret:
         circle_center, circle_radius = detect_circle_info(img)
         aruco_centers, ids = detect_aruco_centers(img)
-        axis_x = circle_center[0] - 50, circle_center[1]
-        axis_y = circle_center[0], circle_center[1] - 50
-        cv2.arrowedLine(
-            img,
-            tuple(circle_center),
-            axis_x,
-            (0, 0, 0),
-            2,
-            tipLength=0.2
-        )
-        cv2.arrowedLine(
-            img,
-            tuple(circle_center),
-            axis_y,
-            (0, 0, 0),
-            2,
-            tipLength=0.2
-        )
+        # axis_x = circle_center[0] - 50, circle_center[1]
+        # axis_y = circle_center[0], circle_center[1] - 50
+        # cv2.arrowedLine(
+        #     img,
+        #     tuple(circle_center),
+        #     axis_x,
+        #     (0, 0, 0),
+        #     2,
+        #     tipLength=0.2
+        # )
+        # cv2.arrowedLine(
+        #     img,
+        #     tuple(circle_center),
+        #     axis_y,
+        #     (0, 0, 0),
+        #     2,
+        #     tipLength=0.2
+        # )
 
         if circle_center is not None and aruco_centers:
             angle = ids_to_angle(ids, circle_center)
