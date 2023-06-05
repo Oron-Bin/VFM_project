@@ -146,16 +146,21 @@ class card_algorithms:
         self.x_d = self.tip_position[0] + int(input())
         print('Enter desired Y location')
         self.y_d = self.tip_position[1] + int(input())
+        # print('Enter desired orientation')
+        # self.orientation = int(input())
         return [self.x_d,self.y_d]
 
     def random_input(self):
         """ Random new input inside the rectangle area"""
         x = random.randint(-50, 50)
         y = random.randint(-50, 0)
+        # phi = random.randint(0,360)
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y
+        # self.orientation = phi
         return [self.x_d, self.y_d]
 
+        # return [self.x_d, self.y_d, self.orientation]
     def generate_path(self):
         """ generate rectangle path"""
         x = np.linspace(-30,30,15) + self.tip_position[0]
@@ -327,67 +332,88 @@ class card_algorithms:
         plt.ylim([0, 360])
         plt.title('Angle vs. Frame')
         plt.show()
-    # def detect_circle(self,img,ret):
-    #     """ Detect circle on img"""
-    #     # print("Inside detect circle")
-    #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) ## convert to gray scale picture
-    #     gray_blurred = cv2.blur(gray, (9, 9)) ## Blur to smooth the picture pixels
-    #     circles = cv2.HoughCircles(gray_blurred,
-    #                                cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=115, maxRadius=130)
+
+    # def find_card_orientation(self, QueryImg):
     #
+    #     """Finding the card orientation using Aruco markers"""
+    #     #to check - if i need this function or if i need the 'orientaion' code
     #
-    #     if circles is not None:
-    #         print("circle is not none")
-    #         # convert the (x, y) coordinates and radius of the circles to integers
-    #         circles = np.round(circles[0, :]).astype("int")
-    #         for (x, y, r) in circles:
-    #             print(r)
-    #         return [circles[0][0],circles[0][1],circles[0][2]]
-    #         # loop over the (x, y) coordinates and radius of the circles
+    #     # grayscale image
+    #     gray = cv2.cvtColor(QueryImg, cv2.COLOR_BGR2GRAY)
+    #     ARUCO_DICT = aruco.Dictionary_get(aruco.DICT_4X4_250)
+    #     ARUCO_PARAMETERS = aruco.DetectorParameters_create()
+    #     # Detect Aruco markers
+    #     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, ARUCO_DICT, parameters=ARUCO_PARAMETERS)
+    #     if ids is not None:
+    #         if ids.shape[0] > 1:
+    #             blanket = {}  ## make a blanket list for the ids and first corner
+    #             for i, corner in zip(ids, corners):
+    #                 blanket[i[0]] = self.find_center_of_marker(corner)
+    #             self.markers = blanket
+    #             # print(self.markers)
+    #             # if self.markers == None:
+    #             #     self.find_orientation(QueryImg)
+    #             new_orientation = self.find_orientation(blanket) ## Update the orientation
+    #             # print('the new orientaion is:',new_orientation)
+    #             return new_orientation
     #
-    #         #     # draw the circle in the output image, then draw a rectangle
-    #         #     # corresponding to the center of the circle
-    #         #     cv2.circle(img, (x, y), r, (0, 255, 0), 4)
-    #         #     cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
-    #         # return (x,y)
+    # def find_center_of_marker(self, marker_corners):
+    #
+    #     """find the center of each aruco markers"""
+    #
+    #     x_sum = marker_corners[0][0][0] + marker_corners[0][1][0] + marker_corners[0][2][0] + marker_corners[0][3][0]
+    #     y_sum = marker_corners[0][0][1] + marker_corners[0][1][1] + marker_corners[0][2][1] + marker_corners[0][3][1]
+    #     x_center = x_sum * .25
+    #     y_center = y_sum * .25
+    #     return (x_center, y_center)
+    #
+    # def check_members(self, marker_dict):
+    #
+    #     """Check which aruco was identifity"""
+    #
+    #     # if 43 in marker_dict:  ## and 47 in marker_dict
+    #     #     return 1
+    #     if 44 in marker_dict and 47 in marker_dict:  ## and 47 in marker_dict
+    #         return 2
+    #     elif 45 in marker_dict:  ## and 47 in marker_dict
+    #         return 3
+    #     elif 46 in marker_dict:  ## and 47 in marker_dict
+    #         return 4
     #     else:
-    #         print("circles is none")
-
-    # def draw_circle(self,img,cordinate):
-    #     """ Draw the circle on img with x y r cordinates"""
-    #     x = cordinate[0]
-    #     y = cordinate[1]
-    #     r = cordinate[2]
-    #     cv2.circle(img, (x, y), r, (0, 255, 0), 4)
-    #     cv2.rectangle(img, (x - 1, y - 1), (x + 1, y + 1),
-    #                   (0, 128, 255), -1)
-
-    # def filter_camera(self,cam,filter):
-    #     """
+    #         return False
     #
-    #     :param cam: camera object
-    #     :param filter: number of img to filter
-    #     :return: Center: New filtered center and Img
-    #     ##Note The more higher the filter the more latency #TODO Move the threading method using ROS2
-    #     """
-    #     i = 0
-    #     center_array = []
-    #     while i < filter:
-    #         ret, Img = cam.read()
-    #         if ret:
-    #             card_center = self.detect_circle(Img, ret)
-    #             # self.markers = self.find_Aruco(Img)
-    #             if card_center is None :  ## Ignore None Values
-    #                 continue
-    #             # if self.markers is None:
-    #             #     self.orientation = self.find_orientation(self.markers)
-    #             center_array.append(card_center)
-    #             # self.orientation_list.append(self.orientation)
-    #             i = i + 1
-    #     center_array = np.array(center_array)
-    #     center = np.round(np.mean(center_array, axis=0)).astype("int")
-    #     return center, Img
-
+    # def find_orientation(self, marker_dict):
+    #
+    #     """ find the card orientation """
+    #
+    #     key_list = self.markers.keys()
+    #     if self.center is not None:
+    #         if self.check_members(key_list) == 1:
+    #              corner_2 = self.markers.get(43)
+    #              self.orientation = self.find_dev(self.center, corner_2)
+    #
+    #         if self.check_members(key_list) == 2:
+    #             corner_2 = self.markers.get(47)
+    #             # corner_1= self.markers.get(47)
+    #             self.orientation = self.find_dev(self.center, corner_2)
+    #
+    #         elif self.check_members(key_list) == 3:
+    #             corner_2 = self.markers.get(45)
+    #             self.orientation = self.find_dev(self.center, corner_2) #-np.pi/2
+    #
+    #         elif self.check_members(key_list) == 4:
+    #             corner_2 = self.markers.get(46)
+    #             self.orientation = self.find_dev(self.center, corner_2) #+ np.pi/2
+    #     print ('the orinentation is:',self.orientation)
+    #     return self.orientation
+    #
+    #
+    # def find_dev(self, q1, q2):
+    #     """ Calculating the card angle in radians"""
+    #
+    #     y = q2[1] - q1[1]
+    #     x = q2[0] - q1[0]
+    #     return math.atan2(y, x)
     def check_distance(self,epsilon):
         """ Check the Distance between the Center of card to destination point
         epslion is the resolution mistake allowed"""
@@ -421,4 +447,5 @@ class card_algorithms:
 
         with open('../../../data.pkl', 'wb') as handle:
             pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
