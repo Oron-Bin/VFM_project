@@ -126,19 +126,19 @@ while cam.isOpened():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
 
-            origin = tuple(circle_center)
+            origin = tuple(algo.finger_position(img)) #green point on screen
             scale = 50
             # Define the endpoints of the X-axis and Y-axis relative to the origin
-            x_axis_end = (origin[0] + int(scale), origin[1])
-            y_axis_end = (origin[0], origin[1] + int(scale))
+            x_axis_end = (origin[0] - int(scale), origin[1])
+            y_axis_end = (origin[0], origin[1] - int(scale))
 
             # Draw coordinate system
-            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)
+            cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)
 
             # Draw coordinate system
-            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)  # Y-axis (green)
+            cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1
@@ -155,6 +155,7 @@ while cam.isOpened():
                 for i in range(30):
                     mycard.send_data('vibrate')
                     set_des = 3
+
             if set_des == 3:
                 time.sleep(3) # a delay of a sec between each iteration
 
