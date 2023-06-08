@@ -84,7 +84,7 @@ j = 0
 while cam.isOpened():
     ret, img = cam.read()
     if ret:
-
+        state_data = []
         circle_center, circle_radius = algo.detect_circle_info(img)
         aruco_centers, ids = algo.detect_aruco_centers(img)
         # print(circle_center, circle_radius)
@@ -101,7 +101,7 @@ while cam.isOpened():
             algo.y_d = 227 ## 220
             algo.x_d = 668
             start = time.perf_counter()
-
+            print('the goal position is', algo.x_d,algo.y_d)
             set_des = 1
             # print(set_des)
 
@@ -121,6 +121,7 @@ while cam.isOpened():
 
             if ids is not None and len(ids) > 0:
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
+                # state_data.append((algo.path[:-1], algo.path[:-1], orientation_angle))
                 # Draw arrowed line indicating orientation
                 cv2.putText(img, f"Angle: {orientation_angle}", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -143,7 +144,7 @@ while cam.isOpened():
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1
                 output = algo.law_1()
-
+                # print(algo.path)
                 ###############################################
 
                 mycard.set_encoder_angle(output) ## Update the motor output
@@ -152,8 +153,10 @@ while cam.isOpened():
 
                 time.sleep(0.1)
             elif algo.check_distance(10) is True:
+                print('arive to the goal', algo.path[-1])
                 for i in range(30):
                     mycard.send_data('vibrate')
+
                     set_des = 3
 
             if set_des == 3:
@@ -170,9 +173,12 @@ while cam.isOpened():
                 algo.package_data()
 
 
-                algo.clear()
+                # algo.clear()
+                # with open('state_data.txt', 'w') as file:
+                #     for state in state_data:
+                #         file.write(f"{state[0]}, {state[1]}, {state[2]}\n")
                 algo.random_input()
-
+                print('the new goal is',algo.random_input())
                 set_des = 2
 
             # time.sleep(0.1)

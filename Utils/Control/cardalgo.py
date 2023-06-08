@@ -320,7 +320,7 @@ class card_algorithms:
                 # angle = calculate_angle(circle_center, last_aruco_center) -90
             if angle < 0:
                 angle += 360
-            print('The orientation is:', angle)
+            # print('The orientation is:', angle)
             return angle
 
     def plot_angles(self,frame_numbers, angles):
