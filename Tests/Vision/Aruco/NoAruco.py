@@ -86,6 +86,7 @@ while cam.isOpened():
     if ret:
 
         circle_center, circle_radius = algo.detect_circle_info(img)
+        aruco_centers, ids = algo.detect_aruco_centers(img)
         # print(circle_center, circle_radius)
 
         # algo.display_image(img, circle_center, circle_radius)
@@ -117,6 +118,27 @@ while cam.isOpened():
             # print('a',circle_center)
             # algo.update(circle_center.tolist())
             algo.plot_path(img)
+
+            if ids is not None and len(ids) > 0:
+                orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
+                # Draw arrowed line indicating orientation
+                cv2.putText(img, f"Angle: {orientation_angle}", (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+
+            origin = tuple(circle_center)
+            scale = 50
+            # Define the endpoints of the X-axis and Y-axis relative to the origin
+            x_axis_end = (origin[0] + int(scale), origin[1])
+            y_axis_end = (origin[0], origin[1] + int(scale))
+
+            # Draw coordinate system
+            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)
+
+            # Draw coordinate system
+            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)  # Y-axis (green)
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1

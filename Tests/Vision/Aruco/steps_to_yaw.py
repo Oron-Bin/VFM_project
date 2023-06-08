@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 def detect_circle_info(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray_blurred = cv2.blur(gray, (8, 8))
-    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
+    circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=500)
 
     if circles is not None:
         circles = np.round(circles[0, :]).astype("int")
@@ -81,8 +81,8 @@ def ids_to_angle(ids,circle_center):
             angle += 360
         print('The orientation is:', angle)
         return angle
-    # else:
-    #     print('ids is none')
+    else:
+        print('ids is none')
     #     angle = angle
 
 def plot_angles(frame_numbers, angles):
@@ -112,26 +112,26 @@ while cam.isOpened():
     if ret:
         circle_center, circle_radius = detect_circle_info(img)
         aruco_centers, ids = detect_aruco_centers(img)
-        # axis_x = circle_center[0] - 50, circle_center[1]
-        # axis_y = circle_center[0], circle_center[1] - 50
-        # cv2.arrowedLine(
-        #     img,
-        #     tuple(circle_center),
-        #     axis_x,
-        #     (0, 0, 0),
-        #     2,
-        #     tipLength=0.2
-        # )
-        # cv2.arrowedLine(
-        #     img,
-        #     tuple(circle_center),
-        #     axis_y,
-        #     (0, 0, 0),
-        #     2,
-        #     tipLength=0.2
-        # )
+        # origin = tuple(circle_center)
+        # scale = 50
+        # # Define the endpoints of the X-axis and Y-axis relative to the origin
+        # x_axis_end = (origin[0] + int(scale), origin[1])
+        # y_axis_end = (origin[0], origin[1] + int(scale))
+        #
+        # # Draw coordinate system
+        # cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
+        # cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)
 
         if circle_center is not None and aruco_centers:
+            origin = tuple(circle_center)
+            scale = 50
+            # Define the endpoints of the X-axis and Y-axis relative to the origin
+            x_axis_end = (origin[0] + int(scale), origin[1])
+            y_axis_end = (origin[0], origin[1] + int(scale))
+
+            # Draw coordinate system
+            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)
             angle = ids_to_angle(ids, circle_center)
             angles.append(angle)
             current_time = time.time() - start_time
@@ -140,6 +140,10 @@ while cam.isOpened():
 
             display_image(img, circle_center, circle_radius)
 
+        else:
+            print("Warning")
+            angle = 0
+            print (angle)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print('Interrupted by user')

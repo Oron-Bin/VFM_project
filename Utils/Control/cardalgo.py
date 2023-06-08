@@ -234,7 +234,7 @@ class card_algorithms:
         if abs(self.last_angle-output) < 180:
             return output - self.last_angle
         else:
-            if  self.last_angle>output:
+            if self.last_angle>output:
                 return abs(self.last_angle-output-360)
             else:
                 return abs(self.last_angle-output)-360
@@ -294,23 +294,21 @@ class card_algorithms:
 
         return angle
 
-    def ids_to_angle(self,ids, circle_center):
-        # aruco_centers, ids = detect_aruco_centers(img)
-        # circle_center, circle_radius = detect_circle_info(img)
+    def ids_to_angle(self, ids, circle_center, aruco_centers):
         last_aruco_center = aruco_centers[-1]
-        angle = calculate_angle(circle_center, last_aruco_center)
+        angle = self.calculate_angle(circle_center, last_aruco_center)
         if ids is not None:
             if ids[-1] == 43:
                 # angle = calculate_angle(circle_center, last_aruco_center)
                 angle = angle
-                cv2.arrowedLine(
-                    img,
-                    tuple(circle_center),
-                    tuple(last_aruco_center),
-                    (0, 0, 255),
-                    2,
-                    tipLength=0.2
-                )
+                # cv2.arrowedLine(
+                #     img,
+                #     tuple(circle_center),
+                #     tuple(last_aruco_center),
+                #     (0, 0, 255),
+                #     2,
+                #     tipLength=0.2
+                # )
             elif ids[-1] == 44:
                 angle += 180
                 # angle = calculate_angle(circle_center, last_aruco_center) + 180
