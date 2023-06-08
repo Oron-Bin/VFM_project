@@ -406,12 +406,12 @@ class card_algorithms:
     #     return self.orientation
     #
     #
-    # def find_dev(self, q1, q2):
-    #     """ Calculating the card angle in radians"""
-    #
-    #     y = q2[1] - q1[1]
-    #     x = q2[0] - q1[0]
-    #     return math.atan2(y, x)
+    def find_dev(self, q1, q2):
+        """ Calculating the card angle in radians"""
+
+        y = q2[1] - q1[1]
+        x = q2[0] - q1[0]
+        return math.atan2(y, x)
     def check_distance(self,epsilon):
         """ Check the Distance between the Center of card to destination point
         epslion is the resolution mistake allowed"""
