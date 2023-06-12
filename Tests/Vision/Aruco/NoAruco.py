@@ -77,6 +77,8 @@ algo = card_algorithms(x_d=0,y_d=0) # Define the card algorithm object
 # Define the set desired paramter and tell the code that user didnt init it yet
 set_des = 0
 
+orientation_list =[]
+delta_list =[]
 
 flag = 0
 
@@ -122,6 +124,11 @@ while cam.isOpened():
 
             if ids is not None and len(ids) > 0:
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
+                orientation_list.append(round(orientation_angle,1))
+
+                print('orientation list')
+                print(orientation_list)
+
                 # state_data.append((algo.path[:-1], algo.path[:-1], orientation_angle))
                 # Draw arrowed line indicating orientation
                 cv2.putText(img, f"Angle: {round(orientation_angle,1)}", (10, 30),
@@ -147,21 +154,17 @@ while cam.isOpened():
             # Draw coordinate system
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)
-            # angle_list =[]
-            # delta_list =[]
+
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1
                 output  = algo.law_1()
+                delta_list.append(output)
+                print("delta list")
+                print(delta_list)
                 # motor_angle = algo.find_dev(algo.tip_position[0]+algo.x_d-algo.center[0],algo.tip_position[1]+algo.y_d-algo.center[1])
                 # cv2.putText(img, f"motor_angle: {motor_angle}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 # print(algo.path)
                 # print(algo.angle_of_motor())
-
-                # angle_list.append(algo.angle_of_motor)
-                # delta_list.append(output)
-                #
-                # print(angle_list[-1])
-                # print(delta_list[-1])
 
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
