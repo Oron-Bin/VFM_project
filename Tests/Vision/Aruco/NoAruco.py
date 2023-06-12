@@ -131,6 +131,9 @@ while cam.isOpened():
                 cv2.putText(img, f"my_position: {algo.path[-1]}", (10, 90),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
+                cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
             origin = tuple(algo.finger_position(img)) #green point on screen
             scale = 50
             # Define the endpoints of the X-axis and Y-axis relative to the origin
@@ -144,13 +147,27 @@ while cam.isOpened():
             # Draw coordinate system
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)
-
+            # angle_list =[]
+            # delta_list =[]
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1
-                output = algo.law_1()
+                output  = algo.law_1()
                 # motor_angle = algo.find_dev(algo.tip_position[0]+algo.x_d-algo.center[0],algo.tip_position[1]+algo.y_d-algo.center[1])
                 # cv2.putText(img, f"motor_angle: {motor_angle}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                print(algo.path)
+                # print(algo.path)
+                # print(algo.angle_of_motor())
+
+                # angle_list.append(algo.angle_of_motor)
+                # delta_list.append(output)
+                #
+                # print(angle_list[-1])
+                # print(delta_list[-1])
+
+
+                cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 ###############################################
 
                 mycard.set_encoder_angle(output) ## Update the motor output
@@ -159,6 +176,7 @@ while cam.isOpened():
 
                 time.sleep(0.1)
             elif algo.check_distance(10) is True:
+
 
                 print('arive to the goal', algo.path[-1])
 

@@ -447,3 +447,8 @@ class card_algorithms:
             pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+    def angle_of_motor(self):
+        dx = self.filter(self.last_dx,self.x_d - self.center[0])
+        dy = self.filter(self.last_dy,self.y_d - self.center[1])
+        new_angle = round(np.degrees(np.arctan2(dx,dy)))
+        return new_angle
