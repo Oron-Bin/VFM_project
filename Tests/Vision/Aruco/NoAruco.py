@@ -1,6 +1,7 @@
 import os
 import sys
 import datetime
+import csv
 
 sys.path.insert(1, r'/')
 
@@ -8,12 +9,12 @@ from Utils.Control.cardalgo import *
 
 initial_flag = 0
 
-"""This Code is use to record a video"""
+"""This Code is used to record a video"""
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
 # frames_per_second = 60
 res = '720p'
-
+data_list = []
 def change_res(cap, width, height):
     cap.set(3, width)
     cap.set(4, height)
@@ -30,7 +31,7 @@ def get_dims(cap, res='1080p'):
     width, height = STD_DIMENSIONS["480p"]
     if res in STD_DIMENSIONS:
         width,height = STD_DIMENSIONS[res]
-    ## change the current caputre device
+    ## change the current capture device
     ## to the resulting resolution
     change_res(cap, width, height)
     return width, height
@@ -50,7 +51,7 @@ def get_video_type(filename):
     return VIDEO_TYPE['avi']
 
 
-"""This part responsible for the close loop control using CV2 circle detection"""
+"""This part is responsible for the closed-loop control using CV2 circle detection"""
 #==========================
 #Defines camera parameters#
 #==========================
@@ -74,11 +75,11 @@ mycard.send_data(key='motor') ## Send data to the motor/ this func in package
 algo = card_algorithms(x_d=0,y_d=0) # Define the card algorithm object
 
 
-# Define the set desired paramter and tell the code that user didnt init it yet
+# Define the set desired parameter and tell the code that the user didn't initialize it yet
 set_des = 0
 
-orientation_list =[]
-delta_list =[]
+orientation_list = []
+delta_list = []
 
 flag = 0
 
@@ -94,11 +95,11 @@ while cam.isOpened():
         # algo.display_image(img, circle_center, circle_radius)
         # center, Img = algo.filter_camera(cam=cam, filter=3)
         # center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
-        algo.finger_position(img,calibration=False) ## If Main axis system need calibartion change to True and calibrate the xy point
+        algo.finger_position(img,calibration=False) ## If Main axis system needs calibration change to True and calibrate the xy point
         # Capturing each frame of our video stream
 
-        if set_des == 0: ## If user didnt input a value yet
-            print("No des yet")
+        if set_des == 0: ## If the user didn't input a value yet
+            print("No desired position yet")
 
             algo.y_d = 227 ## 220
             algo.x_d = 668
@@ -174,14 +175,14 @@ while cam.isOpened():
                 ###############################################
 
                 mycard.set_encoder_angle(output) ## Update the motor output
-                algo.plot_arrow(img) ## Plot the direction of motor
+                algo.plot_arrow(img) ## Plot the direction of the motor
                 mycard.send_data('encoder') ## Send the motor output to the hardware
 
                 time.sleep(0.1)
             elif algo.check_distance(10) is True:
 
 
-                print('arive to the goal', algo.path[-1])
+                print('Arrived at the goal', algo.path[-1])
 
                 for i in range(30):
                     mycard.send_data('vibrate')
@@ -190,11 +191,11 @@ while cam.isOpened():
 
             if set_des == 3:
 
-                time.sleep(3) # a delay of a sec between each iteration
+                time.sleep(3) # a delay of a second between each iteration
 
                 for i in range(30):
 
-                    mycard.send_data('st') # or set des 3 or this is stop the vibration
+                    mycard.send_data('st') # or set des 3 or this is to stop the vibration
                 # mycard.send_data('st')
                 # time.sleep(1)
                 algo.next_iteration()
@@ -202,6 +203,8 @@ while cam.isOpened():
                 # print(j)
                 algo.package_data()
 
+                # Save data to list
+                # data_list.append((algo.path[-1], delta_list[-1], orientation_list[-1]))
 
                 algo.clear()
 
@@ -210,25 +213,32 @@ while cam.isOpened():
 
                 set_des = 2
 
-            # time.sleep(0.1)
-            # algo.draw_circle(self,Img,ret)
-            # algo.detect_aruco_centers(img)
-            # algo.display_image(img, circle_center, circle_radius)
-            # algo.draw_circle(Img, center)
-            # algo.detect_circle(self,Img,ret)
-            # print("output")
-            # print("set des is" , set_des)
             out.write(img)
             algo.display_image(img, circle_center, circle_radius)
         # cv2.imshow('QueryImage', img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            print('Interupt by user')
+            print('Interrupted by user')
             break
         if cv2.waitKey(1) & 0xFF == ord('i'):
             algo.position_user_input(img)
+
 
 cam.release()
 out.release()
 cv2.destroyAllWindows()
 # plt.show()
+
+# Save data to CSV file
+# directory = '/home/roblab20/Desktop/videos/data_oron'
+# filename_template = 'data_{timestamp}.csv'
+# output_filename = os.path.join(directory, filename_template.format(timestamp=timestamp))
+#
+# header = ['Path[-1]', 'Delta Motor Angle', 'Orientation Angle']
+#
+# with open(output_filename, 'w', newline='') as csvfile:
+#     writer = csv.writer(csvfile)
+#     writer.writerow(header)
+#     writer.writerows(data_list)
+#
+# print(f"Data saved to {output_filename}")
