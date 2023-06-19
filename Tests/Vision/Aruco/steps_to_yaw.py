@@ -130,8 +130,8 @@ while cam.isOpened():
             y_axis_end = (origin[0], origin[1] + int(scale))
 
             # Draw coordinate system
-            cv2.line(img, origin, x_axis_end, (0, 0, 255), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 255, 0), 2)
+            cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
+            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)
             angle = ids_to_angle(ids, circle_center)
             angles.append(angle)
             current_time = time.time() - start_time

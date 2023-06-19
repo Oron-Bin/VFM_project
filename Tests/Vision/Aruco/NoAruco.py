@@ -2,6 +2,7 @@ import os
 import sys
 import datetime
 import csv
+import pandas as pd
 
 sys.path.insert(1, r'/')
 
@@ -10,8 +11,14 @@ from Utils.Control.cardalgo import *
 initial_flag = 0
 
 """This Code is used to record a video"""
-timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+timestamp = datetime.datetime.now().strftime("%H-%M-%S")
 filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+start_time = time.time()
+
+
+csv_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.csv'
+df = pd.DataFrame(columns=['Orientation', 'Position','Motor angle', 'Action- delta_teta','Time'])
+
 # frames_per_second = 60
 res = '720p'
 data_list = []
@@ -58,7 +65,7 @@ def get_video_type(filename):
 cam = cv2.VideoCapture(0)
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter(filename, fourcc, 5, (640, 480))
-out = cv2.VideoWriter(filename, get_video_type(filename), 8, get_dims(cam, res))
+out = cv2.VideoWriter(filename, get_video_type(filename), 7, get_dims(cam, res))
 cam.set(3,1280)
 cam.set(4,720)
 # cam.set(cv2.CAP_PROP_AUTOFOCUS,0)
@@ -86,6 +93,7 @@ flag = 0
 j = 0
 while cam.isOpened():
     ret, img = cam.read()
+    time_diff = time.time() - start_time
     if ret:
         state_data = []
         circle_center, circle_radius = algo.detect_circle_info(img)
@@ -126,9 +134,15 @@ while cam.isOpened():
             if ids is not None and len(ids) > 0:
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
                 orientation_list.append(round(orientation_angle,1))
+                if orientation_list and delta_list:
+                    df = df.append({'Orientation': orientation_list[-1],
+                                    'Position': algo.path[-1],
+                                    'Motor angle': algo.angle_of_motor(),
+                                    'Action- delta_teta': delta_list[-1],
+                                    'Time': time_diff}, ignore_index=True)
 
-                print('orientation list')
-                print(orientation_list)
+                    print('orientation list')
+                    print(orientation_list)
 
                 # state_data.append((algo.path[:-1], algo.path[:-1], orientation_angle))
                 # Draw arrowed line indicating orientation
@@ -140,6 +154,8 @@ while cam.isOpened():
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
                 cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                cv2.putText(img, f"Time: {time_diff}", (10, 180),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
             origin = tuple(algo.finger_position(img)) #green point on screen
@@ -154,10 +170,10 @@ while cam.isOpened():
 
             # Draw coordinate system
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)
+            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
-                ## If you want to choose control law number 1
+                ## If you want to choose control law number 1255
                 output  = algo.law_1()
                 delta_list.append(output)
                 print("delta list")
@@ -200,7 +216,7 @@ while cam.isOpened():
                 # time.sleep(1)
                 algo.next_iteration()
                 j = j + 1
-                # print(j)
+                # print('j is', j)
                 algo.package_data()
 
                 # Save data to list
@@ -213,8 +229,8 @@ while cam.isOpened():
 
                 set_des = 2
 
-            out.write(img)
-            algo.display_image(img, circle_center, circle_radius)
+        out.write(img)
+        algo.display_image(img, circle_center, circle_radius)
         # cv2.imshow('QueryImage', img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -222,23 +238,11 @@ while cam.isOpened():
             break
         if cv2.waitKey(1) & 0xFF == ord('i'):
             algo.position_user_input(img)
-
+    print(df)
+    df.to_csv(csv_filename, index=False)
 
 cam.release()
 out.release()
 cv2.destroyAllWindows()
 # plt.show()
 
-# Save data to CSV file
-# directory = '/home/roblab20/Desktop/videos/data_oron'
-# filename_template = 'data_{timestamp}.csv'
-# output_filename = os.path.join(directory, filename_template.format(timestamp=timestamp))
-#
-# header = ['Path[-1]', 'Delta Motor Angle', 'Orientation Angle']
-#
-# with open(output_filename, 'w', newline='') as csvfile:
-#     writer = csv.writer(csvfile)
-#     writer.writerow(header)
-#     writer.writerows(data_list)
-#
-# print(f"Data saved to {output_filename}")
