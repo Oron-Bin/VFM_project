@@ -16,7 +16,7 @@ while True:
     ret, frame = cap.read()
 
     # Write the captured frame to the VideoWriter object
-    out.write(frame)
+    # out.write(frame)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)

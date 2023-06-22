@@ -3,6 +3,7 @@ import sys
 import datetime
 import csv
 import pandas as pd
+import pickle
 
 sys.path.insert(1, r'/')
 
@@ -11,13 +12,13 @@ from Utils.Control.cardalgo import *
 initial_flag = 0
 
 """This Code is used to record a video"""
-timestamp = datetime.datetime.now().strftime("%H-%M-%S")
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
 start_time = time.time()
 
-
+# pickle_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.pickle'
 csv_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.csv'
-df = pd.DataFrame(columns=['Orientation', 'Position','Motor angle', 'Action- delta_teta','Time'])
+df = pd.DataFrame(columns=['Orientation','Pos_x','pos_y','Motor angle','delta_teta','Time'])
 
 # frames_per_second = 60
 res = '720p'
@@ -136,13 +137,14 @@ while cam.isOpened():
                 orientation_list.append(round(orientation_angle,1))
                 if orientation_list and delta_list:
                     df = df.append({'Orientation': orientation_list[-1],
-                                    'Position': algo.path[-1],
+                                    'Pos_x': algo.path[-1][0],
+                                    'Pos_y': algo.path[-1][-1],
                                     'Motor angle': algo.angle_of_motor(),
-                                    'Action- delta_teta': delta_list[-1],
+                                    'delta_teta': delta_list[-1],
                                     'Time': time_diff}, ignore_index=True)
 
-                    print('orientation list')
-                    print(orientation_list)
+                    # print('orientation list')
+                    # print(orientation_list)
 
                 # state_data.append((algo.path[:-1], algo.path[:-1], orientation_angle))
                 # Draw arrowed line indicating orientation
@@ -172,7 +174,7 @@ while cam.isOpened():
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
-            if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
+            if algo.check_distance(epsilon=5) is not True and set_des == 2: #there is a problem
                 ## If you want to choose control law number 1255
                 output  = algo.law_1()
                 delta_list.append(output)
@@ -226,7 +228,7 @@ while cam.isOpened():
 
                 algo.random_input()
                 print('the new goal is',algo.random_input())
-
+                # algo.finger_position(img,calibration=True)
                 set_des = 2
 
         out.write(img)
@@ -240,6 +242,10 @@ while cam.isOpened():
             algo.position_user_input(img)
     print(df)
     df.to_csv(csv_filename, index=False)
+    # with open(pickle_filename, 'wb') as f:
+    #     pickle.dump(df, f)
+    #
+    # print("Data saved as pickle file:", pickle_filename)
 
 cam.release()
 out.release()

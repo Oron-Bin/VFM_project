@@ -270,14 +270,20 @@ class card_algorithms:
         if circle_center is not None and circle_radius is not None:
             cv2.circle(image, tuple(circle_center), circle_radius, (0, 255, 0), 4)
             cv2.circle(image, tuple(circle_center), 3, (0, 0, 255), -1)
-        cv2.imshow('QueryImage', image)
+
+        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], dtype=np.float32)
+        sharpened_image = cv2.filter2D(image, -1, kernel)
+
+        cv2.imshow('QueryImage', sharpened_image)
         cv2.waitKey(1)
     def detect_aruco_centers(self,frame):
         aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_100)
         aruco_params = cv2.aruco.DetectorParameters_create()
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, rejected = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=aruco_params)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+        corners, ids, rejected = cv2.aruco.detectMarkers(blurred, aruco_dict, parameters=aruco_params)
 
         aruco_centers = []
         if ids is not None:
