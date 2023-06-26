@@ -20,8 +20,7 @@ start_time = time.time()
 csv_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.csv'
 df = pd.DataFrame(columns=['Orientation','Pos_x','pos_y','Motor angle','delta_teta','Time'])
 
-# frames_per_second = 60
-res = '720p'
+res = '480p'
 data_list = []
 def change_res(cap, width, height):
     cap.set(3, width)
@@ -54,7 +53,7 @@ VIDEO_TYPE = {
 def get_video_type(filename):
     filename, ext = os.path.splitext(filename)
     if ext in VIDEO_TYPE:
-      return  VIDEO_TYPE[ext]
+      return VIDEO_TYPE[ext]
     # return VIDEO_TYPE['mp4']
     return VIDEO_TYPE['avi']
 
@@ -64,17 +63,9 @@ def get_video_type(filename):
 #Defines camera parameters#
 #==========================
 cam = cv2.VideoCapture(0)
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# out = cv2.VideoWriter(filename, fourcc, 5, (640, 480))
 out = cv2.VideoWriter(filename, get_video_type(filename), 7, get_dims(cam, res))
 cam.set(3,1280)
 cam.set(4,720)
-# cam.set(cv2.CAP_PROP_AUTOFOCUS,0)
-
-# start_time = time.time()
-# times = []
-# angles = []
-# frame_numbers = []
 
 ## Set the card class and open the serial communication
 mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
@@ -82,16 +73,13 @@ mycard.set_motor_angle(0.0001) ## it was 0.0001 ## Update the motor angle value
 mycard.send_data(key='motor') ## Send data to the motor/ this func in package
 algo = card_algorithms(x_d=0,y_d=0) # Define the card algorithm object
 
-
 # Define the set desired parameter and tell the code that the user didn't initialize it yet
 set_des = 0
-
 orientation_list = []
 delta_list = []
-
 flag = 0
-
 j = 0
+
 while cam.isOpened():
     ret, img = cam.read()
     time_diff = time.time() - start_time
@@ -99,37 +87,25 @@ while cam.isOpened():
         state_data = []
         circle_center, circle_radius = algo.detect_circle_info(img)
         aruco_centers, ids = algo.detect_aruco_centers(img)
-        # print(circle_center, circle_radius)
-
-        # algo.display_image(img, circle_center, circle_radius)
-        # center, Img = algo.filter_camera(cam=cam, filter=3)
-        # center, Img = algo.filter_camera(cam=cam, filter=3) ## Update the card center
         algo.finger_position(img,calibration=False) ## If Main axis system needs calibration change to True and calibrate the xy point
-        # Capturing each frame of our video stream
 
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
-
             algo.y_d = 227 ## 220
             algo.x_d = 668
             start = time.perf_counter()
             print('the goal position is', algo.x_d,algo.y_d)
 
             set_des = 1
-            # print(set_des)
 
         elif circle_center is not None and set_des == 1: ## If the first card_center is not updated yet
             if (algo.card_initialize(circle_center)) == 1:
-            # if (algo.card_initialize(circle_center[:-1], )) == 1:
                 set_des = 2
-                # print(set_des)
                 mycard.vibrate_on()
 
         elif circle_center is not None:
             algo.plot_desired_position(img)
             algo.update(circle_center)
-            # print('a',circle_center)
-            # algo.update(circle_center.tolist())
             algo.plot_path(img)
 
             if ids is not None and len(ids) > 0:
@@ -143,10 +119,6 @@ while cam.isOpened():
                                     'delta_teta': delta_list[-1],
                                     'Time': time_diff}, ignore_index=True)
 
-                    # print('orientation list')
-                    # print(orientation_list)
-
-                # state_data.append((algo.path[:-1], algo.path[:-1], orientation_angle))
                 # Draw arrowed line indicating orientation
                 cv2.putText(img, f"Angle: {round(orientation_angle,1)}", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -175,16 +147,8 @@ while cam.isOpened():
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
             if algo.check_distance(epsilon=5) is not True and set_des == 2: #there is a problem
-                ## If you want to choose control law number 1255
                 output  = algo.law_1()
                 delta_list.append(output)
-                print("delta list")
-                print(delta_list)
-                # motor_angle = algo.find_dev(algo.tip_position[0]+algo.x_d-algo.center[0],algo.tip_position[1]+algo.y_d-algo.center[1])
-                # cv2.putText(img, f"motor_angle: {motor_angle}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                # print(algo.path)
-                # print(algo.angle_of_motor())
-
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -195,40 +159,29 @@ while cam.isOpened():
                 mycard.set_encoder_angle(output) ## Update the motor output
                 algo.plot_arrow(img) ## Plot the direction of the motor
                 mycard.send_data('encoder') ## Send the motor output to the hardware
-
                 time.sleep(0.1)
+
             elif algo.check_distance(10) is True:
 
-
-                print('Arrived at the goal', algo.path[-1])
-
+                # print('Arrived at the goal', algo.path[-1])
                 for i in range(30):
                     mycard.send_data('vibrate')
-
                     set_des = 3
 
             if set_des == 3:
-
                 time.sleep(3) # a delay of a second between each iteration
 
                 for i in range(30):
-
                     mycard.send_data('st') # or set des 3 or this is to stop the vibration
                 # mycard.send_data('st')
                 # time.sleep(1)
                 algo.next_iteration()
                 j = j + 1
-                # print('j is', j)
                 algo.package_data()
 
-                # Save data to list
-                # data_list.append((algo.path[-1], delta_list[-1], orientation_list[-1]))
-
                 algo.clear()
-
                 algo.random_input()
-                print('the new goal is',algo.random_input())
-                # algo.finger_position(img,calibration=True)
+                # print('the new goal is',algo.random_input())
                 set_des = 2
 
         out.write(img)
@@ -240,7 +193,7 @@ while cam.isOpened():
             break
         if cv2.waitKey(1) & 0xFF == ord('i'):
             algo.position_user_input(img)
-    print(df)
+
     df.to_csv(csv_filename, index=False)
     # with open(pickle_filename, 'wb') as f:
     #     pickle.dump(df, f)
@@ -250,5 +203,5 @@ while cam.isOpened():
 cam.release()
 out.release()
 cv2.destroyAllWindows()
-# plt.show()
+
 
