@@ -20,7 +20,7 @@ start_time = time.time()
 csv_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.csv'
 df = pd.DataFrame(columns=['Orientation','Pos_x','pos_y','Motor angle','delta_teta','Time'])
 
-res = '480p'
+res = '720p'
 data_list = []
 def change_res(cap, width, height):
     cap.set(3, width)
