@@ -139,7 +139,14 @@ while cam.isOpened():
             frame_numbers.append(len(angles))
 
             display_image(img, circle_center, circle_radius)
-
+            # cv2.line(img, origin, tuple(aruco_centers[0]), (0, 255, 255), 2)
+            # print(circle_radius)
+            # print(ids)
+            print(circle_center)
+            # print(aruco_centers)
+            # print(circle_center)
+            # print(aruco_centers[0][1]-aruco_centers[-1][1])
+            # cv2.line(img,tuple(aruco_centers[0]),tuple(aruco_centers[-1]),(0, 0, 0), 2)
         else:
             print("Warning")
             angle = 0

@@ -2,7 +2,6 @@ import pandas as pd
 
 
 def shortest_way(num_1, num_2):
-    """Function for finding the shortest motor path to destanation"""
 
     if abs(num_1 - num_2) < 180:
         return num_2 - num_1
@@ -13,7 +12,7 @@ def shortest_way(num_1, num_2):
             return abs(num_1 - num_2) - 360
 
 
-data = pd.read_csv('/home/roblab20/Desktop/videos/data_oron/data_oron_2023-06-26-15-57-28.csv')
+data = pd.read_csv('/home/roblab20/Desktop/videos/data_oron/data_oron_2023-06-28-16-47-58.csv')
 pixel_factor = 1/2000
 
 data.at[0, 'x_dot'] = 0
@@ -29,7 +28,6 @@ data.at[len(data['Orientation'] -1 ), 'y_dot'] = 0
 # data.at[0, 'Motor'] = 0
 data['Pos_x'] = data['Pos_x'] * pixel_factor
 data['Pos_y'] = data['Pos_y'] * pixel_factor
-
 
 # data.at[-1, 'phi_dot'] = 0
 # data.at[-1, 'x_dot'] = 0

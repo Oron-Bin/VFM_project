@@ -18,10 +18,21 @@ start_time = time.time()
 
 # pickle_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.pickle'
 csv_filename = f'/home/roblab20/Desktop/videos/data_oron/data_oron_{timestamp}.csv'
-df = pd.DataFrame(columns=['Orientation','Pos_x','pos_y','Motor angle','delta_teta','Time'])
+df = pd.DataFrame(columns=['Orientation','Pos_x','Pos_y','Motor_angle','delta_teta','Time'])
 
 res = '720p'
 data_list = []
+
+def shortest_way(num_1, num_2):
+
+    if abs(num_1 - num_2) < 180:
+        return num_2 - num_1
+    else:
+        if num_1 > num_2:
+            return abs(num_1 - num_2 - 360)
+        else:
+            return abs(num_1 - num_2) - 360
+
 def change_res(cap, width, height):
     cap.set(3, width)
     cap.set(4, height)
@@ -115,7 +126,7 @@ while cam.isOpened():
                     df = df.append({'Orientation': orientation_list[-1],
                                     'Pos_x': algo.path[-1][0],
                                     'Pos_y': algo.path[-1][-1],
-                                    'Motor angle': algo.angle_of_motor(),
+                                    'Motor_angle': algo.angle_of_motor(),
                                     'delta_teta': delta_list[-1],
                                     'Time': time_diff}, ignore_index=True)
 
@@ -146,7 +157,7 @@ while cam.isOpened():
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
-            if algo.check_distance(epsilon=5) is not True and set_des == 2: #there is a problem
+            if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 output  = algo.law_1()
                 delta_list.append(output)
 
@@ -169,7 +180,7 @@ while cam.isOpened():
                     set_des = 3
 
             if set_des == 3:
-                time.sleep(3) # a delay of a second between each iteration
+                time.sleep(0.1) # a delay of a second between each iteration
 
                 for i in range(30):
                     mycard.send_data('st') # or set des 3 or this is to stop the vibration
@@ -200,8 +211,46 @@ while cam.isOpened():
     #
     # print("Data saved as pickle file:", pickle_filename)
 
+    data = pd.read_csv(csv_filename)
+    pixel_factor = 1/2000
+
+    data.at[0, 'x_dot'] = 0
+    data.at[0, 'y_dot'] = 0
+    data.at[0, 'phi_dot'] = 0
+    data.at[0, 'Pos_x'] = 0
+    data.at[0, 'Pos_y'] = 0
+
+    data.at[len(data['Orientation'] -1 ), 'phi_dot'] = 0
+    data.at[len(data['Orientation'] -1 ), 'x_dot'] = 0
+    data.at[len(data['Orientation'] -1 ), 'y_dot'] = 0
+
+    # data.at[0, 'Motor'] = 0
+    data['Pos_x'] = data['Pos_x'] * pixel_factor
+    data['Pos_y'] = data['Pos_y'] * pixel_factor
+
+    # data.at[-1, 'phi_dot'] = 0
+    # data.at[-1, 'x_dot'] = 0
+    # data.at[-1, 'y_dot'] = 0
+
+    for i in range(1,len(data['Orientation']) -1):
+        sub_phi = shortest_way(data['Orientation'][i],data['Orientation'][i-1])
+        sub_x = (data['Pos_x'][i] - data['Pos_x'][i - 1])
+        sub_y = (data['Pos_y'][i] - data['Pos_y'][i - 1])
+        sub_time = data['Time'][i] - data['Time'][i-1]
+        char_phi = sub_phi/sub_time
+        char_x = sub_x / sub_time
+        char_y = sub_y / sub_time
+        data.at[i, 'phi_dot'] = char_phi
+        data.at[i, 'x_dot'] = char_x
+        data.at[i, 'y_dot'] = char_y
+        data.at[i,'delta_teta'] = data.at[i+1, 'delta_teta']
+
+
+
+    data.to_csv(csv_filename, index=False)
+
+
 cam.release()
 out.release()
 cv2.destroyAllWindows()
-
 
