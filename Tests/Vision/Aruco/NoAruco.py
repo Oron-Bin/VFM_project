@@ -217,22 +217,23 @@ while cam.isOpened():
     data.at[0, 'x_dot'] = 0
     data.at[0, 'y_dot'] = 0
     data.at[0, 'phi_dot'] = 0
-    data.at[0, 'Pos_x'] = 0
-    data.at[0, 'Pos_y'] = 0
+
 
     data.at[len(data['Orientation'] -1 ), 'phi_dot'] = 0
     data.at[len(data['Orientation'] -1 ), 'x_dot'] = 0
     data.at[len(data['Orientation'] -1 ), 'y_dot'] = 0
 
     # data.at[0, 'Motor'] = 0
-    data['Pos_x'] = data['Pos_x'] * pixel_factor
-    data['Pos_y'] = data['Pos_y'] * pixel_factor
+    data['Pos_x'] = (data['Pos_x']-data['Pos_x'][0]) * pixel_factor
+    data['Pos_y'] = (data['Pos_y']-data['Pos_y'][0]) * pixel_factor
 
     # data.at[-1, 'phi_dot'] = 0
     # data.at[-1, 'x_dot'] = 0
     # data.at[-1, 'y_dot'] = 0
-
+    # data.at[0, 'Pos_x'] = 0
+    # data.at[0, 'Pos_y'] = 0
     for i in range(1,len(data['Orientation']) -1):
+
         sub_phi = shortest_way(data['Orientation'][i],data['Orientation'][i-1])
         sub_x = (data['Pos_x'][i] - data['Pos_x'][i - 1])
         sub_y = (data['Pos_y'][i] - data['Pos_y'][i - 1])
