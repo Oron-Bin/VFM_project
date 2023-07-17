@@ -79,12 +79,12 @@ f_c_opt , tau_f_opt = result.x
 
 # Print the optimized values
 print("Optimized values:")
-print("f_C:", f_c_opt)
-print("tau_f:", tau_f_opt)
+print("f_C:", f_c_opt , 'N')
+print("tau_f:", tau_f_opt, 'Nm')
 
-# print(delta_t)
-print((phi_dot[3]) + delta_t[2]*(f_c_opt * ((pos_x[3])* np.sin(teta[3]) - (pos_y[3]) * np.cos(teta[3])) + tau_f_opt) / \
-          (M * ((pos_x[3])**2 + (pos_y[3])**2)+ 0.00001))
+# check if there is any connection:
+# print((phi_dot[3]) + delta_t[2]*(f_c_opt * ((pos_x[3])* np.sin(teta[3]) - (pos_y[3]) * np.cos(teta[3])) + tau_f_opt) / \
+#           (M * ((pos_x[3])**2 + (pos_y[3])**2)+ 0.00001))
 print("##################")
 
 #calculate the error between the path:
@@ -94,13 +94,6 @@ print("##################")
 
 
 #calculate the error between the equations that optimized
-
-
-#ploting the real path against the optimize path
-
-phi_rad = np.radians(phi)
-dx = np.cos(phi_rad)
-dy = np.sin(phi_rad)
 
 
 def equations_of_motion(x, y, x_dot, y_dot, teta, delta_t, f_c, tau_f ,phi , phi_dot):
@@ -157,6 +150,10 @@ print("Maximum error between pos_y and y_new:", max_pos_y_error)
 
 
 #plotting:
+phi_rad = np.radians(phi)
+dx = np.cos(phi_rad)
+dy = np.sin(phi_rad)
+
 phi_rad_new = np.radians(phi_new)
 dx_new = np.cos(phi_new)
 dy_new = np.sin(phi_new)
