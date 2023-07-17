@@ -233,7 +233,7 @@ while cam.isOpened():
     # data.at[0, 'Pos_x'] = 0
     # data.at[0, 'Pos_y'] = 0
     for i in range(1,len(data['Orientation']) -1):
-
+        # sub_phi = shortest_way(data['Orientation'][i-1], data['Orientation'][i]) #to try this one
         sub_phi = shortest_way(data['Orientation'][i],data['Orientation'][i-1])
         sub_x = (data['Pos_x'][i] - data['Pos_x'][i - 1])
         sub_y = (data['Pos_y'][i] - data['Pos_y'][i - 1])
