@@ -7,7 +7,8 @@ import csv
 
 
 # filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-51-22.csv'
-filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-50-03.csv'
+# filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-50-03.csv'
+filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-06-29-09-57-57.csv'
 df = pd.read_csv(filename)
 
 
