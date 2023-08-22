@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import geopy.distance
 
 cam = cv2.VideoCapture(0)
 cam.set(3,1280)
@@ -30,14 +31,19 @@ while cam.isOpened():
             for (x, y, r) in circles:
                 circle_center = (x, y)
                 print("x is",x,"y is", y,"radius is", r)
+
                 angle = 0
                 if ids is not None:
-
+                    arucoords = []
                     for i in range(len(ids)):
+
                         aruco_center = np.mean(corners[i][0], axis=0)
-                        # print('aruco',aruco_center)
-                    print('ids is:',ids)
-                    print('the center of id number',ids[-1],'is',aruco_center)
+                        arucoords.append(aruco_center)
+                        print('aruco num',ids[i],'is',aruco_center)
+                    print(arucoords)
+                    distance = np.sqrt((arucoords[0][0]-arucoords[-1][0])**2 + (arucoords[-1][1] -arucoords[0][1])**2)
+                    print(distance/2)
+                    # print('the center of id number',ids[-1],'is',aruco_center)
                         # print(np.mean(corners[-1][0], axis=0))
                     dx = circle_center[0] - aruco_center[0]
                     dy = circle_center[1] - aruco_center[1]
@@ -60,7 +66,7 @@ while cam.isOpened():
                         2,  # Thickness of the arrowed line
                         tipLength=0.2
                     )
-                    print('the last ids that detected is:',ids[-1],'and the first orientation between him and the camera is', angle)
+                    # print('the last ids that detected is:',ids[-1],'and the first orientation between him and the camera is', angle)
 
                     if ids[-1] == 43 : #define that 43 is the head of the arrow orientation
                         angle = np.degrees(np.arctan2(dy, dx))
@@ -85,12 +91,12 @@ while cam.isOpened():
 
                     if angle < 0:
                         angle += 360
-                    print('the orientation is:', angle)
+                    # print('the orientation is:', angle)
                 else:
                     print('ids is none')
                     angle = angle
 
-
+                # print(ids[0][0])
                 # draw the circle in the output image, then draw a rectangle
                 # corresponding to the center of the circle
                 cv2.circle(Img, (x, y), r, (0, 255 ,0), 4) # the color is in RGB and the last parameter is the thickness

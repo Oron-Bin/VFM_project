@@ -99,11 +99,14 @@ while cam.isOpened():
         circle_center, circle_radius = algo.detect_circle_info(img)
         aruco_centers, ids = algo.detect_aruco_centers(img)
         algo.finger_position(img,calibration=False) ## If Main axis system needs calibration change to True and calibrate the xy point
-
+        print(aruco_centers)
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
-            algo.y_d = 227 ## 220
-            algo.x_d = 668
+            # algo.y_d = 227 ## 220
+            # algo.x_d = 668
+
+            algo.y_d = 227
+            algo.x_d = 550
             start = time.perf_counter()
             print('the goal position is', algo.x_d,algo.y_d)
 
@@ -192,7 +195,7 @@ while cam.isOpened():
 
                 algo.clear()
                 algo.random_input()
-                # print('the new goal is',algo.random_input())
+                print('the new goal is',algo.random_input())
                 set_des = 2
 
         out.write(img)
@@ -212,8 +215,8 @@ while cam.isOpened():
     # print("Data saved as pickle file:", pickle_filename)
 
     data = pd.read_csv(csv_filename)
-    pixel_factor = 1/2000
-
+    pixel_factor = 1/2 # convert pixel to mm
+    # pixel_factor = 1.0
     data.at[0, 'x_dot'] = 0
     data.at[0, 'y_dot'] = 0
     data.at[0, 'phi_dot'] = 0
@@ -249,6 +252,7 @@ while cam.isOpened():
 
 
     data.to_csv(csv_filename, index=False)
+
 
 
 cam.release()

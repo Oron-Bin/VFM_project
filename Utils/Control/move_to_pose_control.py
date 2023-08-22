@@ -40,6 +40,22 @@ class PathFinderController:
         Returns the control command for the linear and angular velocities as
         well as the distance to goal
 
+        oron understanding:
+                Parameters
+        ----------
+        x_diff : x_goal - x_curr
+        y_diff : y_goal - y_curr
+        theta : here teta means yaw (i think)
+        theta_goal: orientation goal
+
+        Returns
+        -------
+        rho : The distance between the robot and the goal position
+        v : Command linear velocity
+        w : Command
+
+
+
         Parameters
         ----------
         x_diff : The position of target with respect to current robot position
@@ -57,9 +73,9 @@ class PathFinderController:
         """
 
         # Description of local variables:
-        # - alpha is the angle to the goal relative to the heading of the robot
+        # - alpha is the angle to the goal relative to the heading of the robot - oron think orientation angle
         # - beta is the angle between the robot's position and the goal
-        #   position plus the goal angle
+        #   position plus the goal angle  - oron think that this is teta plus orientation goal
         # - Kp_rho*rho and Kp_alpha*alpha drive the robot along a line towards
         #   the goal
         # - Kp_beta*beta rotates the line so that it is parallel to the goal
@@ -70,7 +86,7 @@ class PathFinderController:
         # [-pi, pi] to prevent unstable behavior e.g. difference going
         # from 0 rad to 2*pi rad with slight turn
 
-        rho = np.hypot(x_diff, y_diff)
+        rho = np.hypot(x_diff, y_diff)  #distance between x and y to goal_X and goal_Y
         alpha = (np.arctan2(y_diff, x_diff)
                  - theta + np.pi) % (2 * np.pi) - np.pi
         beta = (theta_goal - theta - alpha + np.pi) % (2 * np.pi) - np.pi
