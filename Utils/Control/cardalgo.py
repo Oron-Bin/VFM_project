@@ -457,5 +457,8 @@ class card_algorithms:
     def angle_of_motor(self):
         dx = self.filter(self.last_dx,self.x_d - self.center[0])
         dy = self.filter(self.last_dy,self.y_d - self.center[1])
-        new_angle = round(np.degrees(np.arctan2(dx,dy)))
+
+        new_angle = -(round(np.degrees(np.arctan2(dx,dy)))) +90
+        if new_angle <0 :
+            new_angle += 360
         return new_angle

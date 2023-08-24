@@ -6,9 +6,9 @@ import pandas as pd
 import csv
 
 
-# filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-51-22.csv'
+filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-51-22.csv'
 # filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-50-03.csv'
-filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-08-24-16-57-51.csv'
+# filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-08-22-14-31-07.csv'
 df = pd.read_csv(filename)
 
 
@@ -38,7 +38,7 @@ df = pd.read_csv(filename).dropna()
 
 # Given constants
 
-M = 14 #kg
+M = 14/1000 #kg
 
 
 
@@ -61,16 +61,16 @@ def objective(x):
 
     eq1= (x_dot[1:] - x_dot[:-1])/delta_t - (x[0]/M)*np.cos(teta)
     eq2 = (y_dot[1:] - y_dot[:-1])/delta_t - (x[0] / M) * np.sin(teta)
-    eq3 = (phi_dot[1:]-phi_dot[:-1])/delta_t - (x[0] * ((pos_x[:-1])* np.sin(teta) - (pos_y[:-1]) * np.cos(teta)) + x[1]) / \
-          (M * ((pos_x[:-1])**2 + (pos_y[:-1])**2)+ 0.00001)
+    eq3 = (phi_dot[1:]-phi_dot[:-1])/delta_t - ((x[0] * ((pos_x[:-1])* np.sin(teta) - (pos_y[:-1]) * np.cos(teta))) + x[1]) / \
+          (M * ((pos_x[:-1])**2 + (pos_y[:-1])**2)+ 0.000001)
 
 
-    return  np.sum(np.square(eq3)) +  np.sum(np.square(eq2)) +  np.sum(np.square(eq1))  # return np.sum(np.square(eq2))
+    return  np.sum(np.square(eq3)) + np.sum(np.square(eq2)) + np.sum(np.square(eq1))  # return np.sum(np.square(eq2))
 
-# Initial guess for C, K, and L
-x0 = np.array([100, 100])
+# Initial guess for f_c, tau_f
+x0 = np.array([0.001, 1])
 
-bounds = [(0.0001 , 1000000), (0.001, 500000)]
+bounds = [(0.0001 , 10), (0.000001, 5)]
 # Minimize the objective function
 result = minimize(objective, x0, bounds=bounds)
 # result = minimize(objective, x0, bounds=bounds, method='SLSQP')

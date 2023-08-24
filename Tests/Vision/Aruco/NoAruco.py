@@ -102,11 +102,11 @@ while cam.isOpened():
         print(aruco_centers)
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
-            # algo.y_d = 227 ## 220
-            # algo.x_d = 668
+            algo.y_d = 227 ## 220
+            algo.x_d = 668
 
-            algo.y_d = 227
-            algo.x_d = 550
+            # algo.y_d = 227
+            # algo.x_d = 520
             start = time.perf_counter()
             print('the goal position is', algo.x_d,algo.y_d)
 
@@ -124,7 +124,7 @@ while cam.isOpened():
 
             if ids is not None and len(ids) > 0:
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
-                orientation_list.append(round(orientation_angle,1))
+                orientation_list.append(round(orientation_angle,2))
                 if orientation_list and delta_list:
                     df = df.append({'Orientation': orientation_list[-1],
                                     'Pos_x': algo.path[-1][0],
@@ -149,8 +149,8 @@ while cam.isOpened():
             origin = tuple(algo.finger_position(img)) #green point on screen
             scale = 50
             # Define the endpoints of the X-axis and Y-axis relative to the origin
-            x_axis_end = (origin[0] - int(scale), origin[1])
-            y_axis_end = (origin[0], origin[1] - int(scale))
+            x_axis_end = (origin[0] + int(scale), origin[1])
+            y_axis_end = (origin[0], origin[1] + int(scale))
 
             # Draw coordinate system
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
@@ -162,6 +162,7 @@ while cam.isOpened():
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
                 output  = algo.law_1()
+                # output = 0
                 delta_list.append(output)
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
@@ -173,8 +174,8 @@ while cam.isOpened():
                 mycard.set_encoder_angle(output) ## Update the motor output
                 algo.plot_arrow(img) ## Plot the direction of the motor
                 mycard.send_data('encoder') ## Send the motor output to the hardware
-                time.sleep(0.1)
-
+                time.sleep(0.001)
+            #
             elif algo.check_distance(10) is True:
 
                 # print('Arrived at the goal', algo.path[-1])
@@ -220,7 +221,7 @@ while cam.isOpened():
     data.at[0, 'x_dot'] = 0
     data.at[0, 'y_dot'] = 0
     data.at[0, 'phi_dot'] = 0
-
+    data.at[0, 'delta_teta'] = 0
 
     data.at[len(data['Orientation'] -1 ), 'phi_dot'] = 0
     data.at[len(data['Orientation'] -1 ), 'x_dot'] = 0
@@ -241,14 +242,16 @@ while cam.isOpened():
         sub_x = (data['Pos_x'][i] - data['Pos_x'][i - 1])
         sub_y = (data['Pos_y'][i] - data['Pos_y'][i - 1])
         sub_time = data['Time'][i] - data['Time'][i-1]
+
+
         char_phi = sub_phi/sub_time
         char_x = sub_x / sub_time
         char_y = sub_y / sub_time
-        data.at[i, 'phi_dot'] = char_phi
+        data.at[i, 'phi_dot'] = -char_phi
         data.at[i, 'x_dot'] = char_x
         data.at[i, 'y_dot'] = char_y
-        data.at[i,'delta_teta'] = data.at[i+1, 'delta_teta']
-
+        # data.at[i,'delta_teta'] = data.at[i+1, 'delta_teta']
+        data.at[i, 'delta_teta'] = (data['Motor_angle'][i] - data['Motor_angle'][i-1])
 
 
     data.to_csv(csv_filename, index=False)
