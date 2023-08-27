@@ -6,9 +6,9 @@ import pandas as pd
 import csv
 
 
-filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-51-22.csv'
+# filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-51-22.csv'
 # filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-07-01-22-50-03.csv'
-# filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-08-22-14-31-07.csv'
+filename = '/home/roblab20/Desktop/videos/data_oron/data_oron_2023-08-24-16-53-39.csv'
 df = pd.read_csv(filename)
 
 
@@ -38,7 +38,7 @@ df = pd.read_csv(filename).dropna()
 
 # Given constants
 
-M = 14/1000 #kg
+M = 14 #g
 
 
 
@@ -47,41 +47,42 @@ pos_x = np.array(df['Pos_x'])
 pos_y = np.array(df['Pos_y'])
 x_dot = np.array(df['x_dot'])
 y_dot = np.array(df['y_dot'])
-phi_dot = -np.array(df['phi_dot'])
+phi_dot = np.array(df['phi_dot'])
 teta = np.array(np.deg2rad(df['Motor_angle']))[:-1]
 time = np.array(df['Time'])
 phi = np.array(df['Orientation'])
 delta_t = time[1:]- time[:-1]
 
+del_t = 0.12
 
 
 # Objective function with L=loss and conditions for the notmal force
 def objective(x):
-    f_C, tau_f = x
+    # f_C, tau_f = x
 
-    eq1= (x_dot[1:] - x_dot[:-1])/delta_t - (x[0]/M)*np.cos(teta)
-    eq2 = (y_dot[1:] - y_dot[:-1])/delta_t - (x[0] / M) * np.sin(teta)
-    eq3 = (phi_dot[1:]-phi_dot[:-1])/delta_t - ((x[0] * ((pos_x[:-1])* np.sin(teta) - (pos_y[:-1]) * np.cos(teta))) + x[1]) / \
-          (M * ((pos_x[:-1])**2 + (pos_y[:-1])**2)+ 0.000001)
+    eq1= (x_dot[1:] - x_dot[:-1])/del_t - (x[0]/M)*np.cos(teta)
+    # eq2 = (y_dot[1:] - y_dot[:-1])/del_t + (x[0] / M) * np.sin(teta)
+    # eq3 = (phi_dot[1:]-phi_dot[:-1])/delta_t - ((x[0] * ((pos_x[:-1])* np.sin(teta) - (pos_y[:-1]) * np.cos(teta))) + x[1]) / \
+    #       (M * ((pos_x[:-1])**2 + (pos_y[:-1])**2)+ 0.000001)
 
 
-    return  np.sum(np.square(eq3)) + np.sum(np.square(eq2)) + np.sum(np.square(eq1))  # return np.sum(np.square(eq2))
+    return  np.sum(np.square(eq1))  # return np.sum(np.square(eq2))
 
 # Initial guess for f_c, tau_f
-x0 = np.array([0.001, 1])
+x0 = np.array([1000])
 
-bounds = [(0.0001 , 10), (0.000001, 5)]
+bounds = [(10 , 10000000)]
 # Minimize the objective function
 result = minimize(objective, x0, bounds=bounds)
 # result = minimize(objective, x0, bounds=bounds, method='SLSQP')
 
 # Extract the optimized values
-f_c_opt , tau_f_opt = result.x
+f_c_opt  = result.x
 
 # Print the optimized values
 print("Optimized values:")
 print("f_C:", f_c_opt , 'N')
-print("tau_f:", tau_f_opt, 'Nm')
+# print("tau_f:", tau_f_opt, 'Nm')
 
 # check if there is any connection:
 # print((phi_dot[3]) + delta_t[2]*(f_c_opt * ((pos_x[3])* np.sin(teta[3]) - (pos_y[3]) * np.cos(teta[3])) + tau_f_opt) / \
@@ -97,20 +98,20 @@ print("##################")
 #calculate the error between the equations that optimized
 
 
-def equations_of_motion(x, y, x_dot, y_dot, teta, delta_t, f_c, tau_f ,phi , phi_dot):
+def equations_of_motion(x, y, x_dot, y_dot, teta, f_c):
     x_acc = f_c * np.cos(teta)
     y_acc = f_c * np.sin(teta)
-    phi_acc = (f_c * ((x) * np.sin(teta) - (y) * np.cos(teta))+ tau_f) / (M * ((x)**2 + (y)**2) + 0.0001)
+    # phi_acc = (f_c * ((x) * np.sin(teta) - (y) * np.cos(teta))+ tau_f) / (M * ((x)**2 + (y)**2) + 0.0001)
 
-    x_dot_new = x_dot + delta_t * x_acc
-    y_dot_new = y_dot + delta_t * y_acc
-    phi_dot_new = -phi_dot + delta_t * phi_acc
+    x_dot_new = x_dot + del_t * x_acc
+    y_dot_new = y_dot + del_t * y_acc
+    # phi_dot_new = -phi_dot + delta_t * phi_acc
 
-    x_new = x + delta_t * x_dot_new
-    y_new = y + delta_t * y_dot_new
-    phi_new = phi + delta_t * phi_dot_new
+    x_new = x + del_t * x_dot_new
+    y_new = y + del_t * y_dot_new
+    # phi_new = phi + delta_t * phi_dot_new
 
-    return x_new , y_new , phi_new ,x_dot_new , y_dot_new , phi_dot_new
+    return x_new , y_new ,x_dot_new , y_dot_new
 #
 optimized_path_x = [pos_x[0]]
 optimized_path_y = [pos_y[0]]
@@ -118,9 +119,8 @@ x_dot_new = x_dot[0]
 y_dot_new = y_dot[0]
 #
 for i in range(len(delta_t)):
-    x_new, y_new, phi_new ,x_dot_new , y_dot_new , phi_dot_new = equations_of_motion(optimized_path_x[-1], optimized_path_y[-1],
-                                                              x_dot_new, y_dot_new, teta[i], delta_t[i],
-                                                              f_c_opt, tau_f_opt, phi , phi_dot)
+    x_new, y_new,x_dot_new , y_dot_new = equations_of_motion(optimized_path_x[-1], optimized_path_y[-1],
+                                                              x_dot_new, y_dot_new, teta[i],f_c_opt)
 
     optimized_path_x.append(x_new)
     optimized_path_y.append(y_new)
@@ -128,22 +128,25 @@ for i in range(len(delta_t)):
 # print()
 # print(optimized_path_x)
 # print(optimized_path_y)
-
+print(optimized_path_x)
+optimized_path_x =
 # Calculate the errors
-phi_error = np.abs(phi - phi_new)
+# phi_error = np.abs(phi - phi_new)
+print(len(optimized_path_x))
+print(len(pos_x))
 pos_x_error = np.abs(pos_x - np.array(optimized_path_x))
 pos_y_error = np.abs(pos_y - np.array(optimized_path_y))
 
 # Calculate the mean and maximum errors
-mean_phi_error = np.mean(phi_error)
-max_phi_error = np.max(phi_error)
+# mean_phi_error = np.mean(phi_error)
+# max_phi_error = np.max(phi_error)
 mean_pos_x_error = np.mean(pos_x_error)
 max_pos_x_error = np.max(pos_x_error)
 mean_pos_y_error = np.mean(pos_y_error)
 max_pos_y_error = np.max(pos_y_error)
 
-print("Mean error between phi and phi_new:", mean_phi_error )
-print("Maximum error between phi and phi_new:", max_phi_error)
+# print("Mean error between phi and phi_new:", mean_phi_error )
+# print("Maximum error between phi and phi_new:", max_phi_error)
 print("Mean error between pos_x and x_new:", mean_pos_x_error)
 print("Maximum error between pos_x and x_new:", max_pos_x_error)
 print("Mean error between pos_y and y_new:", mean_pos_y_error)
@@ -151,20 +154,20 @@ print("Maximum error between pos_y and y_new:", max_pos_y_error)
 
 
 #plotting:
-phi_rad = np.radians(phi)
-dx = np.cos(phi_rad)
-dy = np.sin(phi_rad)
+# phi_rad = np.radians(phi)
+# dx = np.cos(phi_rad)
+# dy = np.sin(phi_rad)
 
-phi_rad_new = np.radians(phi_new)
-dx_new = np.cos(phi_new)
-dy_new = np.sin(phi_new)
+# phi_rad_new = np.radians(phi_new)
+# dx_new = np.cos(phi_new)
+# dy_new = np.sin(phi_new)
 #
 plt.plot(pos_x, pos_y, marker='o', linestyle='-', color='b', label='Real Path')
-plt.quiver(pos_x, pos_y, dx, dy, scale=15, color='r')
+# plt.quiver(pos_x, pos_y, dx, dy, scale=15, color='r')
 #
 # # Plot the optimized path in green
 plt.plot(optimized_path_x, optimized_path_y, marker='o', linestyle='-', color='g', label='Optimized Path')
-plt.quiver(optimized_path_x, optimized_path_y, dx_new, dy_new, scale=15, color= 'r')  # Same orientation arrows for optimized path
+# plt.quiver(optimized_path_x, optimized_path_y, dx_new, dy_new, scale=15, color= 'r')  # Same orientation arrows for optimized path
 #
 plt.xlabel('X')
 plt.ylabel('Y')
@@ -176,8 +179,8 @@ x_margin = 0.005
 y_margin = 0.005
 # x_min, x_max = min(min(pos_x), min(optimized_path_x)) - x_margin, max(max(pos_x), max(optimized_path_x)) + x_margin
 # y_min, y_max = min(min(pos_y), min(optimized_path_y)) - y_margin, max(max(pos_y), max(optimized_path_y)) + y_margin
-plt.xlim(-0.1, 0.05)
-plt.ylim(-0.1, 0.15)
+plt.xlim(-10, 10)
+plt.ylim(-10, 10)
 #
 plt.grid()
 plt.show()
