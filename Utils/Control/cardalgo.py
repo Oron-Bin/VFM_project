@@ -157,9 +157,9 @@ class card_algorithms:
         # phi = random.randint(0,360)
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y
-        # self.orientation = phi
+        self.orientation = phi
         print('Enter desired point is',self.x_d, self.y_d)
-        return [self.x_d, self.y_d]
+        return [self.x_d, self.y_d,self.orientation]
 
         # return [self.x_d, self.y_d, self.orientation]
     def generate_path(self):
