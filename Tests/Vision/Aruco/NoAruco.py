@@ -161,8 +161,8 @@ while cam.isOpened():
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
-                # output  = algo.law_1()
-                output = 0
+                output  = algo.law_1()
+                # output = 0
                 delta_list.append(output)
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
@@ -184,7 +184,7 @@ while cam.isOpened():
                     set_des = 3
 
             if set_des == 3:
-                time.sleep(0.1) # a delay of a second between each iteration
+                time.sleep(3) # a delay of a second between each iteration
 
                 for i in range(30):
                     mycard.send_data('st') # or set des 3 or this is to stop the vibration

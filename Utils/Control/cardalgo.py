@@ -152,12 +152,12 @@ class card_algorithms:
 
     def random_input(self):
         """ Random new input inside the rectangle area"""
-        x = random.randint(-80, 80)
-        y = random.randint(-80, 0)
+        x = random.randint(-50, 50)
+        y = random.randint(-50, 0)
         # phi = random.randint(0,360)
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y
-        self.orientation = phi
+        self.orientation = random.randint(0, 359)
         print('Enter desired point is',self.x_d, self.y_d)
         return [self.x_d, self.y_d,self.orientation]
 

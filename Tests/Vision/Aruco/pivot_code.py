@@ -80,21 +80,24 @@ while cam.isOpened():
     ret, img = cam.read()
     time_diff = time.time() - start_time
     if ret:
-        state_data = []
+        # state_data = []
         circle_center, circle_radius = algo.detect_circle_info(img)
         aruco_centers, ids = algo.detect_aruco_centers(img)
         origin = tuple(algo.finger_position(img))
         algo.finger_position(img,calibration=False) ## If Main axis system needs calibration change to True and calibrate the xy point
-        print(aruco_centers)
+        # print(aruco_centers)
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
-            algo.y_d = origin[1] ## 220
-            algo.x_d = origin[0]
+            # algo.y_d = origin[1] ## 220
+            # algo.x_d = origin[0]
+            algo.y_d = 227 ## 220
+            algo.x_d = 642
+            algo.orientation = random.randint(0,359)
             # algo.x_d = circle_center[0]
             # algo.y_d = circle_center[1]
 
             start = time.perf_counter()
-            print('the goal position is', algo.x_d,algo.y_d)
+            print('the goal pose is', algo.x_d,algo.y_d, algo.orientation)
 
             set_des = 1
 
@@ -110,7 +113,7 @@ while cam.isOpened():
 
             if ids is not None and len(ids) > 0:
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
-                orientation_list.append(round(orientation_angle,2))
+                # orientation_list.append(round(orientation_angle,2))
                 # if orientation_list and delta_list:
                 #     df = df.append({'Orientation': orientation_list[-1],
                 #                     'Pos_x': algo.path[-1][0],
@@ -145,52 +148,96 @@ while cam.isOpened():
             # Draw coordinate system
             cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
-            des_orientation = algo.random_input()[-1]
-            print(des_orientation)
-            if algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) > 2 :
-                # output  = algo.law_1()
-                output = 0
+
+
+            if algo.check_distance(epsilon=5) is not True and set_des == 2:
+                # des_orientation = random.randint(0, 359)
+                print('des_orientation', algo.orientation)
+                print('current orientation', orientation_angle)
+                print(abs(orientation_angle - algo.orientation))
+                if abs(orientation_angle-algo.orientation) > 20 :
+
+                    print('condition reached and the error is', abs(orientation_angle-algo.orientation))
+                    print('**********************************************************')
+                    print('**********************************************************')
+                    print('**********************************************************')
+                    print('**********************************************************')
+                    print('**********************************************************')
+                    print('**********************************************************')
+                    if flag ==0:
+
+                    # output  = algo.law_1()
+                        output = 0
                 # delta_list.append(output)
+                        cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                        # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
+                        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                        ###############################################
 
-                cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                ###############################################
+                        mycard.set_encoder_angle(output) ## Update the motor output
+                        algo.plot_arrow(img) ## Plot the direction of the motor
+                        mycard.send_data('encoder') ## Send the motor output to the hardware
+                        time.sleep(0.001)
+                    else:
+                        output = algo.law_1()
+                        mycard.set_encoder_angle(output)  ## Update the motor output
+                        algo.plot_arrow(img)  ## Plot the direction of the motor
+                        mycard.send_data('encoder')  ## Send the motor output to the hardware
+                        time.sleep(0.001)
 
-                mycard.set_encoder_angle(output) ## Update the motor output
-                algo.plot_arrow(img) ## Plot the direction of the motor
-                mycard.send_data('encoder') ## Send the motor output to the hardware
-                time.sleep(0.001)
-            elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
-                output = algo.law_1()
-                mycard.set_encoder_angle(output) ## Update the motor output
-                algo.plot_arrow(img) ## Plot the direction of the motor
-                mycard.send_data('encoder') ## Send the motor output to the hardware
-                time.sleep(0.001)
+                        if algo.check_distance(10) is True:
+                            # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
+                            print('Arrived at the goal position', algo.path[-1], 'and orientation')
+                            for i in range(30):
+                                mycard.send_data('vibrate')
+                                set_des = 3
 
-            elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
-                print('Arrived at the goal position', algo.path[-1], 'and orientation', des_orientation)
-                for i in range(30):
-                    mycard.send_data('vibrate')
-                    set_des = 3
+                        if set_des == 3:
+                            print('Arrived at the goal pose finalllllllllllllll')
+                            time.sleep(3)  # a delay of a second between each iteration
 
-            if set_des == 3:
-                time.sleep(3) # a delay of a second between each iteration
+                else:
+                    flag += 1
+            # # elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
+                    print('starting navigate to the point')
 
-                for i in range(30):
-                    mycard.send_data('st') # or set des 3 or this is to stop the vibration
-                # mycard.send_data('st')
-                # time.sleep(1)
-                algo.next_iteration()
-                j = j + 1
-                algo.package_data()
+                    output = algo.law_1()
+                    mycard.set_encoder_angle(output) ## Update the motor output
+                    algo.plot_arrow(img) ## Plot the direction of the motor
+                    mycard.send_data('encoder') ## Send the motor output to the hardware
+                    time.sleep(0.001)
 
-                algo.clear()
-                algo.random_input()
-                print('the new goal is',algo.random_input())
-                set_des = 2
+                    if algo.check_distance(10) is True:
+                # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
+                            print('Arrived at the goal position', algo.path[-1], 'and orientation')
+                            for i in range(30):
+                                mycard.send_data('vibrate')
+                                print('Arrived at the goal pose finalllllllllllllll')
+                                time.sleep(3)
+                                set_des = 3
 
+                    if set_des == 3:
+
+                        time.sleep(3)
+                        # a delay of a second between each iteration
+
+        #             for i in range(30):
+        #                 mycard.send_data('st') # or set des 3 or this is to stop the vibration
+        #                 # mycard.send_data('st')
+        #                 # time.sleep(1)
+        #             algo.next_iteration()
+        #             j = j + 1
+        #             algo.package_data()
+        # #
+        #             algo.clear()
+                        # time.sleep(5)
+                        # algo.random_input()
+                        # print('the new goal is',algo.random_input())
+                        # set_des = 2
+                # for i in range(30):
+                #     mycard.send_data('vibrate')
+                #     set_des = 3
         out.write(img)
         algo.display_image(img, circle_center, circle_radius)
         # cv2.imshow('QueryImage', img)
