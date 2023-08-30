@@ -9,7 +9,7 @@ initial_flag = 0
 
 """This Code is used to record a video"""
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+filename = f"/home/roblab20/Desktop/videos/orientation_videos/oron_{timestamp}.avi"
 start_time = time.time()
 
 res = '720p'
@@ -211,9 +211,12 @@ while cam.isOpened():
 
                 else:
                     flag = 1
+
             # # elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
                     print('navigate to the point')
                     output = algo.law_1()
+                    cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                     mycard.set_encoder_angle(output) ## Update the motor output
                     algo.plot_arrow(img) ## Plot the direction of the motor
                     mycard.send_data('encoder') ## Send the motor output to the hardware

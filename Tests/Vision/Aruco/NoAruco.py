@@ -103,10 +103,10 @@ while cam.isOpened():
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
             # algo.y_d = 220 ## 220
-            # algo.x_d = 800
+            algo.x_d = 800
 
             algo.y_d = 227
-            algo.x_d = 640
+            # algo.x_d = 640
             start = time.perf_counter()
             print('the goal position is', algo.x_d,algo.y_d)
 
@@ -161,8 +161,9 @@ while cam.isOpened():
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
-                output  = algo.law_1()
-                # output = 0
+                # output  = algo.law_1()
+                output = 0
+
                 delta_list.append(output)
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
@@ -175,19 +176,25 @@ while cam.isOpened():
                 algo.plot_arrow(img) ## Plot the direction of the motor
                 mycard.send_data('encoder') ## Send the motor output to the hardware
                 time.sleep(0.001)
+                # time.sleep(2)
+                # for i in range(1000):
+                #     mycard.send_data('vibrate')
+                # for i in range(30):
+                #     mycard.send_data('vibrate')
             #
             elif algo.check_distance(10) is True:
 
-                # print('Arrived at the goal', algo.path[-1])
+                print('Arrived at the goal', algo.path[-1])
                 for i in range(30):
                     mycard.send_data('vibrate')
                     set_des = 3
 
             if set_des == 3:
-                time.sleep(3) # a delay of a second between each iteration
+                time.sleep(1) # a delay of a second between each iteration
 
                 for i in range(30):
-                    mycard.send_data('st') # or set des 3 or this is to stop the vibration
+                    mycard.send_data('st')
+                    # or set des 3 or this is to stop the vibration
                 # mycard.send_data('st')
                 # time.sleep(1)
                 algo.next_iteration()
