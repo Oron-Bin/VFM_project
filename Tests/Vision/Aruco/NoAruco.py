@@ -103,10 +103,10 @@ while cam.isOpened():
         if set_des == 0: ## If the user didn't input a value yet
             print("No desired position yet")
             # algo.y_d = 220 ## 220
-            algo.x_d = 800
+            # algo.x_d = 800
 
             algo.y_d = 227
-            # algo.x_d = 640
+            algo.x_d = 640
             start = time.perf_counter()
             print('the goal position is', algo.x_d,algo.y_d)
 
@@ -161,8 +161,8 @@ while cam.isOpened():
             cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
 
             if algo.check_distance(epsilon=10) is not True and set_des == 2: #there is a problem
-                # output  = algo.law_1()
-                output = 0
+                output  = algo.law_1()
+                # output = 0
 
                 delta_list.append(output)
 
