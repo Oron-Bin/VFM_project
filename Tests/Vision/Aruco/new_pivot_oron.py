@@ -193,7 +193,7 @@ while cam.isOpened():
                 elif orientation_error <= 15:
                     # mycard.send_data('vibrate')
                     # time.sleep(2)
-                    flag = 1
+                    flag = 1 #because i dont want to fix the orientation error again
             # # elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
                     print('starting navigate to the point')
 
