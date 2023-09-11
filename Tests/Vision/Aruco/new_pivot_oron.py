@@ -9,7 +9,7 @@ initial_flag = 0
 
 """This Code is used to record a video"""
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+filename = f"/home/roblab20/Desktop/videos/new_orientation/oron_{timestamp}.avi"
 start_time = time.time()
 
 res = '720p'
@@ -187,6 +187,7 @@ while cam.isOpened():
                         # print('Arrived at the goal pose !!!!')
                             time.sleep(3)
                             set_des = 3
+
                         if set_des == 3:
                             time.sleep(3)
                 elif orientation_error <= 15:
