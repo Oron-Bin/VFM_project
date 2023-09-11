@@ -145,8 +145,8 @@ while cam.isOpened():
             if algo.check_distance(epsilon=1) is not True and set_des == 2 :
                 print('des_orientation', algo.orientation)
                 print('current orientation', orientation_angle)
-                # orientation_error = abs(shortest_way(orientation_angle,algo.orientation))
-                orientation_error = abs(orientation_angle - algo.orientation)
+                orientation_error = abs(shortest_way(orientation_angle,algo.orientation))
+                # orientation_error = abs(orientation_angle - algo.orientation)
                 print('the error is',orientation_error)
                 if orientation_error > 15 and flag == 0:
                     # flag = 0
@@ -187,7 +187,8 @@ while cam.isOpened():
                         # print('Arrived at the goal pose !!!!')
                             time.sleep(3)
                             set_des = 3
-
+                        if set_des == 3:
+                            time.sleep(3)
                 elif orientation_error <= 15:
                     # mycard.send_data('vibrate')
                     # time.sleep(2)
@@ -205,16 +206,19 @@ while cam.isOpened():
                     # time.sleep(0.001)
 
                     if algo.check_distance(10) is True:
+                        # for i in range(30):
+                        mycard.send_data('vibrate')
+                        time.sleep(3)
                         print('flag number 2')
                 # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
-                        print('Arrived at the goal pose finalllllllllllllll and the possition')
-                        for i in range(30):
-                            mycard.send_data('vibrate')
-                            time.sleep(3)
-                            set_des = 3
+                        print('Arrived at the goal pose finalllllllllllllll and the position')
 
-                    # if set_des == 3:
+                        # mycard.send_data('vibrate')
                         # time.sleep(3)
+                        set_des = 3
+
+                    if set_des == 3:
+                        time.sleep(3)
 
         out.write(img)
         algo.display_image(img, circle_center, circle_radius)
