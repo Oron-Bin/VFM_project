@@ -75,7 +75,7 @@ orientation_list = []
 delta_list = []
 flag = 0
 j = 0
-
+motor_flag = 0
 while cam.isOpened():
     ret, img = cam.read()
     time_diff = time.time() - start_time
@@ -148,9 +148,9 @@ while cam.isOpened():
                 orientation_error = abs(shortest_way(orientation_angle,algo.orientation))
                 # orientation_error = abs(orientation_angle - algo.orientation)
                 print('the error is',orientation_error)
-                if orientation_error > 15 and flag == 0:
+                if orientation_error > 5 and flag == 0:
                     # flag = 0
-                    print('condition reached and the error is', orientation_error)
+                    print('condition reached and the error is', round(orientation_error,2))
                     print('**********************************************************')
                     print('**********************************************************')
                     print('**********************************************************')
@@ -169,7 +169,7 @@ while cam.isOpened():
                     algo.plot_arrow(img) ## Plot the direction of the motor
                     mycard.send_data('encoder') ## Send the motor output to the hardware
                     time.sleep(0.001)
-                elif orientation_error > 15 and flag ==1:
+                elif orientation_error > 5 and flag ==1:
                     print('just ignore the error now')
                     output = algo.law_1()
                     print('output is', output)
@@ -178,48 +178,53 @@ while cam.isOpened():
                     mycard.send_data('encoder')  ## Send the motor output to the hardware
                     time.sleep(0.001)
 
-                    if algo.check_distance(10) is True:
+                    if algo.check_distance(5) is True:
                         print('flag number 1')
-                        # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
-                        print('Arrived at the goal position', algo.path[-1], 'and orientation')
-                        for i in range(30):
-                            mycard.send_data('vibrate')
+                        print('Arrived at the goal position', algo.path[-1], 'and orientation error is',orientation_error )
+                        # for i in range(10):
+                        mycard.send_data('vibrate')
                         # print('Arrived at the goal pose !!!!')
+                        time.sleep(3)
+                        set_des = 3
+
+                        if set_des == 3:
                             time.sleep(3)
+                elif orientation_error <= 5:
+                    flag = 1 #because i dont want to fix the orientation error again
+                    if motor_flag == 0:
+                        mycard.send_data('vibrate')
+                        time.sleep(5)
+                        motor_flag = 1
+
+                    elif motor_flag ==1:
+
+                # # elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
+                        print('starting navigate to the point')
+
+                        output = algo.law_1()
+                        print('output is', output)
+                        mycard.set_encoder_angle(output) ## Update the motor output
+                        algo.plot_arrow(img) ## Plot the direction of the motor
+                        mycard.send_data('encoder') ## Send the motor output to the hardware
+                        time.sleep(0.001)
+                        mycard.send_data('st')
+                        time.sleep(0.001)
+
+                        if algo.check_distance(5) is True:
+                            print('flag number 2')
+                            # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
+                            print('Arrived at the goal pose finalllllllllllllll and the position')
+                            # for i in range(30):
+                            mycard.send_data('vibrate')
+                            time.sleep(3)
+
+
+                            # mycard.send_data('vibrate')
+                            # time.sleep(3)
                             set_des = 3
 
                         if set_des == 3:
                             time.sleep(3)
-                elif orientation_error <= 15:
-                    # mycard.send_data('vibrate')
-                    # time.sleep(2)
-                    flag = 1 #because i dont want to fix the orientation error again
-            # # elif algo.check_distance(epsilon=10) is not True and set_des == 2 and (orientation_angle-des_orientation) <= 2:
-                    print('starting navigate to the point')
-
-                    output = algo.law_1()
-                    print('output is', output)
-                    mycard.set_encoder_angle(output) ## Update the motor output
-                    algo.plot_arrow(img) ## Plot the direction of the motor
-                    mycard.send_data('encoder') ## Send the motor output to the hardware
-                    time.sleep(0.001)
-                    # mycard.send_data('st')
-                    # time.sleep(0.001)
-
-                    if algo.check_distance(10) is True:
-                        # for i in range(30):
-                        mycard.send_data('vibrate')
-                        time.sleep(3)
-                        print('flag number 2')
-                # # elif algo.check_distance(10) is True and (orientation_angle-des_orientation) <= 2 :
-                        print('Arrived at the goal pose finalllllllllllllll and the position')
-
-                        # mycard.send_data('vibrate')
-                        # time.sleep(3)
-                        set_des = 3
-
-                    if set_des == 3:
-                        time.sleep(3)
 
         out.write(img)
         algo.display_image(img, circle_center, circle_radius)
