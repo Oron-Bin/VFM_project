@@ -207,8 +207,8 @@ while cam.isOpened():
                         algo.plot_arrow(img) ## Plot the direction of the motor
                         mycard.send_data('encoder') ## Send the motor output to the hardware
                         time.sleep(0.001)
-                        mycard.send_data('st')
-                        time.sleep(0.001)
+                        # mycard.send_data('st')
+                        # time.sleep(0.001)
 
                         if algo.check_distance(5) is True:
                             print('flag number 2')
