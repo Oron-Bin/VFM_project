@@ -2,6 +2,8 @@ import os
 import sys
 import datetime
 
+import cv2
+
 from Utils.Control.cardalgo import *
 
 sys.path.insert(1, r'/')
@@ -134,12 +136,10 @@ while cam.isOpened():
             y_axis_end = (origin[0], origin[1] + int(scale))
 
             # Draw coordinate system
-            cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)
+            cv2.arrowedLine(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (black)
+            cv2.arrowedLine(img, origin, y_axis_end, (0, 0, 0), 2) # Y- axis (black)
 
-            # Draw coordinate system
-            cv2.line(img, origin, x_axis_end, (0, 0, 0), 2)  # X-axis (red)
-            cv2.line(img, origin, y_axis_end, (0, 0, 0), 2)  # Y-axis (green)255
+
 
 
             if algo.check_distance(epsilon=1) is not True and set_des == 2 :
