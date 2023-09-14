@@ -181,10 +181,10 @@ while cam.isOpened():
                     if algo.check_distance(5) is True:
                         print('flag number 1')
                         print('Arrived at the goal position', algo.path[-1], 'and orientation error is',orientation_error )
-                        # for i in range(10):
-                        mycard.send_data('vibrate')
+                        for i in range(15):
+                            mycard.send_data('vibrate')
                         # print('Arrived at the goal pose !!!!')
-                        time.sleep(3)
+                        # time.sleep(3)
                         set_des = 3
 
                         if set_des == 3:
