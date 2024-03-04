@@ -184,7 +184,7 @@ while cam.isOpened():
                         for i in range(15):
                             mycard.send_data('vibrate')
                         # print('Arrived at the goal pose !!!!')
-                        # time.sleep(3)
+                            time.sleep(3)
                         set_des = 3
 
                         if set_des == 3:
