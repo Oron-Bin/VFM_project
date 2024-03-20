@@ -9,25 +9,32 @@ def vibration_phi(z, t, omega, tau_f, theta, r, m, miu):
     dzdt = [omega_val, (f_c * (r + np.cos(theta) * np.sin(theta) - r * np.sin(theta) * np.cos(theta)) + tau_f) / (m * (r ** 2))]
     return dzdt
 
-def vibration_x(x, t, omega, theta, m, miu):
+def vibration_x(x, t, omega, theta, M, miu, beta):
     x_val, x_dot = x
-    f_c = 5 * np.sin(omega * t) - miu * x_dot
-    dzdt = [x_dot, (f_c * np.cos(theta) / m)]
+    F_K = (7.91/1000) * np.sin(240 * t) + (32.33/1000)
+    f_c = (34.56/1000)* np.cos(240 * t) + (1.2/1000)
+    dzdt = [x_dot, ((f_c- F_K - M*g*np.sin(beta))* np.cos(theta)) / M]
     return dzdt
 
-def vibration_y(y, t, omega, theta, m, miu):
+def vibration_y(y, t, omega, theta, m, miu,F_N, F_K):
     y_val, y_dot = y
-    f_c = 5 * np.sin(omega * t) - miu * y_dot
-    dydt = [y_dot, (f_c * np.sin(theta) / m)]
+    # f_c = (34.56/1000)* np.cos(240 * t) + (1.2/1000)
+    F_K = (7.91 / 1000) * np.sin(240 * t) + (32.33 / 1000)
+    F_N = (34.56/ 1000) * np.sin(240 * t) + (141.2 / 1000)
+    dydt = [y_dot, ((F_N - F_K - M*g*np.sin(beta)) * np.sin(theta)) / M]
     return dydt
 
 tau_f = 10
 r = 0.005
-m = 14
+m = 14/1000#   kg or 22 gram
 theta = 0
 omega = 2*np.pi / 10  # Frequency of 0.1 Hz
-miu = 0.1  # Friction coefficient
-
+miu = 0.229 # Friction coefficient
+F_K = 0.0
+F_N = 0.0
+M = 0.0
+dx =0.0
+dy = 0.0
 y0 = [1.0, 1.0]
 x0 = [0.0, 0.0]
 z0 = [np.pi - 0.1, 0.0]
