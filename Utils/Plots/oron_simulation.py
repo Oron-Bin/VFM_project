@@ -1,92 +1,75 @@
-import sympy as smp
-from scipy.integrate import odeint
 import numpy as np
+from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# Define symbols
-x, y, teta, beta, f_c, m, g, tau_f = smp.symbols('x y teta beta f_c m g tau_f')
+def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy):
+    F_N = (m*l*(w**2)) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g
+    F_K = miu* F_N
+    f_c = (m*l*(w**2))* np.cos(np.deg2rad(w * t)) + m*g
 
-# Define equations
-F = -(m * g) * smp.sin(beta)
-F_x = F * smp.cos(teta)
-F_y = F * smp.sin(teta)
+    phi, omega, x, vx, y, vy = variables
+    dx_dt = vx
+    dvx_dt = ((f_c - F_K - M*g*np.sin(np.deg2rad(beta)))* (np.cos(np.deg2rad(theta)))) / M
+    dy_dt = vy
+    dvy_dt = ((f_c - F_K - M*g*np.sin(np.deg2rad(beta))) * (np.sin(np.deg2rad(theta)))) / M
+    dphi_dt = omega
+    domega_dt = ((f_c -F_K)*(dx*np.sin(np.deg2rad(theta)) - dy*np.cos(np.deg2rad(theta))) - tau_f) / (I_com + (M*(x**2 + y**2)))
+    return [dphi_dt,domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
 
-eq1 = (F_x + f_c * smp.cos(teta))/m
-eq2 = (F_y + f_c * smp.sin(teta))/m
-eq3 = (f_c * (x * smp.sin(teta) - y * smp.cos(teta)) - (x * F_y - y * F_x) + tau_f) / (m * (x ** 2 + y ** 2))
+# Initial conditions
+initial_conditions = [0 ,0, 30.0, 0.0, -30.0, 0.0]  # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
-# Substitute teta=0
-eq1_sub = eq1.subs(teta ,0)
-eq2_sub = eq2.subs(teta, 0)
-eq3_sub = eq3.subs(teta, 0)
+# Parameters
+tau_f = -100
+R = 50.0 #mm
+M = 14.0#   m kg
+I_com = (1/2)*(M*R*R)
+m = 1.2  #mkg
+l = 5.0 # mm
+beta = 0.0
+g = 9.81*1000 #mm/s^2
+theta = 90
+w = 240   # Frequency of 0.1 Hz
+miu = 0.229 # Friction coefficient
+dx = 3.0
+dy = 3.0
+parameters = (w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy)  #
 
-print(eq1_sub)
-print(eq2_sub)
-print(eq3_sub)
+# Time span for the integration
+t_span = (0, 100)
 
-# Convert equations to numerical functions
-eq1_func = smp.lambdify((x, y, beta,  f_c, m, g, tau_f), eq1_sub)
-eq2_func = smp.lambdify((x, y, beta,  f_c, m, g, tau_f), eq2_sub)
-eq3_func = smp.lambdify((x, y, beta,  f_c, m, g, tau_f), eq3_sub)
+# Solve the system of ODEs
+solution = solve_ivp(system_of_odes, t_span, initial_conditions, args=parameters, dense_output=True, t_eval=np.linspace(0, 100, 1000))
 
+# Animation function
+def animate(i):
+    ax_phi.clear()
+    ax_phi.plot(solution.t[:i], solution.y[0][:i], label='phi(t)', color='blue')
+    ax_phi.set_xlabel('Time (t)')
+    ax_phi.set_ylabel('Phi')
+    ax_phi.set_title('Evolution of Phi over Time')
+    ax_phi.grid(True)
 
-# Define parameters
-beta_val = 20.0  # Assuming beta is constant
-# phi_val = 0.0  # Assuming phi is constant
-f_c_val = 10.0  # Assuming f_c is constant
-m_val = 14.0  # Assuming mass m is constant
-g_val = 9.81  # Assuming gravitational acceleration g is constant
-tau_f_val = 1.0  # Assuming tau_f is constant
+    ax_x.clear()
+    ax_x.plot(solution.t[:i], solution.y[2][:i], label='x(t)', color='red')
+    ax_x.set_xlabel('Time (t)')
+    ax_x.set_ylabel('x')
+    ax_x.set_title('Evolution of x over Time')
+    ax_x.grid(True)
 
-# Define initial conditions
-x0 = 1.0
-y0 = 1.0
-v0 = 1.0  # Initial velocity
-phi0 = 10.0 # Initial
-# Time vector
-t = np.linspace(0, 10, 100)  # Simulation time from 0 to 10 seconds
+    ax_y.clear()
+    ax_y.plot(solution.t[:i], solution.y[4][:i], label='y(t)', color='green')
+    ax_y.set_xlabel('Time (t)')
+    ax_y.set_ylabel('y')
+    ax_y.set_title('Evolution of y over Time')
+    ax_y.grid(True)
 
-# Define function to integrate
-def func(z, t):
-    x, y , phi = z
-    ddx_dt = eq1_func(x, y, beta_val, f_c_val, m_val, g_val, tau_f_val)
-    ddy_dt = eq2_func(x, y, beta_val, f_c_val, m_val, g_val, tau_f_val)
-    ddphi_dt = eq3_func(x, y, beta_val,f_c_val,m_val, g_val, tau_f_val)
-    return [ddx_dt, ddy_dt, ddphi_dt]
+# Create subplots
+fig, (ax_phi, ax_x, ax_y) = plt.subplots(3, 1, figsize=(10, 18))
 
-# Integrate the equations of motion
-sol = odeint(func, [x0, y0, phi0], t)
+# Create animation
+ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
 
-
-def update_plot(frame_num):
-    scat.set_offsets([t[frame_num], sol[frame_num, 2]])  # Update time and phi
-
-# Create the figure and axis
-fig, ax = plt.subplots()
-ax.set_xlim(0, max(t))  # Set x-axis limits based on the time vector
-ax.set_ylim(0, max(sol[:, 2]))  # Set y-axis limits based on phi
-# ax.set_ylim(min(sol[:, 2]), max(sol[:, 2]))  # Set y-axis limits based on phi
-ax.set_xlabel('Time')
-ax.set_ylabel('omega')
-ax.set_title('omega vs Time')
-
-# Plot the marker representing the current time and phi
-scat = ax.scatter([], [], color='red', marker='o')
-
-# Set up the animation
-ani = FuncAnimation(fig, update_plot, frames=len(t), interval=50)
-
-# Display the animation
+# Show animation
 plt.show()
-# Plot x and y positions versus time
-# import matplotlib.pyplot as plt
-#
-# plt.plot(t, sol[:, 0], label='x')
-# plt.plot(t, sol[:, 1], label='y')
-# plt.xlabel('Time')
-# plt.ylabel('Position')
-# plt.title('Simulation of x and y positions vs time')
-# plt.legend()
-# plt.grid(True)
-# plt.show()

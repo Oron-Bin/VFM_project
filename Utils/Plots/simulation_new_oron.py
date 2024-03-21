@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-def vibration_phi(z, t, omega, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, y):
+def vibration_phi(z, t, omega, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, x, y):
     phi, phi_dot = z
     F_N = (m*l*(omega**2)) * np.sin(np.deg2rad(omega * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g
     F_K = miu* F_N
