@@ -3,75 +3,84 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-def vibration_phi(z, t, omega, tau_f, theta, r, m, miu):
-    phi, omega_val = z
-    f_c = 5 * np.sin(omega * t) - miu * omega_val
-    dzdt = [omega_val, (f_c * (r + np.cos(theta) * np.sin(theta) - r * np.sin(theta) * np.cos(theta)) + tau_f) / (m * (r ** 2))]
+def vibration_phi(z, t, omega, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, y):
+    phi, phi_dot = z
+    F_N = (m*l*(omega**2)) * np.sin(np.deg2rad(omega * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g
+    F_K = miu* F_N
+    f_c = (m*l*(omega**2))* np.cos(np.deg2rad(omega * t)) + m*g
+    dzdt = [phi_dot, ((f_c -F_K)*(dx*np.sin(np.deg2rad(theta)) - dy*np.cos(np.deg2rad(theta))) - tau_f) / (I_com + (M*(x**2 + y**2)))]
     return dzdt
 
-def vibration_x(x, t, omega, theta, M, miu, beta):
+def vibration_x(x, t, omega, theta, M, m, miu, g,l, beta):
     x_val, x_dot = x
-    F_K = (7.91/1000) * np.sin(240 * t) + (32.33/1000)
-    f_c = (34.56/1000)* np.cos(240 * t) + (1.2/1000)
-    dzdt = [x_dot, ((f_c- F_K - M*g*np.sin(beta))* np.cos(theta)) / M]
+    F_N = (m*l*(omega^2)) * np.sin(np.deg2rad(omega * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g
+    F_K = miu* F_N
+    f_c = (m*l*(omega^2))* np.cos(np.deg2rad(omega * t)) + m*g
+    dzdt = [x_dot, ((f_c - F_K - M*g*np.sin(np.deg2rad(beta)))* (np.cos(np.deg2rad(theta)))) / M]
     return dzdt
 
-def vibration_y(y, t, omega, theta, m, miu,F_N, F_K):
+def vibration_y(y, t, omega, theta, M, m, miu, g,l, beta):
     y_val, y_dot = y
-    # f_c = (34.56/1000)* np.cos(240 * t) + (1.2/1000)
-    F_K = (7.91 / 1000) * np.sin(240 * t) + (32.33 / 1000)
-    F_N = (34.56/ 1000) * np.sin(240 * t) + (141.2 / 1000)
-    dydt = [y_dot, ((F_N - F_K - M*g*np.sin(beta)) * np.sin(theta)) / M]
+    F_N = (m*l*(omega^2)) * np.sin(np.deg2rad(omega * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g
+    F_K = miu* F_N
+    f_c = (m*l*(omega^2))* np.cos(np.deg2rad(omega * t)) + m*g
+    dydt = [y_dot, ((f_c - F_K - M*g*np.sin(np.deg2rad(beta))) * (np.sin(np.deg2rad(theta)))) / M]
     return dydt
 
-tau_f = 10
-r = 0.005
-m = 14/1000#   kg or 22 gram
-theta = 0
-omega = 2*np.pi / 10  # Frequency of 0.1 Hz
+tau_f = -100
+R = 50.0 #mm
+M = 14.0#   m kg
+I_com = (1/2)*(M*R*R)
+m = 1.2  #mkg
+l = 5.0 # mm
+beta = 0.0
+g = 9.81*1000 #mm/s^2
+theta = 90
+omega = 240   # Frequency of 0.1 Hz
 miu = 0.229 # Friction coefficient
-F_K = 0.0
-F_N = 0.0
-M = 0.0
-dx =0.0
-dy = 0.0
-y0 = [1.0, 1.0]
-x0 = [0.0, 0.0]
-z0 = [np.pi - 0.1, 0.0]
-t = np.linspace(0, 10, 101)
+dx = 3.0
+dy = 3.0
+y0 = [-30.0, 0.0]
+x0 = [30.0, 0.0]
+z0 = [0.0, 0.0]
+t = np.linspace(0, 100, 100)
 
-sol_phi = odeint(vibration_phi, z0, t, args=(omega, tau_f, theta, r, m, miu))
-sol_x = odeint(vibration_x, x0, t, args=(omega, theta, m, miu))
-sol_y = odeint(vibration_y, y0, t, args=(omega, theta, m, miu))
+# print(t)
 
+
+sol_x = odeint(vibration_x, x0, t, args=(omega, theta, M, m, miu, g,l, beta))
+sol_y = odeint(vibration_y, y0, t, args=(omega, theta, M, m, miu, g,l, beta))
+sol_phi = odeint(vibration_phi, z0, t, args=(omega, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy,1))
+for i in range(0,100):
+    print(sol_y[i][0])
 fig, axs = plt.subplots(3)
 
 def update_phi(frame):
+    axs[2].cla()
+    axs[2].plot(t[:frame], sol_phi[:frame, 0], 'b', label='phi(t)')
+    axs[2].plot(t[:frame], sol_phi[:frame, 1], 'g', label='omega(t)')
+    axs[2].set_xlabel('t')
+    axs[2].set_ylabel('Phi/Omega')
+    axs[2].legend(loc='best')
+    axs[2].grid()
+
+def update_x(frame):
     axs[0].cla()
-    axs[0].plot(t[:frame], sol_phi[:frame, 0], 'b', label='phi(t)')
-    axs[0].plot(t[:frame], sol_phi[:frame, 1], 'g', label='omega(t)')
+    axs[0].plot(t[:frame], sol_x[:frame, 0], 'b', label='x(t)(mm)')
+    axs[0].plot(t[:frame], sol_x[:frame, 1], 'g', label='v(t)(mm/s)')
     axs[0].set_xlabel('t')
-    axs[0].set_ylabel('Phi/Omega')
+    axs[0].set_ylabel('X/Velocity')
     axs[0].legend(loc='best')
     axs[0].grid()
 
-def update_x(frame):
+def update_y(frame):
     axs[1].cla()
-    axs[1].plot(t[:frame], sol_x[:frame, 0], 'b', label='x(t)')
-    axs[1].plot(t[:frame], sol_x[:frame, 1], 'g', label='v(t)')
+    axs[1].plot(t[:frame], sol_y[:frame, 0]*1000, 'b', label='y(t)(mm)')
+    axs[1].plot(t[:frame], sol_y[:frame, 1], 'g', label='v(t)(mm/s)')
     axs[1].set_xlabel('t')
-    axs[1].set_ylabel('X/Velocity')
+    axs[1].set_ylabel('Y/Velocity')
     axs[1].legend(loc='best')
     axs[1].grid()
-
-def update_y(frame):
-    axs[2].cla()
-    axs[2].plot(t[:frame], sol_y[:frame, 0], 'b', label='y(t)')
-    axs[2].plot(t[:frame], sol_y[:frame, 1], 'g', label='v(t)')
-    axs[2].set_xlabel('t')
-    axs[2].set_ylabel('Y/Velocity')
-    axs[2].legend(loc='best')
-    axs[2].grid()
 
 ani_phi = FuncAnimation(fig, update_phi, frames=len(t), interval=50)
 ani_x = FuncAnimation(fig, update_x, frames=len(t), interval=50)
