@@ -18,7 +18,7 @@ def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l ,I_com, beta, 
     return [dphi_dt,domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
 
 # Initial conditions
-initial_conditions = [0 ,0, 30.0, 0.0, -30.0, 0.0]  # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+initial_conditions = [10 ,0.0, 30.0, 0.0, 0.0, 0.0]  # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
 # Parameters
 tau_f = -100
@@ -30,10 +30,10 @@ l = 5.0 # mm
 beta = 0.0
 g = 9.81*1000 #mm/s^2
 theta = 90
-w = 240   # Frequency of 0.1 Hz
+w = 240   # Frequency
 miu = 0.229 # Friction coefficient
-dx = 3.0
-dy = 3.0
+dx = 5.0
+dy = 5.0
 parameters = (w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy)  #
 
 # Time span for the integration
@@ -46,6 +46,7 @@ solution = solve_ivp(system_of_odes, t_span, initial_conditions, args=parameters
 def animate(i):
     ax_phi.clear()
     ax_phi.plot(solution.t[:i], solution.y[0][:i], label='phi(t)', color='blue')
+    ax_phi.plot(solution.t[:i], solution.y[1][:i], label='phi_dot(t)', color='green')
     ax_phi.set_xlabel('Time (t)')
     ax_phi.set_ylabel('Phi')
     ax_phi.set_title('Evolution of Phi over Time')
@@ -53,6 +54,7 @@ def animate(i):
 
     ax_x.clear()
     ax_x.plot(solution.t[:i], solution.y[2][:i], label='x(t)', color='red')
+    ax_x.plot(solution.t[:i], solution.y[3][:i], label='phi_dot(t)', color='green')
     ax_x.set_xlabel('Time (t)')
     ax_x.set_ylabel('x')
     ax_x.set_title('Evolution of x over Time')
