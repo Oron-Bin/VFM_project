@@ -1,10 +1,11 @@
+
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, fb):
-    F_N = ((m*l*(w**2))/1000.0) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g + fb*t #mN
+    F_N = ((m*l*(w**2))/1000.0) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g - fb*t #mN
     # F_N = ((-m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + m * g + fb*t  # mN
     F_K = miu* F_N
     f_c = ((m*l*(w**2))/1000.0)* np.cos(np.deg2rad(w * t)) + m*g
@@ -34,21 +35,21 @@ M = 14.0#   m kg
 I_com = (1/2)*(M*R*R)
 m = 1.2  #mkg
 l = 4.0 # mm
-beta = 0.0
+beta = 10.0
 g = 9.81 #m/s^2
 theta = 90
 w = 240   # Frequency
 miu = 0.229 # Friction coefficient
 dx = 10.0 # mm
 dy = 10.0 # mm
-fb = -2
+fb = 8.0
 parameters = (w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, fb)  #
 
 # Time span for the integration
-t_span = (0, 100)
+t_span = (0, 50)
 
 # Solve the system of ODEs
-solution = solve_ivp(system_of_odes, t_span, initial_conditions, args=parameters, dense_output=True, t_eval=np.linspace(0, 100, 1000))
+solution = solve_ivp(system_of_odes, t_span, initial_conditions, args=parameters, dense_output=True, t_eval=np.linspace(0, 50, 1000))
 
 # Animation function
 def animate(i):
