@@ -5,12 +5,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, fb):
-    F_N = ((m*l*(w**2))/1000.0) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g - fb*t #mN
-    # F_N = ((-m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + m * g + fb*t  # mN
+    F_N = (-(m*l*(w**2))/1000.0) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g - fb*t #mN
     F_K = miu* F_N
     f_c = ((m*l*(w**2))/1000.0)* np.cos(np.deg2rad(w * t)) + m*g
-
-
 
     phi, omega, x, vx, y, vy = variables
     dx_dt = vx
