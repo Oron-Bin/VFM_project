@@ -3,26 +3,23 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, fb):
-    F_N = (-(m*l*(w**2))/1000.0) * np.sin(np.deg2rad(w * t)) + (M*np.cos(np.deg2rad(beta)) + m)*g - fb*t #mN
-    F_K = miu* F_N
-    f_c = ((m*l*(w**2))/1000.0)* np.cos(np.deg2rad(w * t)) + m*g
-
+def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l, I_com, beta, dx, dy, fb):
+    F_N = ((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g
+    F_K = miu * F_N
+    f_c = ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * t)) + m * g
     phi, omega, x, vx, y, vy = variables
     dx_dt = vx
-    dvx_dt = ((f_c - F_K - M*g*np.sin(np.deg2rad(beta)))* (np.cos(np.deg2rad(theta)))) / M
+    dvx_dt = ((f_c - F_K - M * g * np.sin(np.deg2rad(beta))) * (np.cos(np.deg2rad(theta)))) / M
     dy_dt = vy
-    dvy_dt = ((f_c - F_K - M*g*np.sin(np.deg2rad(beta))) * (np.sin(np.deg2rad(theta)))) / M
+    dvy_dt = ((f_c - F_K - miu * fb * y - M * g * np.sin(np.deg2rad(beta))) * (np.sin(np.deg2rad(theta)))) / M
     dphi_dt = omega
-    domega_dt = ((f_c - F_K)*(dx*np.sin(np.deg2rad(theta)) - dy*np.cos(np.deg2rad(theta))) - tau_f) / ((I_com + (M*(x**2 + y**2))))
+    domega_dt = ((f_c - F_K) * (dx * np.sin(np.deg2rad(theta)) - dy * np.cos(np.deg2rad(theta))) - tau_f) / (
+                I_com + (M * (x ** 2 + y ** 2)))
 
-    if f_c ==  F_K + M * g * np.sin(np.deg2rad(beta)):
-        dvy_dt = 0
-        print('some')
-    return [dphi_dt,domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
+    return [dphi_dt, domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
 
 # Initial conditions
-initial_conditions = [0.0 ,0.0, 30.0, 0.0, 10.0, 0.0]  # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+initial_conditions = [0.0 ,0.0, 30.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
 # Parameters
 tau_f = 100
@@ -31,14 +28,14 @@ M = 14.0#   m kg
 I_com = (1/2)*(M*R*R)
 m = 1.2  #mkg
 l = 4.0 # mm
-beta = 10.0
+beta = 5.0
 g = 9.81 #m/s^2
 theta = 90
 w = 240   # Frequency
-miu = 0.229 # Friction coefficient
+miu = 0.15 # Friction coefficient
 dx = 10.0 # mm
 dy = 10.0 # mm
-fb = 8.0
+fb = 2.18
 parameters = (w, tau_f, theta, M, m, miu, g, l ,I_com, beta, dx, dy, fb)  #
 
 # Time span for the integration
@@ -68,17 +65,28 @@ def animate(i):
     ax_y.clear()
     ax_y.plot(solution.t[:i], solution.y[4][:i]/10, label='y(t)(cm)', color='blue')
     ax_y.plot(solution.t[:i], solution.y[5][:i]/10, label='y_dot', color='green')
+    # ax_y.plot(solution.t[:i],  system_of_odes(solution.t[:i], solution.y[:, :i], *parameters)[-1], label='dvy_dt', color='red')
     ax_y.set_xlabel('Time (t)')
     ax_y.set_ylabel('y(cm)')
     ax_y.set_title('Evolution of y over Time')
     ax_y.grid(True)
-    # print(solution.y[4][:i] / 10)
+
+    # # Plot f_c and f_k
+    ax_fc.clear()
+    ax_fc.plot(solution.t[:i], ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * solution.t[:i])) + m * g, label='f_c', color='orange')
+    ax_fc.plot(solution.t[:i], miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * solution.t[:i])) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb*10*solution.y[4][:i])) - M * g * np.sin(np.deg2rad(beta)) , label='f_k', color='purple')
+    ax_fc.set_xlabel('Time (t)')
+    ax_fc.set_ylabel('Forces')
+    ax_fc.set_title('Evolution of f_c and f_k over Time')
+    ax_fc.legend()
+    ax_fc.grid(True)
 
 # Create subplots
-fig, (ax_phi, ax_x, ax_y) = plt.subplots(3, 1, figsize=(10, 18))
-
+fig, (ax_phi, ax_x, ax_y,ax_fc) = plt.subplots(4, 1, figsize=(10, 18))
+# fig_2,  = plt.subplots(figsize=(10, 6))
 # Create animation
 ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
 
 # Show animation
 plt.show()
+
