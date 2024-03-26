@@ -6,14 +6,15 @@ from matplotlib.animation import FuncAnimation
 def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l, I_com, beta, dx, dy, fb):
     F_N = ((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g
     F_K = miu * F_N
+    F_g = M * g * np.sin(np.deg2rad(beta))
     f_c = ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * t)) + m * g
     phi, omega, x, vx, y, vy = variables
     dx_dt = vx
-    dvx_dt = ((f_c - F_K - M * g * np.sin(np.deg2rad(beta))) * (np.cos(np.deg2rad(theta)))) / M
+    dvx_dt = ((f_c - F_K - F_g) * (np.cos(np.deg2rad(theta)))) / M
     dy_dt = vy
-    dvy_dt = ((f_c - F_K - miu * fb * y - M * g * np.sin(np.deg2rad(beta))) * (np.sin(np.deg2rad(theta)))) / M
+    dvy_dt = ((f_c - (F_K + miu * fb * y) - F_g) * (np.sin(np.deg2rad(theta)))) / M
     dphi_dt = omega
-    domega_dt = ((f_c - F_K) * (dx * np.sin(np.deg2rad(theta)) - dy * np.cos(np.deg2rad(theta))) - tau_f) / (
+    domega_dt = ((f_c - (F_K + miu * fb * y)) * (dx * np.sin(np.deg2rad(theta)) - dy * np.cos(np.deg2rad(theta))) - tau_f) / (
                 I_com + (M * (x ** 2 + y ** 2)))
 
     return [dphi_dt, domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
@@ -74,7 +75,7 @@ def animate(i):
     # # Plot f_c and f_k
     ax_fc.clear()
     ax_fc.plot(solution.t[:i], ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * solution.t[:i])) + m * g, label='f_c', color='orange')
-    ax_fc.plot(solution.t[:i], miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * solution.t[:i])) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb*10*solution.y[4][:i])) - M * g * np.sin(np.deg2rad(beta)) , label='f_k', color='purple')
+    ax_fc.plot(solution.t[:i], -1*(miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * solution.t[:i])) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb*10*(solution.y[4][:i]))) + M * g * np.sin(np.deg2rad(beta))) , label='f_k', color='purple')
     ax_fc.set_xlabel('Time (t)')
     ax_fc.set_ylabel('Forces')
     ax_fc.set_title('Evolution of f_c and f_k over Time')
@@ -89,4 +90,3 @@ ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
 
 # Show animation
 plt.show()
-
