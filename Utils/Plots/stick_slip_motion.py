@@ -17,11 +17,11 @@ def system_of_odes(t, variables, w, tau_f, theta, M, m, miu, g, l, I_com, beta, 
     dx_dt = vx
     dvx_dt = ((f_c - (F_K + miu * fb * x) - F_g) * (np.cos(np.deg2rad(theta)))) / M
     dy_dt = vy
-    # tolerance = 10  # Define a small tolerance
-    # if np.abs(f_c - f_res_y) < tolerance:
-    #     dvy_dt = 0  # If f_c and f_res are close, set dvy_dt to 0
-    # else:
-    if y < -5.0:
+
+    amplitude_fc = (m * l * (w ** 2)) / (1000.0) +(M * np.cos(np.deg2rad(beta)) + m) * g
+    min_amplitude_res = miu * ((m * l * (w ** 2)) / (1000.0) - (M * np.cos(np.deg2rad(beta))) - (m * g) - (fb*10*y) - (M * g * np.sin(np.deg2rad(beta))))
+
+    if amplitude_fc < min_amplitude_res:
         dy_dt = 0.0
         dvy_dt = 0.0
     else:
@@ -109,3 +109,4 @@ ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
 
 # Show animation
 plt.show()
+
