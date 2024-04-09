@@ -66,27 +66,30 @@ solution = solve_ivp(system_of_odes, t_span, initial_conditions, dense_output=Tr
 def animate(i):
     ax_phi.clear()
     ax_phi.plot(solution.t[:i], solution.y[0][:i]*(180/np.pi), label='phi(t)', color='blue')
-    ax_phi.plot(solution.t[:i], solution.y[1][:i], label='phi_dot(t)', color='green')
+    ax_phi.plot(solution.t[:i], solution.y[1][:i], label='omega(t)', color='green')
     ax_phi.set_xlabel('Time (t)')
     ax_phi.set_ylabel('Phi(deg)')
     ax_phi.set_title('Evolution of Phi over Time')
     ax_phi.grid(True)
+    ax_phi.legend()
 
     ax_x.clear()
     ax_x.plot(solution.t[:i], solution.y[2][:i]/10, label='x(t)', color='blue')
-    ax_x.plot(solution.t[:i], solution.y[3][:i]/10, label='x_dot', color='green')
+    ax_x.plot(solution.t[:i], solution.y[3][:i]/10, label='velocity_x(t)', color='green')
     ax_x.set_xlabel('Time (t)')
     ax_x.set_ylabel('x(cm)')
     ax_x.set_title('Evolution of x over Time')
     ax_x.grid(True)
+    ax_x.legend()
 
     ax_y.clear()
-    ax_y.plot(solution.t[:i], solution.y[4][:i]/10, label='y(t)(cm)', color='blue')
-    ax_y.plot(solution.t[:i], solution.y[5][:i]/10, label='y_dot', color='green')
+    ax_y.plot(solution.t[:i], solution.y[4][:i]/10, label='y(t)', color='blue')
+    ax_y.plot(solution.t[:i], solution.y[5][:i]/10, label='velocity_y(t)', color='green')
     ax_y.set_xlabel('Time (t)')
     ax_y.set_ylabel('y(cm)')
     ax_y.set_title('Evolution of y over Time')
     ax_y.grid(True)
+    ax_y.legend()
 
     # Calculate f_res
     f_c_animation = ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * solution.t[:i])) + m * g
@@ -98,13 +101,13 @@ def animate(i):
     ax_fc.plot(solution.t[:i], f_c_animation, label='f_c', color='orange')
     ax_fc.plot(solution.t[:i], f_res_x_animtaion , label='f_res', color='purple')
     ax_fc.set_xlabel('Time (t)')
-    ax_fc.set_ylabel('Forces')
-    ax_fc.set_title('Evolution of f_c and f_k over Time')
+    ax_fc.set_ylabel('Forces (mN)')
+    ax_fc.set_title('Evolution of f_c and f_k_total over Time')
     ax_fc.legend()
     ax_fc.grid(True)
 
 # Create subplots
-fig, (ax_phi, ax_x, ax_y,ax_fc) = plt.subplots(4, 1, figsize=(10, 18))
+fig, (ax_phi, ax_x, ax_y, ax_fc) = plt.subplots(4, 1, figsize=(10, 18))
 
 # Create animation
 ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
