@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 # Define global variables
 w = 240   # Frequency
 tau_f = 100
-theta = 0
+theta = 90
 R = 50.0 #mm
 M = 14.0#   m kg
 I_com = (1/2)*(M*R*R)
@@ -30,8 +30,8 @@ def system_of_odes(t, variables):
     f_c = ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * t)) + m * g
     distance = np.sqrt(x ** 2 + y ** 2)
 
-    f_res_x = -miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb * dx)) + M * g * np.sin(np.deg2rad(beta))
-    f_res_y = -miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb * dy)) + M * g * np.sin(np.deg2rad(beta))
+    # f_res_x = -miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb * dx)) + M * g * np.sin(np.deg2rad(beta))
+    # f_res_y = -miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * t)) + (M * np.cos(np.deg2rad(beta)) + m) * g + (fb * dy)) + M * g * np.sin(np.deg2rad(beta))
 
     dx_dt = vx
     dy_dt = vy
