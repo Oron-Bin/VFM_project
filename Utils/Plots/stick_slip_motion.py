@@ -99,7 +99,7 @@ def animate(i):
     # # Plot f_c and f_k
     ax_fc.clear()
     ax_fc.plot(solution.t[:i], f_c_animation, label='f_c', color='orange')
-    ax_fc.plot(solution.t[:i], f_res_x_animtaion , label='f_res', color='purple')
+    ax_fc.plot(solution.t[:i], f_res_y_animtaion , label='f_res', color='purple')
     ax_fc.set_xlabel('Time (t)')
     ax_fc.set_ylabel('Forces (mN)')
     ax_fc.set_title('Evolution of f_c and f_k_total over Time')
@@ -114,3 +114,5 @@ ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
 
 # Show animation
 plt.show()
+
+
