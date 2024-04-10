@@ -1,6 +1,6 @@
 import serial
 import time
-
+from Utils.Control.cardalgo import *
 
 def jsonize(key,data): #how the data is tansform in the packet
     packet = 'json:{"'+str(key)+'":'+str(data)+'}'+'\x0d'+'\x0a'
@@ -117,4 +117,32 @@ class Card:
 #
 # def int_from_bytes(binary_data: bytes) -> [int]:
 #     return int.from_bytes(binary_data, byteorder='big', signed=True)
+#
+# mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
+# # for i in range(30):
+# # mycard.set_motor_angle(0.001) ## it was 0.0001 ## Update the motor angle value
+# # mycard.send_data(key='motor') ## Send data to the motor/ this func in package
+# # time.sleep(0.001)
+# # mycard.set_motor_angle(0.001)
+# mycard.set_encoder_angle(50)
+# mycard.send_data('encoder')  ## Send the motor output to the hardware
+
+# mycard.send_data('st')
+# mycard.send_data('vibrate')
+# time.sleep(3)
+# time.sleep(0.0001)
+# mycard.send_data('st')
+# mycard.send_data('st')
+# mycard.send_data('encoder')
+
+# mycard.set_encoder_angle(0)
+# time.sleep(0.001)
+# mycard.vibrate_off()
+
+# mycard.send_data('vibrate')
+# # mycard.send_data('vibrate')
+# # Turning on vibration
+# mycard.vibrate_on()
+# mycard.set_encoder_angle(200)
+# time.sleep(0.001)
 

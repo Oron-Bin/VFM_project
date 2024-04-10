@@ -17,8 +17,8 @@ g = 9.81 #m/s^2
 miu = 0.15 # Friction coefficient
 dx = 10.0 # mm
 dy = 10.0 # mm
-fb = 2.18
-initial_conditions = [0.0 ,0.0, 30.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+fb = 10
+initial_conditions = [0.0 ,0.0, 20.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
 # Define the system of ODEs
 def system_of_odes(t, variables):
