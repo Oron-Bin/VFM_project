@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 # Define global variables
 w = 240   # Frequency
 tau_f = 100
-theta = 90
+theta = 45
 R = 50.0 #mm
 M = 14.0#   m kg
 I_com = (1/2)*(M*R*R)
@@ -18,7 +18,7 @@ miu = 0.15 # Friction coefficient
 dx = 10.0 # mm
 dy = 10.0 # mm
 fb = 10
-initial_conditions = [0.0 ,0.0, 20.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+initial_conditions = [0.0 ,0.0, 10.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
 # Define the system of ODEs
 def system_of_odes(t, variables):
@@ -39,7 +39,7 @@ def system_of_odes(t, variables):
     amplitude_fc = (m * l * (w ** 2)) / (1000.0) +(M * np.cos(np.deg2rad(beta)) + m) * g
     min_amplitude_res_y = miu * ((m * l * (w ** 2)) / (1000.0) - (M * np.cos(np.deg2rad(beta))) - (m * g) - (fb*10*y) - (M * g * np.sin(np.deg2rad(beta))))
     min_amplitude_res_x = miu * ((m * l * (w ** 2)) / (1000.0) - (M * np.cos(np.deg2rad(beta))) - (m * g) - (fb * 10 * x) - ( M * g * np.sin(np.deg2rad(beta))))
-
+    # min_amplitude_res
     if amplitude_fc < min_amplitude_res_x:
         dx_dt = 0.0
         dvx_dt = 0.0
