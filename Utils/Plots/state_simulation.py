@@ -1,125 +1,109 @@
 import numpy as np
-from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from scipy.integrate import solve_ivp
 
-# Define global variables
+# Constants
 w = 240   # Frequency
-tau_f = 100
-theta = 0
-R = 50.0 #mm
-M = 14.0#   m kg
-I_com = (1/2)*(M*R*R)
-m = 1.2  #mkg
-l = 4.0 # mm
-beta = 5.0
-g = 9.81 #m/s^2
-miu = 0.15 # Friction coefficient
-dx = 10.0 # mm
-dy = 10.0 # mm
-fb = 5
-initial_conditions = [0.0 ,0.0, 10.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+R = 50.0 # mm
+M = 14.0 # kg
+m = 1.2  # kg
+l = 4.0  # mm
+beta = 0.0
+g = 9.81 # m/s^2
+miu_k = 0.3 # Friction coefficient
+miu_s = 0.8 # Static Friction coefficient
+fb = 1.2
+lamda = 0.8
+lamda_2 = 0.8
+teta = 30
 
-def forces(t):
-    f_c = (m*l*(w**2))/1000.0*np.cos(np.deg2rad(w*t))
-    F_N = (m*l*(w**2))/1000.0*np.sin(np.deg2rad(w*t)) + M*g*np.cos(np.deg2rad(beta))
-    F_k = miu*F_N
-    F_g = M * g * np.sin(np.deg2rad(beta))
-    return [f_c, F_N, F_k, F_g]
+def calculate_forces(t_values):
+    f_c_values = (m*l*(w**2))/1000.0*np.cos(np.deg2rad(w*t_values))*lamda
+    F_N_values = M*g*np.cos(np.deg2rad(beta)) -((m*l*(w**2))*np.sin(np.deg2rad(w*t_values))*lamda_2/1000.0)
+    # F_k_values = miu_k*F_N_values + fb*t_values
+    F_k_values = miu_k*F_N_values
+    F_s_values = np.full_like(t_values, miu_s*(M * g + (m*l*(w**2))*lamda_2/1000.0))
+    return f_c_values, F_k_values, F_s_values
 
-# Define the system of ODEs
-def system_of_odes(t, variables):
-    phi, omega, x, vx, y, vy = variables
-    distance = np.sqrt(x**2 + y**2)
 
-    f_c = forces(t)[0]
-    F_N = forces(t)[1]
-    F_k = forces(t)[2]
-    F_g = forces(t)[-1]
-    F_res = F_k + fb * distance
+def system_equations(t, x, f_c_values, F_k_values):
+    phi, omega, r, vr = x
+    f_c = np.interp(t, t_values, f_c_values)
+    F_k = np.interp(t, t_values, F_k_values )
+    F_k = F_k + fb* np.abs(r)
 
-    dx_dt = vx
-    dy_dt = vy
-    dphi_dt = omega
+    amp_f_c = (m*l*(w**2))/1000.0*lamda
 
-    amplitude_fc = (m * l * (w ** 2)) / (1000.0)
-    min_amplitude_res_x = miu*((m*l*(w**2))/1000.0 + M*g*np.cos(np.deg2rad(beta))+ fb*10*x)
-    min_amplitude_res_y = miu * ((m * l * (w ** 2)) / 1000.0 + M * g * np.cos(np.deg2rad(beta)) + fb * y)
-
-    if amplitude_fc < min_amplitude_res_x:
-        dx_dt = 0.0
-        dvx_dt = 0.0
-        print('f_c',amplitude_fc)
-        print('res',min_amplitude_res_x)
-        print(dvx_dt)
+    if amp_f_c <= F_k :
+        dphi_dt = omega
+        domega_dt = 0
+        dr_dt = 0
+        dvr_dt = 0
     else:
-        dvx_dt = ((f_c - (F_k + miu * fb * x)) * (np.cos(np.deg2rad(theta))) - F_g) / M
+        F = f_c - F_k
+        dphi_dt = omega
+        domega_dt = 2 * F * r * np.sin(np.deg2rad(teta)) / (M * (R ** 2))
+        dr_dt = vr
+        dvr_dt = (F * np.cos(np.deg2rad(teta)) + M * r * omega ** 2) / M
 
-    if amplitude_fc < min_amplitude_res_y:
-        dy_dt = 0.0
-        dvy_dt = 0.0
-    else:
-        dvy_dt = ((f_c - (F_k + miu * fb * y)) * (np.sin(np.deg2rad(theta))) - F_g) / M
+    return [dphi_dt, domega_dt, dr_dt, dvr_dt]
 
-    domega_dt = ((f_c - (F_k + miu * fb * distance)) * (dx * np.sin(np.deg2rad(theta)) - dy * np.cos(np.deg2rad(theta))) ) / (I_com + (M * (x ** 2 + y ** 2)))
+# Initial conditions
+r0 = 30.0
+phi0 = 0.0
+vr0 = 0.0
+omega0 = 0.0
+initial_conditions = [phi0, omega0, r0, vr0]
 
-    return [dphi_dt, domega_dt, dx_dt, dvx_dt, dy_dt, dvy_dt]
+# Time span
+t_span = (0, 12)
+t_values = np.linspace(*t_span, 120)
 
-# Time span for the integration
-t_span = (0, 50)
+# Calculate forces
+f_c_values, F_k_values, F_s_values = calculate_forces(t_values)
 
-# Solve the system of ODEs
-solution = solve_ivp(system_of_odes, t_span, initial_conditions, dense_output=True, t_eval=np.linspace(0, 50, 1000))
+# Solve equations
+sol = solve_ivp(lambda t, x: system_equations(t, x, f_c_values, F_k_values), t_span, initial_conditions, dense_output=True)
 
-# Animation function
-def animate(i):
-    ax_phi.clear()
-    ax_phi.plot(solution.t[:i], solution.y[0][:i]*(180/np.pi), label='phi(t)', color='blue')
-    ax_phi.plot(solution.t[:i], solution.y[1][:i], label='omega(t)', color='green')
-    ax_phi.set_xlabel('Time (t)')
-    ax_phi.set_ylabel('Phi(deg)')
-    ax_phi.set_title('Evolution of Phi over Time')
-    ax_phi.grid(True)
-    ax_phi.legend()
+# Evaluate solution
+sol_values = sol.sol(t_values)
 
-    ax_x.clear()
-    ax_x.plot(solution.t[:i], solution.y[2][:i]/10, label='x(t)', color='blue')
-    ax_x.plot(solution.t[:i], solution.y[3][:i]/10, label='velocity_x(t)', color='green')
-    ax_x.set_xlabel('Time (t)')
-    ax_x.set_ylabel('x(cm)')
-    ax_x.set_title('Evolution of x over Time')
-    ax_x.grid(True)
-    ax_x.legend()
+# Find the index where F_k_values + fb*np.abs(sol_values[2]) exceeds F_s_values
+index = np.argmax(F_k_values + fb*np.abs(sol_values[2]) > F_s_values)
 
-    ax_y.clear()
-    ax_y.plot(solution.t[:i], solution.y[4][:i]/10, label='y(t)', color='blue')
-    ax_y.plot(solution.t[:i], solution.y[5][:i]/10, label='velocity_y(t)', color='green')
-    ax_y.set_xlabel('Time (t)')
-    ax_y.set_ylabel('y(cm)')
-    ax_y.set_title('Evolution of y over Time')
-    ax_y.grid(True)
-    ax_y.legend()
+# Plot results
+fig, axs = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
-    # Calculate f_res
-    f_c_animation = ((m * l * (w ** 2)) / 1000.0) * np.cos(np.deg2rad(w * solution.t[:i]))
-    f_res_x_animation = miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * solution.t[:i])) + (M * np.cos(np.deg2rad(beta))*g)) + miu*(fb*10*(solution.y[2][:i])) + M * g * np.sin(np.deg2rad(beta))
-    f_res_y_animation = miu * (((m * l * (w ** 2)) / 1000.0) * np.sin(np.deg2rad(w * solution.t[:i])) + (M * np.cos(np.deg2rad(beta))*g)) + miu*(fb*10*(solution.y[4][:i])) + M * g * np.sin(np.deg2rad(beta))
+# Plot forces up to the point where F_k_values + fb*np.abs(sol_values[2]) exceeds F_s_values
+axs[0].plot(t_values[:index], f_c_values[:index], label='F_c')
+axs[0].plot(t_values[:index], F_s_values[:index], label='F_s')
+axs[0].plot(t_values[:index], F_k_values[:index] + fb*np.abs(sol_values[2][:index]), label='F_k', color='orange')
+axs[0].set_ylabel('Force (mN)')
+axs[0].set_title('Forces vs Time')
+axs[0].legend()
+axs[0].grid(True)
 
-    # Plot f_c and f_k
-    ax_fc.clear()
-    ax_fc.plot(solution.t[:i], f_c_animation, label='f_c', color='orange')
-    ax_fc.plot(solution.t[:i], f_res_x_animation , label='f_res', color='purple')
-    ax_fc.set_xlabel('Time (t)')
-    ax_fc.set_ylabel('Forces (mN)')
-    ax_fc.set_title('Evolution of f_c and f_k_total over Time')
-    ax_fc.legend()
-    ax_fc.grid(True)
+# Plot F_s values after the condition is met
+axs[0].plot(t_values[index:], F_s_values[index:], linestyle='--', color='grey')
+axs[0].plot(t_values, f_c_values, label='F_c', color='magenta')
+# Plot other variables
+axs[1].plot(t_values, sol_values[0]*(180/np.pi), label='phi', color='m')
+axs[1].plot(t_values, sol_values[1]*(180/np.pi), label='omega', color='orange')
+axs[1].set_ylabel('Values (degree, degree/s)')
+axs[1].set_title('Phi and Omega')
+axs[1].legend()
+axs[1].grid(True)
 
-# Create subplots
-fig, (ax_phi, ax_x, ax_y, ax_fc) = plt.subplots(4, 1, figsize=(10, 18))
+# Modify r_dot values after the condition is met
+sol_values[3][index:] = 0
 
-# Create animation
-ani = FuncAnimation(fig, animate, frames=len(solution.t), interval=10)
+axs[2].plot(t_values, sol_values[2]/10, label='r', color='m')
+axs[2].plot(t_values, sol_values[3]/10, label='r_dot', color='orange')
+axs[2].set_xlabel('Time')
+axs[2].set_ylabel('Values (cm, cm/s)')
+axs[2].set_title('r and r_dot')
+axs[2].legend()
+axs[2].grid(True)
 
-# Show animation
+plt.tight_layout()
 plt.show()
