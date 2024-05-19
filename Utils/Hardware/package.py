@@ -132,7 +132,7 @@ mycard.calibrate()
 mycard.start_hardware()
 # mycard.vibrate_hardware(50)
 mycard.vibrate_hardware(100)
-# # mycard.vibrate_hardware(50)
+# mycard.vibrate_hardware(50)
 # #
 # #
 mycard.set_encoder_angle(90)
