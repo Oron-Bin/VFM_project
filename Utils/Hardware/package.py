@@ -1,6 +1,6 @@
 import serial
 import time
-from Utils.Control.cardalgo import *
+
 
 def jsonize(key,data): #how the data is tansform in the packet
     packet = 'json:{"'+str(key)+'":'+str(data)+'}'+'\x0d'+'\x0a'
@@ -66,15 +66,13 @@ class Card:
                 # rx_byte = rx_byte + self.usb.read().decode('utf-8')
             # print('Sended data :' + rx_byte)
 
+            response = self.usb.readline()  # Wait for response
+            print('Received data:', response.decode('utf-8'))
             self.usb.close()
-            # self.usb.open()
-            # print(self.usb.readline())
-            # self.usb.close()
 
             # print('Length of bytes sended: ' + len(data))
             # print('Length of bytes recieved: ' + len(rx_byte))
             if (len(rx_byte) != len(data)):
-                # print('o')
                 return 0
 
         else:
@@ -82,67 +80,239 @@ class Card:
             print('Serial Bus is not writable')
 
         return 1
-    def stop_initial(self):
+    def stop_initial(self): ## TODO: NOT USED
         byte = 'a'
         self.usb.open()
         self.usb.write(byte.encode())
         # print(self.usb.readline())
         self.usb.close()
         return None
-    def set_motor_angle(self,angle): ## Defines which angle the motor need to move
+    def set_motor_angle(self,angle): ## TODO: NOT USED
         self.key_dict['motor'] = angle
         # print(self.motor_a)
         return None
     def set_encoder_angle(self,angle):
         self.key_dict['encoder'] = angle
+        mycard.send_data(key="encoder")
+
         # print(self.motor_a)
         return None
-    def vibrate_on(self): ## set desired orientation
+    def vibrate_on(self): ## TODO: NOT USED
         self.key_dict['vibrate'] = 1
         return None
-    def vibrate_off(self): ## set desired orientation
+
+    def vibrate_off(self): ## TODO: NOT USED
         self.key_dict['vibrate'] = 0
         return None
 
+    def calibrate(self):
+        self.key_dict['calibrate'] = 1
+        self.send_data(key='calibrate')
+
+    def start_hardware(self):
+        self.key_dict['start'] = 1
+        self.send_data(key='start')
+
+    def stop_hardware(self):
+        self.key_dict['stop'] = 1
+        self.send_data(key='stop')
+
+    def vibrate_hardware(self,precent=0):
+        self.key_dict['vibrate'] = precent
+        self.send_data('vibrate')
+
+    def vibrate_rate(self,ms=0):
+        self.key_dict['vibrate_rate'] = ms
+        self.send_data('vibrate_rate')
 
 
+mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
 
-
-
-
-# Format: json:{"name": "dsp", "mode": "off"}\r\n
-
-# def int_to_bytes(number: int) -> bytes:
-#     return number.to_bytes(length=(8 + (number + (number < 0)).bit_length()) // 8, byteorder='big', signed=True)
-#
-# def int_from_bytes(binary_data: bytes) -> [int]:
-#     return int.from_bytes(binary_data, byteorder='big', signed=True)
-#
-# mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
-# # for i in range(30):
-# # mycard.set_motor_angle(0.001) ## it was 0.0001 ## Update the motor angle value
-# # mycard.send_data(key='motor') ## Send data to the motor/ this func in package
-# # time.sleep(0.001)
-# # mycard.set_motor_angle(0.001)
-# mycard.set_encoder_angle(50)
-# mycard.send_data('encoder')  ## Send the motor output to the hardware
-
-# mycard.send_data('st')
-# mycard.send_data('vibrate')
+mycard.calibrate()
+mycard.start_hardware()
+# mycard.vibrate_hardware(50)
+mycard.vibrate_hardware(100)
+# # mycard.vibrate_hardware(50)
+# #
+# #
+mycard.set_encoder_angle(90)
 # time.sleep(3)
-# time.sleep(0.0001)
-# mycard.send_data('st')
-# mycard.send_data('st')
-# mycard.send_data('encoder')
 
-# mycard.set_encoder_angle(0)
-# time.sleep(0.001)
-# mycard.vibrate_off()
+mycard.set_encoder_angle(40)
+# time.sleep(5)
 
-# mycard.send_data('vibrate')
-# # mycard.send_data('vibrate')
-# # Turning on vibration
-# mycard.vibrate_on()
-# mycard.set_encoder_angle(200)
-# time.sleep(0.001)
+# mycard.set_encoder_angle(10)
+mycard.stop_hardware()
+# mycard.start_hardware()
+# mycard.vibrate_hardware(100)
+# mycard.vibrate_hardware(40)
+# mycard.vibrate_hardware(100)
+# #
+# mycard.set_encoder_angle(90)
+# mycard.vibrate_rate(500)
+# mycard.vibrate_rate(300)
+# mycard.vibrate_rate(30)
+# mycard.vibrate_rate(10)
+
+# mycard.stop_hardware()
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

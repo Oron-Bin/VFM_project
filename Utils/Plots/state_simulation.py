@@ -35,6 +35,7 @@ def system_equations(t, x, f_c_values, F_k_values):
     amp_f_c = (m*l*(w**2))/1000.0*lamda
 
     if amp_f_c <= F_k :
+        print('time static', t)
         dphi_dt = omega
         domega_dt = 0
         dr_dt = 0
@@ -56,8 +57,8 @@ omega0 = 0.0
 initial_conditions = [phi0, omega0, r0, vr0]
 
 # Time span
-t_span = (0, 12)
-t_values = np.linspace(*t_span, 120)
+t_span = (0, 20)
+t_values = np.linspace(*t_span, 200)
 
 # Calculate forces
 f_c_values, F_k_values, F_s_values = calculate_forces(t_values)
@@ -69,7 +70,7 @@ sol = solve_ivp(lambda t, x: system_equations(t, x, f_c_values, F_k_values), t_s
 sol_values = sol.sol(t_values)
 
 # Find the index where F_k_values + fb*np.abs(sol_values[2]) exceeds F_s_values
-index = np.argmax(F_k_values + fb*np.abs(sol_values[2]) > F_s_values)
+index = np.argmax(F_k_values + fb*np.abs(sol_values[2]) >= F_s_values)
 
 # Plot results
 fig, axs = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
