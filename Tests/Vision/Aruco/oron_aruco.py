@@ -68,10 +68,15 @@ algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
 state = 0 #the default is that we need to calibrate the system first
 scale = 28 # 1 cm = 28 pixels
 
-algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
-algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
-
+# algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
+# algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
+algo.x_d = 600  # set a random value of the goal x position
+algo.y_d = 210  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
+
+if state == 0 :
+    mycard.calibrate()
+    state = 1
 
 
 while cam.isOpened():
@@ -92,11 +97,15 @@ while cam.isOpened():
             algo.plot_path(img)
 
 
-            if algo.check_distance(epsilon=10) is False and circle_center is not None:
+            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 1:
+                mycard.start_hardware()
+                mycard.vibrate_hardware(100)
                 print('the distance is big')
-            else:
-                print('arrive')
 
+            else:
+                mycard.stop_hardware()
+                print('arrive')
+                state = 2
 
         out.write(img)  # Saves the current frame to the video file.
         algo.display_image(img, circle_center,circle_radius)  # shows the marker circle center and circle shape in red color
