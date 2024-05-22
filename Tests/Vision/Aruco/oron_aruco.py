@@ -19,15 +19,6 @@ start_time = time.time()
 res = '720p'
 data_list = []
 
-# Utility function to get the shortest way between two angles
-def shortest_way(num_1, num_2):
-    if abs(num_1 - num_2) < 180:
-        return num_2 - num_1
-    else:
-        if num_1 > num_2:
-            return abs(num_1 - num_2 - 360)
-        else:
-            return abs(num_1 - num_2) - 360
 
 # Function to change the resolution of the video capture
 def change_res(cap, width, height):
@@ -77,74 +68,46 @@ algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
 state = 0 #the default is that we need to calibrate the system first
 scale = 28 # 1 cm = 28 pixels
 
+algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
+algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
 
-
+goal_position = [algo.x_d,algo.y_d]
 
 
 while cam.isOpened():
     ret, img = cam.read()
     time_diff = time.time() - start_time
 
-    if state == 0:  # Calibrate the system
-        mycard.calibrate()
-        print('Calibration is done')
-        algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
-        algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
-
-        state = 1  # Now the system is calibrated
-
-        if state ==1 :
-            mycard.start_hardware()
-            mycard.vibrate_hardware(100)
-            state = 2 #
-        if state == 2:
-            if algo.y_d is not None:
-                mycard.stop_hardware()
-    # state = 1
     if ret:
-        out.write(img)  # Saves the current frame to the video file.
-        algo.display_image(img, circle_center,circle_radius)  # shows the marker circle center and circle shape in red color
-        cv2.imshow('QueryImage', img)  # shows the frame
-        # state = 1
         circle_center, circle_radius = algo.detect_circle_info(img)
         # print('the COM is:', circle_center)
         # print('the radius is', circle_radius)
+        algo.update(circle_center)  # this make circle center to be not None object
+        origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
-        state = 3
 
-        if circle_radius is not None and state ==3: #this line solve the problem of None type
+        if circle_radius is not None:
             # print('the radius is', circle_radius/scale)
-            # goal_pos = algo.plot_desired_position(img)
-            origin = tuple(algo.finger_position(img))
             algo.plot_desired_position(img)
-            # print(goal_pos, origin)
+            algo.plot_path(img)
 
 
-            # if state == 1 and goal_pos is not None:  # If the system is calibrated
-            #     # origin = tuple(algo.finger_position(img)) #green point on screen
-            #     print('hello world')
-            #     mycard.start_hardware()
-            #     mycard.vibrate_hardware(100)
-            #     state = 2
-            #     # if circle_center is not None: #this line solve the problem of None type
-            #     # error = np.sqrt((circle_center[0]-goal_pos[0])**2 + (circle_radius[1]-goal_pos[1])**2)
-            #     # print('the pos error is', error)
-            # if state == 2:
-            #         # error = np.sqrt((circle_center[0] - goal_pos[0]) ** 2 + (circle_radius[1] - goal_pos[1]) ** 2)
-            #         # print('the pos error is', error)
-            #         # if error < 10 :
-            #         if algo.check_distance(epsilon=10) is True:
-            #             print('this is enough')
-            #             mycard.stop_hardware()
+            if algo.check_distance(epsilon=10) is False and circle_center is not None:
+                print('the distance is big')
+            else:
+                print('arrive')
 
 
+        out.write(img)  # Saves the current frame to the video file.
+        algo.display_image(img, circle_center,circle_radius)  # shows the marker circle center and circle shape in red color
+        cv2.imshow('QueryImage', img)  # shows the frame
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print('Interrupted by user')
             # mycard.stop_hardware()
             break
-        # if cv2.waitKey(1) & 0xFF == ord('i'):
-        #     algo.position_user_input(img)
+        if cv2.waitKey(1) & 0xFF == ord('i'):
+            algo.position_user_input(img)
 
 
 cam.release()
