@@ -8,7 +8,7 @@ sys.path.insert(1, r'/')
 
 from Utils.Control.cardalgo import *
 
-initial_flag = 0
+# initial_flag = 0
 
 # This code is used to record a video
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -17,7 +17,7 @@ start_time = time.time()
 
 # Define video resolution
 res = '720p'
-data_list = []
+# data_list = []
 
 
 # Function to change the resolution of the video capture
@@ -67,9 +67,15 @@ algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
 # Define the set desired parameter and tell the code that the user didn't initialize it yet
 state = 0 #the default is that we need to calibrate the system first
 scale = 28 # 1 cm = 28 pixels
+j = 0
+orientation_list = []
+delta_list = []
+
+
 
 # algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
 # algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
+start = time.perf_counter()
 algo.x_d = 600  # set a random value of the goal x position
 algo.y_d = 210  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
@@ -87,25 +93,50 @@ while cam.isOpened():
         circle_center, circle_radius = algo.detect_circle_info(img)
         # print('the COM is:', circle_center)
         # print('the radius is', circle_radius)
-        algo.update(circle_center)  # this make circle center to be not None object
+        # algo.update(circle_center)  # this make circle center to be not None object
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
 
         if circle_radius is not None:
+            algo.update(circle_center)
+            # print(circle_center)
             # print('the radius is', circle_radius/scale)
             algo.plot_desired_position(img)
             algo.plot_path(img)
 
-
-            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 1:
-                mycard.start_hardware()
-                mycard.vibrate_hardware(100)
-                print('the distance is big')
-
-            else:
-                mycard.stop_hardware()
-                print('arrive')
+            if algo.card_initialize(circle_center) == 1 and state == 1:
+                print('hello world')
                 state = 2
+
+            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 2:
+                angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
+
+                delta_list.append(angle_teta)
+                # output = algo.law_1()
+                if len(delta_list) < 2 :
+                    output = delta_list[-1]
+                else:
+                    output = delta_list[-1] -delta_list[-2]
+                print(output)
+                # print(delta_list[-1])
+                # print('xd is',algo.x_d)
+                # print('tip is',origin)
+                # print('center is',circle_center)
+                # delta_list.append(output)
+                # print(output)
+                algo.plot_arrow(img)
+                # print('the distance is  still big')
+
+
+            if algo.check_distance(epsilon=10) is True:
+                print('arrive')
+                algo.next_iteration()
+                j = j + 1
+                algo.package_data()
+                algo.clear()
+                algo.random_input()
+                state =2
+
 
         out.write(img)  # Saves the current frame to the video file.
         algo.display_image(img, circle_center,circle_radius)  # shows the marker circle center and circle shape in red color
