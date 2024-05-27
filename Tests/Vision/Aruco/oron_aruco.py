@@ -65,7 +65,7 @@ mycard = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/tt
 algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
 
 # Define the set desired parameter and tell the code that the user didn't initialize it yet
-state = 0 #the default is that we need to calibrate the system first
+state = 'calibrate' #the default is that we need to calibrate the system first
 scale = 28 # 1 cm = 28 pixels
 j = 0
 orientation_list = []
@@ -80,9 +80,9 @@ algo.x_d = 600  # set a random value of the goal x position
 algo.y_d = 210  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
 
-if state == 0 :
+if state == 'calibrate' :
     mycard.calibrate()
-    state = 1
+    state = 'after_calibrate'
 
 
 while cam.isOpened():
@@ -97,14 +97,14 @@ while cam.isOpened():
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
 
-        if circle_radius is not None and state == 1:
+        if circle_radius is not None and state == 'after_calibrate':
             if algo.card_initialize(circle_center) == 1:
                 print('hello world')
-                state = 2
+                state = 'vibrating'
 
-        if circle_radius is not None and state == 2:
+        if circle_radius is not None and state == 'vibrating':
             mycard.start_hardware()
-            mycard.vibrate_hardware(70)
+            mycard.vibrate_hardware(100) #now the vibration is continuous.
 
             algo.update(circle_center)
             # print(circle_center)
@@ -113,11 +113,12 @@ while cam.isOpened():
             algo.plot_path(img)
 
 
-            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 2:
+            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 'vibrating':
                 angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
+                # print(angle_teta)
 
                 output = algo.law_1()
-                print(output)
+                # print(output)
                 # output = 0
 
                 delta_list.append(output)
@@ -133,8 +134,8 @@ while cam.isOpened():
 
                 mycard.set_encoder_angle(output) ## Update the motor output
                 algo.plot_arrow(img) ## Plot the direction of the motor
-                mycard.send_data('encoder') ## Send the motor output to the hardware
-                time.sleep(0.001)
+                # mycard.send_data('encoder') ## still dont sure if its necessary
+                # time.sleep(0.001)
 
 
 
@@ -158,8 +159,8 @@ while cam.isOpened():
 
 
             if algo.check_distance(epsilon=10) is True:
-                state = 3
-                if state == 3:
+                state = 'stop_vibrating'
+                if state == 'stop_vibrating':
                     mycard.stop_hardware()
                     print('arrive')
                     algo.next_iteration()
@@ -167,7 +168,7 @@ while cam.isOpened():
                     algo.package_data()
                     algo.clear()
                     algo.random_input()
-                    state = 2
+                    state = 'vibrating'
 
 
         out.write(img)  # Saves the current frame to the video file.
