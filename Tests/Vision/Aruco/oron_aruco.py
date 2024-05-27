@@ -97,45 +97,77 @@ while cam.isOpened():
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
 
-        if circle_radius is not None:
+        if circle_radius is not None and state == 1:
+            if algo.card_initialize(circle_center) == 1:
+                print('hello world')
+                state = 2
+
+        if circle_radius is not None and state == 2:
+            mycard.start_hardware()
+            mycard.vibrate_hardware(70)
+
             algo.update(circle_center)
             # print(circle_center)
             # print('the radius is', circle_radius/scale)
             algo.plot_desired_position(img)
             algo.plot_path(img)
 
-            if algo.card_initialize(circle_center) == 1 and state == 1:
-                print('hello world')
-                state = 2
 
             if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 2:
                 angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
 
-                delta_list.append(angle_teta)
-                # output = algo.law_1()
-                if len(delta_list) < 2 :
-                    output = delta_list[-1]
-                else:
-                    output = delta_list[-1] -delta_list[-2]
+                output = algo.law_1()
                 print(output)
-                # print(delta_list[-1])
-                # print('xd is',algo.x_d)
-                # print('tip is',origin)
-                # print('center is',circle_center)
-                # delta_list.append(output)
+                # output = 0
+
+                delta_list.append(output)
+
+                cv2.putText(img, f"delta_motor_angle: {angle_teta}", (10, 150),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+                cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                ###############################################
+
+                mycard.set_encoder_angle(output) ## Update the motor output
+                algo.plot_arrow(img) ## Plot the direction of the motor
+                mycard.send_data('encoder') ## Send the motor output to the hardware
+                time.sleep(0.001)
+
+
+
+                # angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
+                #
+                # delta_list.append(angle_teta)
+                # # output = algo.law_1()
+                # if len(delta_list) < 2 :
+                #     output = delta_list[-1]
+                # else:
+                #     output = delta_list[-1] -delta_list[-2]
                 # print(output)
-                algo.plot_arrow(img)
-                # print('the distance is  still big')
+                # # print(delta_list[-1])
+                # # print('xd is',algo.x_d)
+                # # print('tip is',origin)
+                # # print('center is',circle_center)
+                # # delta_list.append(output)
+                # # print(output)
+                # algo.plot_arrow(img)
+                # # print('the distance is  still big')
 
 
             if algo.check_distance(epsilon=10) is True:
-                print('arrive')
-                algo.next_iteration()
-                j = j + 1
-                algo.package_data()
-                algo.clear()
-                algo.random_input()
-                state =2
+                state = 3
+                if state == 3:
+                    mycard.stop_hardware()
+                    print('arrive')
+                    algo.next_iteration()
+                    j = j + 1
+                    algo.package_data()
+                    algo.clear()
+                    algo.random_input()
+                    state = 2
 
 
         out.write(img)  # Saves the current frame to the video file.

@@ -66,6 +66,7 @@ class card_algorithms:
 
         self.last_orientation = self.orientation
         self.first_orientation = self.orientation
+        print("card_initialize")
         return 1
 
 #        if (self.first_orientation != 0):
@@ -77,7 +78,6 @@ class card_algorithms:
     def plot_desired_position(self,img):
 
         """ plot a circle point in the desired position"""
-
         cv2.circle(img, (round(self.x_d), round(self.y_d)), radius=5, color=(255, 0, 0), thickness=3)
 
     def filter(self,prev,new,weight=0.5):
@@ -92,17 +92,26 @@ class card_algorithms:
         """ Function for calculating the first control loop law"""
         dx = self.filter(self.last_dx,self.x_d - self.center[0])
         dy = self.filter(self.last_dy,self.y_d - self.center[1])
+
+
+        # print(self.last_dx,self.x_d,self.center[0])
+        # print('dx',dx)
+        # print('dy',dy)
         new_angle = round(np.degrees(np.arctan2(dx,dy)))
+        # print(new_angle)
         # print("New :{} Last is:{}".format(new_angle, self.last_angle))
         self.last_dx = dx
         self.last_dy = dy
+        # print(self.last_dx)
         if self.last_angle == new_angle:
+            print('oooo')
             return 0
         else:
             # print('aaa')
             out = round(self.shortest_motor_path(new_angle))
             self.last_angle = new_angle
             return out
+
 
     def finger_position(self,img,calibration=False):  ## Finger position is [(632,256)]
 
@@ -111,7 +120,7 @@ class card_algorithms:
         if calibration == True:
             self.tip_position = self.point_calibration(img) #return the x,y of the function below
         else:
-            self.tip_position = (642,227) #the calibration we do in real time
+            self.tip_position = (644,185) #the center of the top
             cv2.circle(img, self.tip_position, radius=5, color=(0, 255, 0), thickness=3)
         return self.tip_position
 
@@ -294,13 +303,18 @@ class card_algorithms:
         # print(ids,aruco_centers)
         return aruco_centers, ids
 
-    def calculate_angle(self,circle_center, aruco_center):
-        dx = circle_center[0] - aruco_center[0]
-        dy = circle_center[1] - aruco_center[1]
+    # def calculate_angle(self,circle_center, aruco_center):
+    #     dx = circle_center[0] - aruco_center[0]
+    #     dy = circle_center[1] - aruco_center[1]
+    #     angle = np.degrees(np.arctan2(dy, dx))
+    #
+    #     return angle
+    def calculate_angle(self,point1,point2):
+        dx = point1[0] - point2[0]
+        dy = point1[1] - point2[1]
         angle = np.degrees(np.arctan2(dy, dx))
 
         return angle
-
     def ids_to_angle(self, ids, circle_center, aruco_centers):
         last_aruco_center = aruco_centers[-1]
         angle = self.calculate_angle(circle_center, last_aruco_center)
@@ -462,3 +476,13 @@ class card_algorithms:
         if new_angle <0 :
             new_angle += 360
         return new_angle
+
+    # Utility function to get the shortest way between two angles
+    def shortest_way(num_1, num_2):
+        if abs(num_1 - num_2) < 180:
+            return num_2 - num_1
+        else:
+            if num_1 > num_2:
+                return abs(num_1 - num_2 - 360)
+            else:
+                return abs(num_1 - num_2) - 360
