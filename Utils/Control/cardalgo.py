@@ -6,6 +6,7 @@ from Utils.Hardware.package import *
 import pickle
 import cv2.aruco as aruco
 import math
+# from Utils.Control.robotiqGripper import *
 
 
 ## Card algortihm function schematics
@@ -104,7 +105,7 @@ class card_algorithms:
         self.last_dy = dy
         # print(self.last_dx)
         if self.last_angle == new_angle:
-            print('oooo')
+            # print('oooo')
             return 0
         else:
             # print('aaa')
@@ -161,8 +162,8 @@ class card_algorithms:
 
     def random_input(self):
         """ Random new input inside the rectangle area"""
-        x = random.randint(-50, 50)
-        y = random.randint(-50, 0)
+        x = random.randint(-30, 30)
+        y = random.randint(-30, 30)
         # phi = random.randint(0,360)
         self.x_d = self.tip_position[0] + x
         self.y_d = self.tip_position[1] + y

@@ -71,7 +71,7 @@ j = 0
 orientation_list = []
 delta_list = []
 
-
+vib_flag = True
 
 # algo.x_d = random.randint(500, 600)  # set a random value of the goal x position
 # algo.y_d = random.randint(250, 300)  # set a random value of the goal y position
@@ -80,16 +80,36 @@ algo.x_d = 600  # set a random value of the goal x position
 algo.y_d = 210  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
 
+
+# if vib_flag is True and state == 'calibrate':
+#     mycard.start_hardware()
+#     for i in range(30):
+#         mycard.vibrate_hardware(100)
+#
+# vib_flag = False
+
+
 if state == 'calibrate' :
     mycard.calibrate()
+    time.sleep(3)
+    mycard.start_hardware()
+    mycard.vibrate_hardware(100)
     state = 'after_calibrate'
 
+# if state == 'start':
+#     print('start')
+#     mycard.start_hardware()
+#     mycard.vibrate_hardware(100)
+#     state = 'after_calibrate'
 
 while cam.isOpened():
+    # mycard.start_hardware()
+    # mycard.vibrate_hardware(100)
     ret, img = cam.read()
     time_diff = time.time() - start_time
 
     if ret:
+
         circle_center, circle_radius = algo.detect_circle_info(img)
         # print('the COM is:', circle_center)
         # print('the radius is', circle_radius)
@@ -97,15 +117,17 @@ while cam.isOpened():
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
 
+
         if circle_radius is not None and state == 'after_calibrate':
             if algo.card_initialize(circle_center) == 1:
                 print('hello world')
                 state = 'vibrating'
 
-        if circle_radius is not None and state == 'vibrating':
-            mycard.start_hardware()
-            mycard.vibrate_hardware(100) #now the vibration is continuous.
 
+          # now the vibration is continuous.
+        if circle_radius is not None and state == 'vibrating':
+            # mycard.start_hardware()
+            # mycard.vibrate_hardware(100)  # now the vibration is continuous.
             algo.update(circle_center)
             # print(circle_center)
             # print('the radius is', circle_radius/scale)
@@ -114,12 +136,13 @@ while cam.isOpened():
 
 
             if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 'vibrating':
+                # mycard.start_hardware()
+                # mycard.vibrate_hardware(100)
                 angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
                 # print(angle_teta)
-
-                output = algo.law_1()
+                # output = algo.law_1()
                 # print(output)
-                # output = 0
+                output = 0
 
                 delta_list.append(output)
 
@@ -128,35 +151,11 @@ while cam.isOpened():
 
                 cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                ###############################################
 
                 mycard.set_encoder_angle(output) ## Update the motor output
                 algo.plot_arrow(img) ## Plot the direction of the motor
                 # mycard.send_data('encoder') ## still dont sure if its necessary
                 # time.sleep(0.001)
-
-
-
-                # angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
-                #
-                # delta_list.append(angle_teta)
-                # # output = algo.law_1()
-                # if len(delta_list) < 2 :
-                #     output = delta_list[-1]
-                # else:
-                #     output = delta_list[-1] -delta_list[-2]
-                # print(output)
-                # # print(delta_list[-1])
-                # # print('xd is',algo.x_d)
-                # # print('tip is',origin)
-                # # print('center is',circle_center)
-                # # delta_list.append(output)
-                # # print(output)
-                # algo.plot_arrow(img)
-                # # print('the distance is  still big')
-
 
             if algo.check_distance(epsilon=10) is True:
                 state = 'stop_vibrating'
