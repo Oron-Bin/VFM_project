@@ -479,7 +479,7 @@ class card_algorithms:
         return new_angle
 
     # Utility function to get the shortest way between two angles
-    def shortest_way(num_1, num_2):
+    def shortest_way(self,num_1, num_2):
         if abs(num_1 - num_2) < 180:
             return num_2 - num_1
         else:
