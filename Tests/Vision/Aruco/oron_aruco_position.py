@@ -113,7 +113,6 @@ while cam.isOpened():
                 state = 'vibrating'
 
 
-
           # now the vibration is continuous.
         if circle_radius is not None and state == 'vibrating' and motor_flag ==2:
             mycard.start_hardware()
@@ -136,15 +135,16 @@ while cam.isOpened():
                     mycard.calibrate()
                     time.sleep(5)
                     mycard.start_hardware()
-                    mycard.set_encoder_angle(30)
+
+                    mycard.set_encoder_angle(30) #for example the angle is 30
                     state = 11
 
             if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 'vibrating' and motor_flag ==2:
                 angle_teta = algo.calculate_angle(goal_position,circle_center)
-                # output = algo.law_1()
+                output = algo.law_1()
                 # output = 0
-                # delta_list.append(output)
-                # mycard.set_encoder_angle(output) ## Update the motor output
+                delta_list.append(output)
+                mycard.set_encoder_angle(output) ## Update the motor output
                 algo.plot_arrow(img) ## Plot the direction of the motor
                 # mycard.send_data('encoder') ## still dont sure if its necessary
                 # time.sleep(0.001)
