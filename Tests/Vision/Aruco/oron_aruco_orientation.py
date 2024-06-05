@@ -79,7 +79,8 @@ start = time.perf_counter()
 # goal_position = [algo.x_d,algo.y_d]
 algo.orientation = random.randint(0,359)
 # angle_teta = 0
-
+algo.x_d = 644
+algo.y_d = 185
 
 if state == 'calibrate' :
     mycard.calibrate()
@@ -125,7 +126,6 @@ while cam.isOpened():
                     state = 'vibrating'
 
                 else:
-
                     mycard.stop_hardware()
                     time.sleep(3)
                     print('the orientation error is: {0}'.format(orientation_error))
@@ -134,8 +134,8 @@ while cam.isOpened():
                     state = 'stop vibrate'
                 if state == 'stop vibrate':
                     mycard.start_hardware()
-                    print(algo.path[-1])
-                    print(list(origin))
+                    # print(algo.path[-1])
+                    # print(list(origin))
                     output = algo.calculate_angle(algo.path[-1],list(origin))
 
                     print('the output', output)
@@ -151,14 +151,44 @@ while cam.isOpened():
                     state = 11
                 if state == 11 and motor_flag == 3:
                     mycard.vibrate_hardware(100)
-                    time.sleep(3)
-                    mycard.stop_hardware()
-                    print(state)
-                    # time.sleep(2)
-                    # algo.clear()
-                    print('the rotation')
+
                     state = 12
+                    print('adsfds')
+
+                if algo.check_distance(epsilon=10) is False and state == 12:
+
+                    algo.plot_arrow(img)
+                    algo.update(circle_center)
+                    algo.plot_desired_position(img)
+                    algo.plot_path(img)
+                    # mycard.stop_hardware()
+                    print('not arrive')
+                    state = 13
+
+                if state == 13:
+                    mycard.calibrate()
+                    print('bye bye')
+                    # time.sleep(5)
+                    mycard.stop_hardware()
+
+                    # algo.plot_arrow(img)
+                    # algo.update(circle_center)
+                    # algo.plot_desired_position(img)
+                    # algo.plot_path(img)
+                    # state = 14
+                    # if state == 14:
+                    #     mycard.stop_hardware()
+                    #     print('ariiveeeeeee')
+                    state = 19
                     motor_flag = 10
+
+                # if algo.check_distance(epsilon=10) is True:
+                #     state = 'stop_vibrating'
+                #     if state == 'stop_vibrating':
+                #         mycard.stop_hardware()
+                #         print('arrive')
+                #         state = 13
+                #         motor_flag = 10
                     # print(state)
 
 
