@@ -128,18 +128,20 @@ while cam.isOpened():
                     print(state)
 
 
-                elif orientation_error >=10 and flag ==1 :
+                elif orientation_error >= 10 and flag ==1 :
                     mycard.start_hardware()
                     mycard.vibrate_hardware(70)
-                    output = algo.law_1()
-                    delta_list.append(output)
-                    print('output is', output)
+                    # algo.update(circle_center)
+                    # output = algo.law_1()
+                    # delta_list.append(output)
+                    # print(delta_list[-1])
+                    # print('output is', output)
                     mycard.set_encoder_angle(output)  ## Update the motor output
                     algo.plot_arrow(img)  ## Plot the direction of the motor
 
                     if algo.check_distance(10) is True:
                         mycard.stop_hardware()
-                        print('agagaga')
+                        print('arrive')
                         time.sleep(10)
 
 
@@ -157,6 +159,7 @@ while cam.isOpened():
 
                         if first_time ==0:
                             mycard.calibrate()
+                            # algo.card_initialize(circle_center)
                             time.sleep(3)
                             first_time = 1
 
@@ -164,12 +167,15 @@ while cam.isOpened():
                         print(state)
 
                         if algo.check_distance(10) is not True and state == 'lets move to goal':
+                            # algo.card_initialize(circle_center)
+                            algo.update(circle_center)
                             mycard.start_hardware()
-
                             output = algo.law_1()
+                            print('output is is is is', output)
                             delta_list.append(output)
                             mycard.set_encoder_angle(output)
                             mycard.vibrate_hardware(70)
+                            # algo.update(circle_center)
 
                             algo.plot_desired_position(img)
                             algo.plot_path(img)
