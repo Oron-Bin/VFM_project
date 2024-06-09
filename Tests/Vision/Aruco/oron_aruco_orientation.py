@@ -72,6 +72,9 @@ orientation_list = []
 delta_list = []
 motor_flag  = 0
 vib_flag = True
+flag = 0
+first_time = 0
+
 
 start = time.perf_counter()
 # algo.x_d = 600  # set a random value of the goal x position
@@ -82,7 +85,7 @@ algo.orientation = random.randint(0,359)
 algo.x_d = 644
 algo.y_d = 185
 
-if state == 'calibrate' :
+if state == 'calibrate' and motor_flag == 0:
     mycard.calibrate()
     print('the system is ready to vibrate')
     time.sleep(3)
@@ -102,94 +105,81 @@ while cam.isOpened():
         start = time.perf_counter()
 
 
-        if circle_radius is not None and motor_flag == 1:
+        if circle_radius is not None :
             if algo.card_initialize(circle_center) == 1:
                 print('hello world')
                 state = 'after_calibrate'
                 algo.update(circle_center)
                 algo.plot_desired_position(img)
                 algo.plot_path(img)
-                # motor_flag = 2
+
 
             if ids is not None and len(ids) > 0 and state == 'after_calibrate':
 
                 orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
                 orientation_error = abs(algo.shortest_way(orientation_angle, algo.orientation))
-                print(orientation_error)
                 cv2.putText(img, f"error: {round(orientation_error, 1)}", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-                if orientation_error >= 10 and len(ids) > 0 :
-                    print(orientation_error)
+                if orientation_error >= 10 and flag == 0: #here state = 'after_calibrate'
                     mycard.start_hardware()
                     mycard.vibrate_hardware(70)
                     state = 'vibrating'
+                    print(state)
 
-                else:
-                    mycard.stop_hardware()
-                    time.sleep(3)
-                    print('the orientation error is: {0}'.format(orientation_error))
-                    mycard.calibrate()
-                    time.sleep(2)
-                    state = 'stop vibrate'
-                if state == 'stop vibrate':
+
+                elif orientation_error >=10 and flag ==1 :
                     mycard.start_hardware()
-                    # print(algo.path[-1])
-                    # print(list(origin))
-                    output = algo.calculate_angle(algo.path[-1],list(origin))
+                    mycard.vibrate_hardware(70)
+                    output = algo.law_1()
+                    delta_list.append(output)
+                    print('output is', output)
+                    mycard.set_encoder_angle(output)  ## Update the motor output
+                    algo.plot_arrow(img)  ## Plot the direction of the motor
 
-                    print('the output', output)
-                    a = round(output)
-                    state = 'move_dc'
-                if state == 'move_dc' :
-                    mycard.set_encoder_angle(a)
-                    time.sleep(2)
-                    motor_flag = 3
-                    # print('output is: {0}'.format(output))
-                    # time.sleep(2)
-                    # print(state)
-                    state = 11
-                if state == 11 and motor_flag == 3:
-                    mycard.vibrate_hardware(100)
+                    if algo.check_distance(10) is True:
+                        mycard.stop_hardware()
+                        print('agagaga')
+                        time.sleep(10)
 
-                    state = 12
-                    print('adsfds')
 
-                if algo.check_distance(epsilon=10) is False and state == 12:
+                elif orientation_error < 10 :
+                    flag = 1
 
-                    algo.plot_arrow(img)
-                    algo.update(circle_center)
-                    algo.plot_desired_position(img)
-                    algo.plot_path(img)
-                    # mycard.stop_hardware()
-                    print('not arrive')
-                    state = 13
+                    if first_time ==0:
+                        mycard.stop_hardware()
+                        time.sleep(2)
 
-                if state == 13:
-                    mycard.calibrate()
-                    print('bye bye')
-                    # time.sleep(5)
-                    mycard.stop_hardware()
+                    state = 'point the motor to goal'
+                    print(state)
 
-                    # algo.plot_arrow(img)
-                    # algo.update(circle_center)
-                    # algo.plot_desired_position(img)
-                    # algo.plot_path(img)
-                    # state = 14
-                    # if state == 14:
-                    #     mycard.stop_hardware()
-                    #     print('ariiveeeeeee')
-                    state = 19
-                    motor_flag = 10
+                    if state == 'point the motor to goal':
 
-                # if algo.check_distance(epsilon=10) is True:
-                #     state = 'stop_vibrating'
-                #     if state == 'stop_vibrating':
-                #         mycard.stop_hardware()
-                #         print('arrive')
-                #         state = 13
-                #         motor_flag = 10
-                    # print(state)
+                        if first_time ==0:
+                            mycard.calibrate()
+                            time.sleep(3)
+                            first_time = 1
+
+                        state = 'lets move to goal'
+                        print(state)
+
+                        if algo.check_distance(10) is not True and state == 'lets move to goal':
+                            mycard.start_hardware()
+
+                            output = algo.law_1()
+                            delta_list.append(output)
+                            mycard.set_encoder_angle(output)
+                            mycard.vibrate_hardware(70)
+
+                            algo.plot_desired_position(img)
+                            algo.plot_path(img)
+                            algo.plot_arrow(img)
+                            print('mamamama')
+
+                        elif algo.check_distance(10) is True and 'lets move to goal':
+                            mycard.stop_hardware()
+                            print('stop')
+
 
 
         out.write(img)  # Saves the current frame to the video file.
@@ -207,4 +197,3 @@ while cam.isOpened():
 cam.release()
 out.release()
 cv2.destroyAllWindows()
-
