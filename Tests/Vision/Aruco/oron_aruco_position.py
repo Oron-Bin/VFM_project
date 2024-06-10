@@ -113,7 +113,7 @@ while cam.isOpened():
           # now the vibration is continuous.
         if circle_radius is not None and state == 'vibrating' and motor_flag ==2:
             mycard.start_hardware()
-            mycard.vibrate_hardware(100)
+            mycard.vibrate_hardware(62)
             algo.update(circle_center)
             algo.plot_desired_position(img)
             algo.plot_path(img)

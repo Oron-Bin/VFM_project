@@ -67,7 +67,7 @@ class card_algorithms:
         # print(f"last dx + last dy: {self.last_dx, self.last_dy}")
         self.last_orientation = self.orientation
         self.first_orientation = self.orientation
-        print("card_initialize")
+        # print("card_initialize")
         return 1
 
     def card_initialize_pos(self, card_center): ## Use to intialize position for the first iteration
@@ -186,7 +186,7 @@ class card_algorithms:
         print('Enter desired point is',self.x_d, self.y_d)
         return [self.x_d, self.y_d,self.orientation]
 
-        # return [self.x_d, self.y_d, self.orientation]
+
     def generate_path(self):
         """ generate rectangle path"""
         x = np.linspace(-30,30,15) + self.tip_position[0]
@@ -328,7 +328,7 @@ class card_algorithms:
     def calculate_angle(self,point1,point2):
         dx = point1[0] - point2[0]
         dy = point1[1] - point2[1]
-        angle = np.degrees(np.arctan2(dy, dx))
+        angle = round(np.degrees(np.arctan2(dy, dx)))
 
         return angle
     def ids_to_angle(self, ids, circle_center, aruco_centers):

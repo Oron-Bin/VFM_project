@@ -12,7 +12,7 @@ from Utils.Control.cardalgo import *
 
 # This code is used to record a video
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+filename = f"/home/roblab20/Desktop/videos/main_orientation/oron_{timestamp}.avi"
 start_time = time.time()
 
 # Define video resolution
@@ -101,7 +101,7 @@ while cam.isOpened():
     if ret:
 
         circle_center, circle_radius = algo.detect_circle_info(img)
-        print(f'circle_center: {circle_center}')
+        # print(f'circle_center: {circle_center}')
 
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
@@ -109,7 +109,7 @@ while cam.isOpened():
 
         if circle_radius is not None:
             if algo.card_initialize(circle_center) == 1:
-                print('hello world')
+                # print('hello world')
                 state = 'after_calibrate'
 
                 algo.update(circle_center)
@@ -128,7 +128,7 @@ while cam.isOpened():
                     mycard.start_hardware()
                     mycard.vibrate_hardware(100)
                     state = 'vibrating'
-                    print(state)
+                    # print(state)
 
                 # Vibrate and command to motor with the relative orientation
                 elif orientation_error >= 10 and flag == 1 :
@@ -144,10 +144,11 @@ while cam.isOpened():
                     mycard.set_encoder_angle(output)  ## Update the motor output
                     algo.plot_arrow(img)  ## Plot the direction of the motor
 
-                    if algo.check_distance(10) is True:
+                    if algo.check_distance(5) is True:
                         mycard.stop_hardware()
-                        time.sleep(10)
                         print('arrive')
+                        time.sleep(10)
+
 
 
                 # Stop everything; Calibrate
@@ -173,7 +174,7 @@ while cam.isOpened():
                         state = 'lets move to goal'
                         print(state)
 
-                        if algo.check_distance(10) is not True and state == 'lets move to goal':
+                        if algo.check_distance(5) is not True and state == 'lets move to goal':
                             # algo.card_initialize(circle_center)
                             algo.update(circle_center)
                             mycard.start_hardware()
@@ -189,10 +190,12 @@ while cam.isOpened():
                             algo.plot_arrow(img)
                             print('mamamama')
 
-                        elif algo.check_distance(10) is True and 'lets move to goal':
+                        elif algo.check_distance(5) is True and 'lets move to goal':
                             mycard.stop_hardware()
-                            time.sleep(10)
                             print('stop')
+                            # motor_flag = 0
+                            time.sleep(10)
+
 
 
 
