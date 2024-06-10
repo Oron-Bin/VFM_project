@@ -84,6 +84,7 @@ algo.orientation = random.randint(0,359)
 # angle_teta = 0
 algo.x_d = 644
 algo.y_d = 185
+oron = True
 
 if state == 'calibrate' and motor_flag == 0:
     mycard.calibrate()
@@ -100,19 +101,20 @@ while cam.isOpened():
     if ret:
 
         circle_center, circle_radius = algo.detect_circle_info(img)
+        print(f'circle_center: {circle_center}')
+
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
         start = time.perf_counter()
 
-
-        if circle_radius is not None :
+        if circle_radius is not None:
             if algo.card_initialize(circle_center) == 1:
                 print('hello world')
                 state = 'after_calibrate'
+
                 algo.update(circle_center)
                 algo.plot_desired_position(img)
                 algo.plot_path(img)
-
 
             if ids is not None and len(ids) > 0 and state == 'after_calibrate':
 
@@ -121,14 +123,15 @@ while cam.isOpened():
                 cv2.putText(img, f"error: {round(orientation_error, 1)}", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
+                # Vibrate till you minimize the orientation error
                 if orientation_error >= 10 and flag == 0: #here state = 'after_calibrate'
                     mycard.start_hardware()
-                    mycard.vibrate_hardware(70)
+                    mycard.vibrate_hardware(100)
                     state = 'vibrating'
                     print(state)
 
-
-                elif orientation_error >= 10 and flag ==1 :
+                # Vibrate and command to motor with the relative orientation
+                elif orientation_error >= 10 and flag == 1 :
                     mycard.start_hardware()
                     mycard.vibrate_hardware(70)
                     # algo.update(circle_center)
@@ -136,19 +139,22 @@ while cam.isOpened():
                     # delta_list.append(output)
                     # print(delta_list[-1])
                     # print('output is', output)
+                    output = algo.law_1(first=oron)  #
+                    oron = False
                     mycard.set_encoder_angle(output)  ## Update the motor output
                     algo.plot_arrow(img)  ## Plot the direction of the motor
 
                     if algo.check_distance(10) is True:
                         mycard.stop_hardware()
-                        print('arrive')
                         time.sleep(10)
+                        print('arrive')
 
 
+                # Stop everything; Calibrate
                 elif orientation_error < 10 :
                     flag = 1
 
-                    if first_time ==0:
+                    if first_time == 0:
                         mycard.stop_hardware()
                         time.sleep(2)
 
@@ -158,6 +164,7 @@ while cam.isOpened():
                     if state == 'point the motor to goal':
 
                         if first_time ==0:
+
                             mycard.calibrate()
                             # algo.card_initialize(circle_center)
                             time.sleep(3)
@@ -170,7 +177,7 @@ while cam.isOpened():
                             # algo.card_initialize(circle_center)
                             algo.update(circle_center)
                             mycard.start_hardware()
-                            output = algo.law_1()
+                            output = algo.law_1(first=oron)
                             print('output is is is is', output)
                             delta_list.append(output)
                             mycard.set_encoder_angle(output)
@@ -184,6 +191,7 @@ while cam.isOpened():
 
                         elif algo.check_distance(10) is True and 'lets move to goal':
                             mycard.stop_hardware()
+                            time.sleep(10)
                             print('stop')
 
 

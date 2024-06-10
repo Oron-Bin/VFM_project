@@ -57,19 +57,31 @@ class card_algorithms:
         self.time_list.clear() ## Clear time list
         self.orientation_list.clear() ## Clear Orientation list
 
-    def card_initialize(self,card_center): ## Use to intialize position for the first iteration
+    def card_initialize(self, card_center): ## Use to intialize position for the first iteration
+
+        """ function for initialize card data after starting the system"""
+
+        self.center = card_center
+        # self.last_dx = self.x_d - self.center[0]
+        # self.last_dy = self.y_d - self.center[1]
+        # print(f"last dx + last dy: {self.last_dx, self.last_dy}")
+        self.last_orientation = self.orientation
+        self.first_orientation = self.orientation
+        print("card_initialize")
+        return 1
+
+    def card_initialize_pos(self, card_center): ## Use to intialize position for the first iteration
 
         """ function for initialize card data after starting the system"""
 
         self.center = card_center
         self.last_dx = self.x_d - self.center[0]
         self.last_dy = self.y_d - self.center[1]
-
+        # print(f"last dx + last dy: {self.last_dx, self.last_dy}")
         self.last_orientation = self.orientation
         self.first_orientation = self.orientation
         print("card_initialize")
         return 1
-
 #        if (self.first_orientation != 0):
 #             print("First orientation is {}:", self.first_orientation)
 #             return 1
@@ -88,12 +100,14 @@ class card_algorithms:
         output = weight*new +(1-weight*prev)
         return output
 
-    def law_1(self):
+    def law_1(self, first=True):
 
         """ Function for calculating the first control loop law"""
-        dx = self.filter(self.last_dx,self.x_d - self.center[0])
-        dy = self.filter(self.last_dy,self.y_d - self.center[1])
-
+        if first:
+            dx, dy = self.x_d - self.center[0], self.y_d - self.center[1]
+        else:
+            dx = self.filter(self.last_dx, self.x_d - self.center[0])
+            dy = self.filter(self.last_dy, self.y_d - self.center[1])
 
         # print(self.last_dx,self.x_d,self.center[0])
         # print('dx',dx)
@@ -103,6 +117,7 @@ class card_algorithms:
         # print("New :{} Last is:{}".format(new_angle, self.last_angle))
         self.last_dx = dx
         self.last_dy = dy
+
         # print(self.last_dx)
         if self.last_angle == new_angle:
             # print('oooo')

@@ -18,7 +18,7 @@ lamda = 0.9
 lamda_2 = 0.5
 static_friction = miu_s *M*g
 epsilon = 20
-print("static friction", static_friction)
+# print("static friction", static_friction)
 teta = 40
 
 initial_conditions = [0.0 ,0.0, 10.0, 0.0]
@@ -40,12 +40,6 @@ def system_of_odes(t, variables):
     Fk = forces(t)[2] + fb * t
     Fc = forces(t)[0]
     F = Fc - Fk
-    print(F)
-    if F < -293:
-        if last_valid_values is None:
-            last_valid_values = [phi, omega, r, vr]
-        elif last_valid_values[2] < r:  # Compare current r with stored r
-            last_valid_values = [phi, omega, r, vr]
 
     dr_dt = vr
     dphi_dt = omega
@@ -68,6 +62,7 @@ print("Velocity_r:", last_vr)
 
 # Plotting
 fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
 
 # Plot 1: Phi vs Time
 axs[0, 0].plot(solution.t, solution.y[0])

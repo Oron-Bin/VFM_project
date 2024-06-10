@@ -3,7 +3,7 @@ import sys
 import datetime
 import time
 import cv2
-from Utils.Control.robotiqGripper import *
+# from Utils.Control.robotiqGripper import *
 
 sys.path.insert(1, r'/')
 
@@ -64,10 +64,9 @@ cam.set(4, 720)
 # Set the card class and open the serial communication
 mycard = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
 algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
-grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
-# Define the set desired parameter and tell the code that the user didn't initialize it yet
-state = 0 #the default is that we need to calibrate the system first
-scale = 28 # 1 cm = 28 pixels
+
+
+state = 'before_calibrate' #the default is that we need to calibrate the system first
 j = 0
 orientation_list = []
 delta_list = []
@@ -80,9 +79,9 @@ algo.x_d = 600  # set a random value of the goal x position
 algo.y_d = 210  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
 
-if state == 0 :
+if state == 'before_calibrate' :
     mycard.calibrate()
-    state = 1
+    state = 'after calibrate'
 
 
 while cam.isOpened():
@@ -91,63 +90,27 @@ while cam.isOpened():
 
     if ret:
         circle_center, circle_radius = algo.detect_circle_info(img)
-        # print('the COM is:', circle_center)
-        # print('the radius is', circle_radius)
-        # algo.update(circle_center)  # this make circle center to be not None object
         origin = tuple(algo.finger_position(img))
         aruco_centers, ids = algo.detect_aruco_centers(img)
 
-        if circle_radius is not None and state == 1:
+        if circle_radius is not None and state == 'after calibrate':
             if algo.card_initialize(circle_center) == 1:
                 print('hello world')
-                state = 2
+                state = 'after_calibration and cam'
 
-        if circle_radius is not None and state == 2:
-
+        if circle_radius is not None and state == 'after_calibration and cam':
 
             algo.update(circle_center)
-            # print(circle_center)
-            # print('the radius is', circle_radius/scale)
             algo.plot_desired_position(img)
             algo.plot_path(img)
 
 
-            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 2:
-                angle_teta = np.rad2deg(np.arctan2(algo.y_d - circle_center[1],algo.x_d - circle_center[0]))
-                # print(angle_teta)
-                # d0 = np.round(np.sqrt((algo.path[0][0] - goal_position[0]) ** 2 + (algo.path[0][1] - goal_position[1]) ** 2))
-                # print('distance d0 is', d0)
-                # distance=np.round(np.sqrt((circle_center[0] - goal_position[0]) ** 2 + (circle_center[1] - goal_position[1]) ** 2))
-                # # distance = np.linalg.norm(list(circle_center) - goal_position)
-                # print(distance)
-                #
-                # linear_fit = (int(2*((d0-distance)//d0) + 10))
-                # print(linear_fit)
-                #
-                # grip.goTo(linear_fit)
-
-
-                output = algo.law_1()
-                # print(output)
-                # output = 0
-
-                delta_list.append(output)
-
-                cv2.putText(img, f"delta_motor_angle: {angle_teta}", (10, 150),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-                cv2.putText(img, f"delta_motor_angle: {output}", (10, 120),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                # cv2.putText(img, f"motor_angle: {algo.angle_of_motor()}", (10, 150),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                ###############################################
-
-                mycard.set_encoder_angle(output) ## Update the motor output
+            if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 'after_calibration and cam':
                 algo.plot_arrow(img) ## Plot the direction of the motor
 
             if algo.check_distance(epsilon=10) is True:
                 state = 3
-                grip.goTo(10)
+                # grip.goTo(10)
                 if state == 3:
                     print('arrive')
                     algo.next_iteration()
@@ -155,7 +118,7 @@ while cam.isOpened():
                     algo.package_data()
                     algo.clear()
                     algo.random_input()
-                    grip.goTo(12)
+                    # grip.goTo(12)
                     state = 2
 
         out.write(img)  # Saves the current frame to the video file.

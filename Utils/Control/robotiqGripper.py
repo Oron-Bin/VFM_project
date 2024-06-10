@@ -616,8 +616,8 @@ if True:
 #     # grip.activate()
 #     # grip.printInfo()
 # #
-    grip.goTo(12)
-#     # print("")
+    grip.goTo(15)
+    # print("")
 
     # grip.goTo(0)
 

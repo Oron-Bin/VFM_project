@@ -1,6 +1,6 @@
 import serial
 import time
-from Utils.Control.robotiqGripper import *
+# from Utils.Control.robotiqGripper import *
 
 def jsonize(key,data): #how the data is tansform in the packet
     packet = 'json:{"'+str(key)+'":'+str(data)+'}'+'\x0d'+'\x0a'
@@ -124,22 +124,39 @@ class Card:
     def vibrate_rate(self,ms=0):
         self.key_dict['vibrate_rate'] = ms
         self.send_data('vibrate_rate')
+
+    def vibrate_hardware_2(self,precent=0):
+        self.key_dict['vibrate_2'] = precent
+        self.send_data(key ='vibrate_2')
 #
 # # grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
 # grip.goTo(12)
 # mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
-# # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # #
 # mycard.calibrate()
 # mycard.start_hardware()
+# # mycard.set_encoder_angle(120)
+# # # # mycard.start_hardware()
+# # mycard.vibrate_hardware_2(100)
+# # mycard.stop_hardware()
+# # mycard.start_hardware()
 # mycard.vibrate_hardware(100)
-# # # # # mycard.vibrate_hardware(70)
 # mycard.set_encoder_angle(120)
-# # #
-# # # # # mycard.vibrate_rate(500)
-# # # # # mycard.vibrate_rate(300)
-#
+# # mycard.start_hardware()
+# # mycard.vibrate_hardware(100)
+# # mycard.vibrate_hardware(70)
+# # mycard.set_encoder_angle(120)
+# # mycard.stop_hardware()
+# #
+# # mycard.calibrate()
+# # mycard.start_hardware()
+# # mycard.set_encoder_angle(30)
+# # # # time.sleep(3)
+# # mycard.vibrate_hardware(70)
+# # # mycard.vibrate_rate(300)
+# # # #
 # mycard.stop_hardware()
-# # #
+
 
 
 

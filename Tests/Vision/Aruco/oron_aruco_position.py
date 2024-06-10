@@ -80,7 +80,7 @@ goal_position = [algo.x_d,algo.y_d]
 algo.orientation = random.randint(0,359)
 angle_teta = 0
 
-
+oron = True
 if state == 'calibrate' :
     mycard.calibrate()
     print('the system is ready to vibrate')
@@ -101,14 +101,11 @@ while cam.isOpened():
         start = time.perf_counter()
 
         if motor_flag == 0:
-            #
-            # mycard.start_hardware()
-            # mycard.set_encoder_angle(-45)
             motor_flag = 2
 
 
         if circle_radius is not None and state == 'after_calibrate' and motor_flag ==2:
-            if algo.card_initialize(circle_center) == 1:
+            if algo.card_initialize_pos(circle_center) == 1:
                 print('hello world')
                 state = 'vibrating'
 
@@ -116,32 +113,16 @@ while cam.isOpened():
           # now the vibration is continuous.
         if circle_radius is not None and state == 'vibrating' and motor_flag ==2:
             mycard.start_hardware()
-            mycard.vibrate_hardware(50)
+            mycard.vibrate_hardware(100)
             algo.update(circle_center)
             algo.plot_desired_position(img)
             algo.plot_path(img)
-            if ids is not None and len(ids) > 0:
-                orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
-                orientation_error = abs(algo.shortest_way(orientation_angle, algo.orientation))
-                print(orientation_error)
-                cv2.putText(img, f"error: {round(orientation_error, 1)}", (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-            if orientation_error < 10 :
-                mycard.stop_hardware()
-                print('the orientation error is: {0}'.format(orientation_error))
-                state = 10
-                if state == 10 :
-                    mycard.calibrate()
-                    time.sleep(5)
-                    mycard.start_hardware()
-
-                    mycard.set_encoder_angle(30) #for example the angle is 30
-                    state = 11
 
             if algo.check_distance(epsilon=10) is False and circle_center is not None and state == 'vibrating' and motor_flag ==2:
                 angle_teta = algo.calculate_angle(goal_position,circle_center)
-                output = algo.law_1()
+                output = algo.law_1(first=oron)
+                oron=False
                 # output = 0
                 delta_list.append(output)
                 mycard.set_encoder_angle(output) ## Update the motor output
@@ -182,4 +163,3 @@ while cam.isOpened():
 cam.release()
 out.release()
 cv2.destroyAllWindows()
-

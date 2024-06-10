@@ -68,7 +68,7 @@ from matplotlib.animation import FuncAnimation
 # Define global variables
 w = 240   # Frequency
 tau_f = 100
-theta = 90
+theta = 20
 R = 50.0 #mm
 M = 14.0#   m kg
 I_com = (1/2)*(M*R*R)
@@ -80,7 +80,7 @@ miu = 0.15 # Friction coefficient
 dx = 10.0 # mm
 dy = 10.0 # mm
 fb = 10
-initial_conditions = [0.0 ,0.0, 20.0, 0.0, 10.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
+initial_conditions = [0.0 ,0.0, 10.0, 0.0, 20.0, 0.0] # [phi_0, omega_0, x0, vx_0, y_0, vy_0]
 
 # Define the system of ODEs
 def system_of_odes(t, variables):
