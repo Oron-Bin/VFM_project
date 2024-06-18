@@ -126,14 +126,14 @@ while cam.isOpened():
                 # Vibrate till you minimize the orientation error
                 if orientation_error >= 10 and flag == 0: #here state = 'after_calibrate'
                     mycard.start_hardware()
-                    mycard.vibrate_hardware(100)
+                    mycard.vibrate_hardware(50)
                     state = 'vibrating'
                     # print(state)
 
                 # Vibrate and command to motor with the relative orientation
                 elif orientation_error >= 10 and flag == 1 :
                     mycard.start_hardware()
-                    mycard.vibrate_hardware(70)
+                    mycard.vibrate_hardware(100)
                     # algo.update(circle_center)
                     # output = algo.law_1()
                     # delta_list.append(output)
@@ -182,7 +182,7 @@ while cam.isOpened():
                             print('output is is is is', output)
                             delta_list.append(output)
                             mycard.set_encoder_angle(output)
-                            mycard.vibrate_hardware(70)
+                            mycard.vibrate_hardware(50)
                             # algo.update(circle_center)
 
                             algo.plot_desired_position(img)
