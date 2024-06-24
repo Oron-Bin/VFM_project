@@ -41,6 +41,7 @@ def detect_circles_and_get_centers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.medianBlur(gray, 5)
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
+    cv2.circle(frame, (323, 150), radius=5, color=(0, 0, 0), thickness=2)
 
     centers = []
     if circles is not None:
