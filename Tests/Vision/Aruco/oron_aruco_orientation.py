@@ -10,7 +10,7 @@ sys.path.insert(1, r'/')
 
 # Video settings
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+filename = f"/home/roblab20/Desktop/videos/main_orientation/oron_{timestamp}.avi"
 res = '720p'
 
 # Video resolution settings
@@ -65,7 +65,7 @@ oron = True
 if state == 'calibrate' and motor_flag == 0:
     mycard.calibrate()
     print('the system is ready to vibrate')
-    time.sleep(3)
+    cv2.waitKey(3000)
     motor_flag = 1
 
 while cam.isOpened():
@@ -113,13 +113,13 @@ while cam.isOpened():
             flag = 1
             if first_time == 0:
                 mycard.stop_hardware()
-                time.sleep(2)
+                cv2.waitKey(2000)
             state = 'point the motor to goal'
             print(state)
 
             if first_time == 0:
                 mycard.calibrate()
-                time.sleep(3)
+                cv2.waitKey(3000)
                 first_time = 1
 
             state = 'lets move to goal'
