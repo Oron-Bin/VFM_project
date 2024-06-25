@@ -1,47 +1,79 @@
 import cv2
 import threading
-import serial
 import os
 import time
 import datetime
 from Utils.Hardware.package import Card
 import numpy as np
+import math
+import tkinter as tk
+from tkinter import ttk
+
 
 def jsonize(key, data):
-    packet = 'json:{"'+str(key)+'":'+str(data)+'}'+'\x0d'+'\x0a'
+    packet = 'json:{"' + str(key) + '":' + str(data) + '}' + '\x0d' + '\x0a'
     return packet
 
 
-def command_listener(card):
+def rotate_point(center, point, angle):
+    angle_rad = np.deg2rad(angle)
+    rotation_matrix = np.array([
+        [np.cos(angle_rad), -np.sin(angle_rad)],
+        [np.sin(angle_rad), np.cos(angle_rad)]
+    ])
+    point_shifted = np.array(point) - np.array(center)
+    rotated_point_shifted = rotation_matrix.dot(point_shifted)
+    rotated_point = rotated_point_shifted + np.array(center)
+    return rotated_point.astype(int)
+
+
+angle_list = [0]
+
+
+def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
+    hardware_started = False
+
     while True:
-        command = input("Enter command: ")
-        if command == "calibrate":
+        if calibrate_btn_var.get() == 1:
+            print("Calibrating...")
             card.calibrate()
-        elif command == "start":
+            calibrate_btn_var.set(0)
+            print("Calibration done.")
+
+        if start_btn_var.get() == 1:
+            print("Starting hardware...")
             card.start_hardware()
-        elif command == "stop":
+            hardware_started = True
+            start_btn_var.set(0)
+            print("Hardware started.")
+
+        if stop_btn_var.get() == 1:
+            print("Stopping hardware...")
             card.stop_hardware()
-        elif command == "vibrate":
-            try:
-                percent = int(input("Enter vibration percentage: "))
-                card.vibrate_hardware(percent)
-            except ValueError:
-                print("Invalid vibration percentage")
-        elif command.startswith("encoder"):
-            try:
-                angle = int(input("Enter motor angle: "))
-                card.set_encoder_angle(angle)
-            except ValueError:
-                print("Invalid encoder command")
-        else:
-            print("Unknown command")
+            hardware_started = False
+            vibration_var.set(0)
+            encoder_var.set(0)
+            stop_btn_var.set(0)
+            print("Hardware stopped and sliders reset.")
+
+        if hardware_started:
+            # Apply the vibration and encoder settings continuously
+            card.vibrate_hardware(vibration_var.get())
+            angle = encoder_var.get()
+            card.set_encoder_angle(angle)
+            angle_list.append(angle + angle_list[-1])
+
+        time.sleep(0.1)
+
+
+tip_pos = (323, 150)
 
 
 def detect_circles_and_get_centers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.medianBlur(gray, 5)
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
-    cv2.circle(frame, (323, 150), radius=5, color=(0, 0, 0), thickness=2)
+    cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
 
     centers = []
     if circles is not None:
@@ -56,7 +88,34 @@ def detect_circles_and_get_centers(frame):
 def main():
     card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
 
-    command_thread = threading.Thread(target=command_listener, args=(card,))
+    root = tk.Tk()
+    root.title("Hardware Control")
+
+    vibration_var = tk.IntVar()
+    encoder_var = tk.IntVar()
+    calibrate_btn_var = tk.IntVar()
+    start_btn_var = tk.IntVar()
+    stop_btn_var = tk.IntVar()
+
+    ttk.Label(root, text="Vibration (%)").grid(column=0, row=0, padx=10, pady=10)
+    vibration_slider = ttk.Scale(root, from_=0, to=100, orient='horizontal', variable=vibration_var)
+    vibration_slider.grid(column=1, row=0, padx=10, pady=10)
+
+    ttk.Label(root, text="Encoder (°)").grid(column=0, row=1, padx=10, pady=10)
+    encoder_slider = ttk.Scale(root, from_=0, to=360, orient='horizontal', variable=encoder_var)
+    encoder_slider.grid(column=1, row=1, padx=10, pady=10)
+
+    calibrate_btn = ttk.Button(root, text="Calibrate", command=lambda: calibrate_btn_var.set(1))
+    calibrate_btn.grid(column=0, row=2, columnspan=2, padx=10, pady=10)
+
+    start_btn = ttk.Button(root, text="Start", command=lambda: start_btn_var.set(1))
+    start_btn.grid(column=0, row=3, columnspan=2, padx=10, pady=10)
+
+    stop_btn = ttk.Button(root, text="Stop", command=lambda: stop_btn_var.set(1))
+    stop_btn.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
+
+    command_thread = threading.Thread(target=command_listener, args=(
+    card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var))
     command_thread.daemon = True
     command_thread.start()
 
@@ -72,29 +131,46 @@ def main():
 
     circle_centers = []
 
-    while True:
+    def update_frame():
         ret, frame = cap.read()
         if not ret:
             print("Failed to grab frame")
-            break
+            return
 
         frame_copy = frame.copy()  # Create a copy of the frame for drawing purposes
 
         frame, centers = detect_circles_and_get_centers(frame_copy)
 
+        if len(angle_list) > 1:
+            start_point = tip_pos
+            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(angle_list[-1]))),
+                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(angle_list[-1]))))
+            rotated_end_point = rotate_point(start_point, end_point, 90)
+
+            # Draw the rotated arrow
+            cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
+
         # Display circle centers on the screen
         for idx, center in enumerate(centers):
-            cv2.putText(frame, f"{(center[0],center[1])}", (10, 20),
+            cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         out.write(frame)  # Write the frame to the video file
         cv2.imshow("Camera", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            root.quit()
+            return
+
+        root.after(10, update_frame)  # Schedule the next update
+
+    root.after(10, update_frame)
+    root.protocol("WM_DELETE_WINDOW", root.quit)
+    root.mainloop()
 
     cap.release()
     out.release()  # Release the VideoWriter object
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()
