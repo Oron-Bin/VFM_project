@@ -53,7 +53,6 @@ algo.x_d, algo.y_d = 644, 185
 
 # Initial setup
 state = 'calibrate'
-scale = 28
 orientation_list, delta_list = [], []
 motor_flag = 0
 vib_flag = True
@@ -66,6 +65,7 @@ if state == 'calibrate' and motor_flag == 0:
     mycard.calibrate()
     print('the system is ready to vibrate')
     cv2.waitKey(3000)
+    # time.sleep(3)
     motor_flag = 1
 
 while cam.isOpened():
@@ -97,6 +97,7 @@ while cam.isOpened():
                 mycard.vibrate_hardware(70)
                 state = 'vibrating'
                 print(state)
+
             else:
                 mycard.start_hardware()
                 mycard.vibrate_hardware(70)
@@ -104,10 +105,12 @@ while cam.isOpened():
                 oron = False
                 mycard.set_encoder_angle(output)
                 # algo.plot_arrow(img)
-                if algo.check_distance(5):
+                if algo.check_distance(10):
                     mycard.stop_hardware()
-                    cv2.waitKey(5000)
+
                     print('arrive')
+                    motor_flag = 2
+                    cv2.waitKey(5000)
                     break
         else:
             flag = 1
@@ -124,7 +127,7 @@ while cam.isOpened():
 
             state = 'lets move to goal'
             print(state)
-            if not algo.check_distance(5):
+            if not algo.check_distance(10):
                 algo.update(circle_center)
                 mycard.start_hardware()
                 output = algo.law_1(first=oron)
@@ -138,13 +141,16 @@ while cam.isOpened():
                 print('mamamama')
             else:
                 mycard.stop_hardware()
-                cv2.waitKey(5000)
+                # cv2.waitKey(5000)
                 print('stop')
+                cv2.waitKey(5000)
+                motor_flag = 2
                 break
 
     out.write(img)
     algo.display_image(img, circle_center, circle_radius)
     cv2.imshow('QueryImage', img)
+
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print('Interrupted by user')
