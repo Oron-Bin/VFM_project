@@ -32,12 +32,14 @@ angle_list = [0]
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     hardware_started = False
+    last_encoder_value = 0  # Track the last encoder value
 
     while True:
         if calibrate_btn_var.get() == 1:
             print("Calibrating...")
             card.calibrate()
             calibrate_btn_var.set(0)
+            last_encoder_value = 0  # Reset the last encoder value on calibration
             print("Calibration done.")
 
         if start_btn_var.get() == 1:
@@ -54,14 +56,19 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             vibration_var.set(0)
             encoder_var.set(0)
             stop_btn_var.set(0)
+            last_encoder_value = 0  # Reset the last encoder value on stop
             print("Hardware stopped and sliders reset.")
 
         if hardware_started:
-            # Apply the vibration and encoder settings continuously
+            # Apply the vibration setting
             card.vibrate_hardware(vibration_var.get())
-            angle = encoder_var.get()
-            card.set_encoder_angle(angle)
-            angle_list.append(angle + angle_list[-1])
+
+            # Calculate the difference for the encoder
+            current_encoder_value = encoder_var.get()
+            encoder_difference = current_encoder_value - last_encoder_value
+            card.set_encoder_angle(encoder_difference)
+            angle_list.append(encoder_difference + angle_list[-1])
+            last_encoder_value = current_encoder_value  # Update the last encoder value
 
         time.sleep(0.1)
 
