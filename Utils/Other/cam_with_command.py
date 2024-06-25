@@ -9,11 +9,9 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
-
 def jsonize(key, data):
     packet = 'json:{"' + str(key) + '":' + str(data) + '}' + '\x0d' + '\x0a'
     return packet
-
 
 def rotate_point(center, point, angle):
     angle_rad = np.deg2rad(angle)
@@ -26,9 +24,7 @@ def rotate_point(center, point, angle):
     rotated_point = rotated_point_shifted + np.array(center)
     return rotated_point.astype(int)
 
-
 angle_list = [0]
-
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     hardware_started = False
@@ -40,6 +36,8 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             card.calibrate()
             calibrate_btn_var.set(0)
             last_encoder_value = 0  # Reset the last encoder value on calibration
+            angle_list.clear()  # Clear angle list
+            angle_list.append(0)  # Start angle list with zero after calibration
             print("Calibration done.")
 
         if start_btn_var.get() == 1:
@@ -72,9 +70,7 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
 
         time.sleep(0.1)
 
-
 tip_pos = (323, 150)
-
 
 def detect_circles_and_get_centers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -90,7 +86,6 @@ def detect_circles_and_get_centers(frame):
             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
             cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
     return frame, centers
-
 
 def main():
     card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
@@ -121,8 +116,25 @@ def main():
     stop_btn = ttk.Button(root, text="Stop", command=lambda: stop_btn_var.set(1))
     stop_btn.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
 
+    def adjust_vibration(event):
+        if event.keysym == "Up":
+            vibration_var.set(min(vibration_var.get() + 1, 100))
+        elif event.keysym == "Down":
+            vibration_var.set(max(vibration_var.get() - 1, 0))
+
+    def adjust_encoder(event):
+        if event.keysym == "Right":
+            encoder_var.set(min(encoder_var.get() + 1, 360))
+        elif event.keysym == "Left":
+            encoder_var.set(max(encoder_var.get() - 1, 0))
+
+    root.bind("<Up>", adjust_vibration)
+    root.bind("<Down>", adjust_vibration)
+    root.bind("<Right>", adjust_encoder)
+    root.bind("<Left>", adjust_encoder)
+
     command_thread = threading.Thread(target=command_listener, args=(
-    card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var))
+        card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var))
     command_thread.daemon = True
     command_thread.start()
 
@@ -148,7 +160,7 @@ def main():
 
         frame, centers = detect_circles_and_get_centers(frame_copy)
 
-        if len(angle_list) > 1:
+        if len(angle_list) > 0:
             start_point = tip_pos
             end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(angle_list[-1]))),
                          round(tip_pos[1] - 50 * math.sin(np.deg2rad(angle_list[-1]))))
@@ -177,7 +189,6 @@ def main():
     cap.release()
     out.release()  # Release the VideoWriter object
     cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
     main()
