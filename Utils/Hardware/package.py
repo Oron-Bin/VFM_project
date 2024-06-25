@@ -121,6 +121,7 @@ class Card:
         self.key_dict['vibrate'] = precent
         self.send_data('vibrate')
 
+
     def vibrate_rate(self,ms=0):
         self.key_dict['vibrate_rate'] = ms
         self.send_data('vibrate_rate')

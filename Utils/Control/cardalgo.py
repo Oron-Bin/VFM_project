@@ -338,14 +338,6 @@ class card_algorithms:
             if ids[-1] == 43:
                 # angle = calculate_angle(circle_center, last_aruco_center)
                 angle = angle
-                # cv2.arrowedLine(
-                #     img,
-                #     tuple(circle_center),
-                #     tuple(last_aruco_center),
-                #     (0, 0, 255),
-                #     2,
-                #     tipLength=0.2
-                # )
             elif ids[-1] == 44:
                 angle += 180
                 # angle = calculate_angle(circle_center, last_aruco_center) + 180
@@ -454,6 +446,7 @@ class card_algorithms:
         epslion is the resolution mistake allowed"""
         # self.center = list(self.center)
         distance = np.sqrt((self.center[0]-self.x_d)**2+(self.center[1]-self.y_d)**2)
+        print('distance:',distance)
         if distance < epsilon:
             self.error = distance
             # print("reached to destantion error is:{}".format(distance))
