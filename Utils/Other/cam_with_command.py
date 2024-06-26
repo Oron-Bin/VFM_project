@@ -1,5 +1,5 @@
 from Utils.Control.cardalgo import *
-from Utils.Hardware.package import Card
+from Utils.Hardware.package import *
 import cv2
 import threading
 import os
@@ -10,9 +10,6 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
-def jsonize(key, data):
-    packet = 'json:{"' + str(key) + '":' + str(data) + '}' + '\x0d' + '\x0a'
-    return packet
 
 motor_angle_list = [0]
 
