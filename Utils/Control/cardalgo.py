@@ -376,6 +376,17 @@ class card_algorithms:
                 cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
         return frame, centers
 
+    def rotate_point(self,center, point, angle):
+        angle_rad = np.deg2rad(angle)
+        rotation_matrix = np.array([
+            [np.cos(angle_rad), -np.sin(angle_rad)],
+            [np.sin(angle_rad), np.cos(angle_rad)]
+        ])
+        point_shifted = np.array(point) - np.array(center)
+        rotated_point_shifted = rotation_matrix.dot(point_shifted)
+        rotated_point = rotated_point_shifted + np.array(center)
+        return rotated_point.astype(int)
+
     # def find_card_orientation(self, QueryImg):
     #
     #     """Finding the card orientation using Aruco markers"""
