@@ -1,9 +1,10 @@
+from Utils.Control.cardalgo import *
+from Utils.Hardware.package import Card
 import cv2
 import threading
 import os
 import time
 import datetime
-from Utils.Hardware.package import Card
 import numpy as np
 import math
 import tkinter as tk
@@ -24,7 +25,7 @@ def rotate_point(center, point, angle):
     rotated_point = rotated_point_shifted + np.array(center)
     return rotated_point.astype(int)
 
-angle_list = [0]
+motor_angle_list = [0]
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     hardware_started = False
@@ -36,8 +37,8 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             card.calibrate()
             calibrate_btn_var.set(0)
             last_encoder_value = 0  # Reset the last encoder value on calibration
-            angle_list.clear()  # Clear angle list
-            angle_list.append(0)  # Start angle list with zero after calibration
+            motor_angle_list.clear()  # Clear angle list
+            motor_angle_list.append(0)  # Start angle list with zero after calibration
             print("Calibration done.")
 
         if start_btn_var.get() == 1:
@@ -65,68 +66,69 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             current_encoder_value = encoder_var.get()
             encoder_difference = current_encoder_value - last_encoder_value
             card.set_encoder_angle(encoder_difference)
-            angle_list.append(encoder_difference + angle_list[-1])
+            motor_angle_list.append(encoder_difference + motor_angle_list[-1])
             last_encoder_value = current_encoder_value  # Update the last encoder value
 
         time.sleep(0.1)
 
-tip_pos = (323, 150)
+# tip_pos = (323, 150)
 
-def detect_circles_and_get_centers(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.medianBlur(gray, 21)
-    circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
-    cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
+# def detect_circles_and_get_centers(frame):
+#     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#     gray = cv2.medianBlur(gray, 21)
+#     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
+#     cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
+#
+#     centers = []
+#     if circles is not None:
+#         circles = np.round(circles[0, :]).astype("int")
+#         for (x, y, r) in circles:
+#             centers.append((x, y))
+#             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
+#             cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
+#     return frame, centers
 
-    centers = []
-    if circles is not None:
-        circles = np.round(circles[0, :]).astype("int")
-        for (x, y, r) in circles:
-            centers.append((x, y))
-            cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
-            cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
-    return frame, centers
-
-def detect_aruco_centers(frame):
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_100)
-    aruco_params = cv2.aruco.DetectorParameters_create()
-
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    corners, ids, rejected = cv2.aruco.detectMarkers(blurred, aruco_dict, parameters=aruco_params)
-
-    aruco_centers = []
-    if ids is not None:
-        for i in range(len(ids)):
-            aruco_center = np.mean(corners[i][0], axis=0)
-            aruco_centers.append(aruco_center)
-    return aruco_centers, ids
-
-def calculate_angle(point1, point2):
-    dx = point1[0] - point2[0]
-    dy = point1[1] - point2[1]
-    angle = round(np.degrees(np.arctan2(dy, dx)))
-    return angle
-
-def ids_to_angle(ids, circle_center, aruco_centers):
-    last_aruco_center = aruco_centers[-1]
-    angle = calculate_angle(circle_center, last_aruco_center)
-    if ids is not None:
-        if ids[-1] == 43:
-            angle = angle
-        elif ids[-1] == 44:
-            angle += 180
-        elif ids[-1] == 45:
-            angle += 90
-        elif ids[-1] == 46:
-            angle -= 90
-        if angle < 0:
-            angle += 360
-        return angle
+# def detect_aruco_centers(frame):
+#     aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_100)
+#     aruco_params = cv2.aruco.DetectorParameters_create()
+#
+#     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+#
+#     corners, ids, rejected = cv2.aruco.detectMarkers(blurred, aruco_dict, parameters=aruco_params)
+#
+#     aruco_centers = []
+#     if ids is not None:
+#         for i in range(len(ids)):
+#             aruco_center = np.mean(corners[i][0], axis=0)
+#             aruco_centers.append(aruco_center)
+#     return aruco_centers, ids
+#
+# def calculate_angle(point1, point2):
+#     dx = point1[0] - point2[0]
+#     dy = point1[1] - point2[1]
+#     angle = round(np.degrees(np.arctan2(dy, dx)))
+#     return angle
+#
+# def ids_to_angle(ids, circle_center, aruco_centers):
+#     last_aruco_center = aruco_centers[-1]
+#     angle = calculate_angle(circle_center, last_aruco_center)
+#     if ids is not None:
+#         if ids[-1] == 43:
+#             angle = angle
+#         elif ids[-1] == 44:
+#             angle += 180
+#         elif ids[-1] == 45:
+#             angle += 90
+#         elif ids[-1] == 46:
+#             angle -= 90
+#         if angle < 0:
+#             angle += 360
+#         return angle
 
 def main():
     card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
+    algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
 
     root = tk.Tk()
     root.title("Hardware Control")
@@ -213,31 +215,36 @@ def main():
 
         frame_copy = frame.copy()  # Create a copy of the frame for drawing purposes
 
-        frame, centers = detect_circles_and_get_centers(frame_copy)
+        frame, centers = algo.detect_circles_and_get_centers(frame_copy)
 
-        aruco_centers, ids = detect_aruco_centers(frame_copy)
+        aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
         if aruco_centers and ids is not None:
-            angle = ids_to_angle(ids, tip_pos, aruco_centers)
-            if angle is not None:
-                print(f"Orientation angle: {angle}°")  # Debug print statement
-                cv2.putText(frame, f"Orientation: {angle}", (10, 40),
+            for idx, center in enumerate(centers):
+                # Display circle centers on the screen
+                cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-            else:
-                print("Failed to calculate orientation angle")  # Debug print statement
+                angle = algo.ids_to_angle(ids, center, aruco_centers)
+                if angle is not None:
+                    # print(f"Orientation angle: {angle}°")  # Debug print statement
+                    cv2.putText(frame, f"Orientation: {angle}", (10, 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                else:
+                    print("Failed to calculate orientation angle")  # Debug print statement
 
-        if len(angle_list) > 0:
+        if len(motor_angle_list) > 0:
+            tip_pos = (323, 150)
             start_point = tip_pos
-            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(angle_list[-1]))),
-                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(angle_list[-1]))))
+            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
+                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
             rotated_end_point = rotate_point(start_point, end_point, 90)
 
             # Draw the rotated arrow
             cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
 
-        # Display circle centers on the screen
-        for idx, center in enumerate(centers):
-            cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+        # for idx, center in enumerate(centers):
+        #     cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
+        #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         out.write(frame)  # Write the frame to the video file
         cv2.imshow("Camera", frame)
