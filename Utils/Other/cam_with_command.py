@@ -74,7 +74,7 @@ tip_pos = (323, 150)
 
 def detect_circles_and_get_centers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.medianBlur(gray, 5)
+    gray = cv2.medianBlur(gray, 21)
     circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
     cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
 
@@ -86,6 +86,44 @@ def detect_circles_and_get_centers(frame):
             cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
             cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
     return frame, centers
+
+def detect_aruco_centers(frame):
+    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_100)
+    aruco_params = cv2.aruco.DetectorParameters_create()
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    corners, ids, rejected = cv2.aruco.detectMarkers(blurred, aruco_dict, parameters=aruco_params)
+
+    aruco_centers = []
+    if ids is not None:
+        for i in range(len(ids)):
+            aruco_center = np.mean(corners[i][0], axis=0)
+            aruco_centers.append(aruco_center)
+    return aruco_centers, ids
+
+def calculate_angle(point1, point2):
+    dx = point1[0] - point2[0]
+    dy = point1[1] - point2[1]
+    angle = round(np.degrees(np.arctan2(dy, dx)))
+    return angle
+
+def ids_to_angle(ids, circle_center, aruco_centers):
+    last_aruco_center = aruco_centers[-1]
+    angle = calculate_angle(circle_center, last_aruco_center)
+    if ids is not None:
+        if ids[-1] == 43:
+            angle = angle
+        elif ids[-1] == 44:
+            angle += 180
+        elif ids[-1] == 45:
+            angle += 90
+        elif ids[-1] == 46:
+            angle -= 90
+        if angle < 0:
+            angle += 360
+        return angle
 
 def main():
     card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
@@ -99,13 +137,30 @@ def main():
     start_btn_var = tk.IntVar()
     stop_btn_var = tk.IntVar()
 
+    def update_vibration_label(*args):
+        vibration_label_var.set(f"Vibration: {vibration_var.get()}%")
+
+    def update_encoder_label(*args):
+        encoder_label_var.set(f"Encoder: {encoder_var.get()}°")
+
+    vibration_var.trace_add("write", update_vibration_label)
+    encoder_var.trace_add("write", update_encoder_label)
+
+    vibration_label_var = tk.StringVar()
+    encoder_label_var = tk.StringVar()
+
+    update_vibration_label()
+    update_encoder_label()
+
     ttk.Label(root, text="Vibration (%)").grid(column=0, row=0, padx=10, pady=10)
     vibration_slider = ttk.Scale(root, from_=0, to=100, orient='horizontal', variable=vibration_var)
     vibration_slider.grid(column=1, row=0, padx=10, pady=10)
+    ttk.Label(root, textvariable=vibration_label_var).grid(column=2, row=0, padx=10, pady=10)
 
     ttk.Label(root, text="Encoder (°)").grid(column=0, row=1, padx=10, pady=10)
     encoder_slider = ttk.Scale(root, from_=0, to=360, orient='horizontal', variable=encoder_var)
     encoder_slider.grid(column=1, row=1, padx=10, pady=10)
+    ttk.Label(root, textvariable=encoder_label_var).grid(column=2, row=1, padx=10, pady=10)
 
     calibrate_btn = ttk.Button(root, text="Calibrate", command=lambda: calibrate_btn_var.set(1))
     calibrate_btn.grid(column=0, row=2, columnspan=2, padx=10, pady=10)
@@ -159,6 +214,16 @@ def main():
         frame_copy = frame.copy()  # Create a copy of the frame for drawing purposes
 
         frame, centers = detect_circles_and_get_centers(frame_copy)
+
+        aruco_centers, ids = detect_aruco_centers(frame_copy)
+        if aruco_centers and ids is not None:
+            angle = ids_to_angle(ids, tip_pos, aruco_centers)
+            if angle is not None:
+                print(f"Orientation angle: {angle}°")  # Debug print statement
+                cv2.putText(frame, f"Orientation: {angle}", (10, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            else:
+                print("Failed to calculate orientation angle")  # Debug print statement
 
         if len(angle_list) > 0:
             start_point = tip_pos

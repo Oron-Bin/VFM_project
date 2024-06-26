@@ -604,12 +604,12 @@ if True:
     #
 
 
-    grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
+    # grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
     # grip.serial.baudrate(115200)
     # grip.resetActivate()
 # # #     # grip.calibrate(0,85)
 # #     print("fsdsfsf")
-#     grip.reset()
+    grip.reset()
 
 #     # grip.resetActivate()
 #     # # grip.printInfo()
