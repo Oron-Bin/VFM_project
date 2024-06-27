@@ -170,6 +170,9 @@ def main():
 
     # Function to update video frame
     def update_frame():
+        stop_applied = False
+        calibrate_applied = False
+
         ret, frame = cap.read()
         if not ret:
             print("Failed to grab frame")
@@ -191,7 +194,7 @@ def main():
                 # Calculate and display orientation angle
                 angle = algo.ids_to_angle(frame ,ids, center, aruco_centers)
                 if angle is not None:
-
+                    orientation_error = abs(des_oreientation-angle)
                     end_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(angle))),
                                        round(center[1] - 50 * math.sin(np.deg2rad(angle))))
                     end_des_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(des_oreientation))),
@@ -200,12 +203,19 @@ def main():
                     cv2.putText(frame, f"Orientation: {angle}", (10, 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-                    cv2.putText(frame, f"Orientation_error: {abs(angle-des_oreientation)}", (10, 60),
+                    cv2.putText(frame, f"Orientation_error: {orientation_error}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
 
                     cv2.arrowedLine(frame,  center, end_orientation, (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
+
+                    # Check if orientation error is less than 5 degrees
+                    if orientation_error < 5 and not stop_applied:
+                        print("Orientation error is less than 5 degrees")
+                        stop_btn_var.set(1)  # Apply the stop button action
+                        # calibrate_btn_var.set(1) # Apply the calibration button action
+                        stop_applied = True  # Set the flag to prevent repeated action
 
                 else:
                     print("Failed to calculate orientation angle")
@@ -216,7 +226,6 @@ def main():
             start_point = tip_pos
             end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
                          round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
-
 
 
             rotated_end_point = algo.rotate_point(start_point, end_point, 90)
