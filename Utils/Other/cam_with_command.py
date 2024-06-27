@@ -184,6 +184,8 @@ def main():
                         stop_btn_var.set(1)
                         calibrate_btn_var.set(1)
                         algo.stop_trigger = True
+
+
                 else:
                     print("Failed to calculate orientation angle")
 
