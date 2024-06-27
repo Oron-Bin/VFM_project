@@ -39,6 +39,7 @@ class card_algorithms:
         self.data  = pd.DataFrame(columns = ['path','orientation', 'desired_x','desired_y','iteration','time','error']) ## ,dtype='object'
         self.markers = None
         self.rec_path = None
+        self.stop_trigger = False # this is for the stop trigger
 
 
     def update(self,center):

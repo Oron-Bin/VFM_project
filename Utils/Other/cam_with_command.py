@@ -10,9 +10,11 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
+# stop_triggered = False
+
 # List to store the motor angle values
 motor_angle_list = [0]
-
+# calibrate_after_stop = False
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     """
@@ -30,7 +32,7 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
     last_encoder_value = 0  # Track the last encoder value
 
     while True:
-        if calibrate_btn_var.get() == 1:
+        if calibrate_btn_var.get() == 1 :
             # Calibrate hardware
             print("Calibrating...")
             card.calibrate()
@@ -39,6 +41,7 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             motor_angle_list.clear()  # Clear angle list
             motor_angle_list.append(0)  # Start angle list with zero after calibration
             print("Calibration done.")
+
 
         if start_btn_var.get() == 1:
             # Start hardware
@@ -167,12 +170,12 @@ def main():
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     video_path = f"/home/roblab20/Desktop/experiments/output_{timestamp}.avi"
     out = cv2.VideoWriter(video_path, fourcc, 20.0, (640, 480))
-
+    # stop_applied = False
     # Function to update video frame
-    def update_frame():
-        stop_applied = False
-        calibrate_applied = False
 
+
+    def update_frame():
+        # stop_triggered = False
         ret, frame = cap.read()
         if not ret:
             print("Failed to grab frame")
@@ -211,11 +214,11 @@ def main():
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
 
                     # Check if orientation error is less than 5 degrees
-                    if orientation_error < 5 and not stop_applied:
+                    if orientation_error < 5 and not algo.stop_trigger:
                         print("Orientation error is less than 5 degrees")
+                        # card.stop_hardware()
                         stop_btn_var.set(1)  # Apply the stop button action
-                        # calibrate_btn_var.set(1) # Apply the calibration button action
-                        stop_applied = True  # Set the flag to prevent repeated action
+                        algo.stop_trigger = True
 
                 else:
                     print("Failed to calculate orientation angle")
@@ -226,7 +229,6 @@ def main():
             start_point = tip_pos
             end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
                          round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
-
 
             rotated_end_point = algo.rotate_point(start_point, end_point, 90)
 
