@@ -10,15 +10,28 @@ import math
 import tkinter as tk
 from tkinter import ttk
 
-
+# List to store the motor angle values
 motor_angle_list = [0]
 
+
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
+    """
+    Thread function to listen for commands and control hardware accordingly.
+
+    Parameters:
+    - card: Hardware control object
+    - vibration_var: Tkinter IntVar for vibration control
+    - encoder_var: Tkinter IntVar for encoder angle
+    - calibrate_btn_var: Tkinter IntVar for calibration button
+    - start_btn_var: Tkinter IntVar for start button
+    - stop_btn_var: Tkinter IntVar for stop button
+    """
     hardware_started = False
     last_encoder_value = 0  # Track the last encoder value
 
     while True:
         if calibrate_btn_var.get() == 1:
+            # Calibrate hardware
             print("Calibrating...")
             card.calibrate()
             calibrate_btn_var.set(0)
@@ -28,6 +41,7 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             print("Calibration done.")
 
         if start_btn_var.get() == 1:
+            # Start hardware
             print("Starting hardware...")
             card.start_hardware()
             hardware_started = True
@@ -35,6 +49,7 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             print("Hardware started.")
 
         if stop_btn_var.get() == 1:
+            # Stop hardware
             print("Stopping hardware...")
             card.stop_hardware()
             hardware_started = False
@@ -57,34 +72,47 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
 
         time.sleep(0.1)
 
+
 def main():
+    """
+    Main function to initialize the GUI and start the hardware control and video processing.
+    """
+    # Initialize the hardware control object
     card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
     algo = card_algorithms(x_d=0, y_d=0)  # Define the card algorithm object
+    tip_pos = (323, 150)
+    des_oreientation = random.randint(0,359)
 
+    # Initialize the Tkinter root window
     root = tk.Tk()
     root.title("Hardware Control")
 
+    # Tkinter variables for GUI controls
     vibration_var = tk.IntVar()
     encoder_var = tk.IntVar()
     calibrate_btn_var = tk.IntVar()
     start_btn_var = tk.IntVar()
     stop_btn_var = tk.IntVar()
 
+    # Functions to update labels based on slider values
     def update_vibration_label(*args):
         vibration_label_var.set(f"Vibration: {vibration_var.get()}%")
 
     def update_encoder_label(*args):
         encoder_label_var.set(f"Encoder: {encoder_var.get()}°")
 
+    # Trace changes to the variables to update labels
     vibration_var.trace_add("write", update_vibration_label)
     encoder_var.trace_add("write", update_encoder_label)
 
     vibration_label_var = tk.StringVar()
     encoder_label_var = tk.StringVar()
 
+    # Initialize label text
     update_vibration_label()
     update_encoder_label()
 
+    # Create and place GUI elements
     ttk.Label(root, text="Vibration (%)").grid(column=0, row=0, padx=10, pady=10)
     vibration_slider = ttk.Scale(root, from_=0, to=100, orient='horizontal', variable=vibration_var)
     vibration_slider.grid(column=1, row=0, padx=10, pady=10)
@@ -104,6 +132,7 @@ def main():
     stop_btn = ttk.Button(root, text="Stop", command=lambda: stop_btn_var.set(1))
     stop_btn.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
 
+    # Functions to adjust slider values with arrow keys
     def adjust_vibration(event):
         if event.keysym == "Up":
             vibration_var.set(min(vibration_var.get() + 1, 100))
@@ -116,16 +145,19 @@ def main():
         elif event.keysym == "Left":
             encoder_var.set(max(encoder_var.get() - 1, 0))
 
+    # Bind arrow keys to adjust functions
     root.bind("<Up>", adjust_vibration)
     root.bind("<Down>", adjust_vibration)
     root.bind("<Right>", adjust_encoder)
     root.bind("<Left>", adjust_encoder)
 
+    # Start the command listener thread
     command_thread = threading.Thread(target=command_listener, args=(
         card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var))
     command_thread.daemon = True
     command_thread.start()
 
+    # Initialize video capture
     cap = cv2.VideoCapture(0)
 
     # Define the codec and create a VideoWriter object
@@ -136,8 +168,7 @@ def main():
     video_path = f"/home/roblab20/Desktop/experiments/output_{timestamp}.avi"
     out = cv2.VideoWriter(video_path, fourcc, 20.0, (640, 480))
 
-    # circle_centers = []
-
+    # Function to update video frame
     def update_frame():
         ret, frame = cap.read()
         if not ret:
@@ -146,47 +177,74 @@ def main():
 
         frame_copy = frame.copy()  # Create a copy of the frame for drawing purposes
 
+        # Detect circles and get centers
         frame, centers = algo.detect_circles_and_get_centers(frame_copy)
 
+        # Detect ArUco markers and get their centers and ids
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
+        algo.arrow_coordinate_sys_motor(frame, tip_pos)
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
                 # Display circle centers on the screen
                 cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                angle = algo.ids_to_angle(ids, center, aruco_centers)
+                # Calculate and display orientation angle
+                angle = algo.ids_to_angle(frame ,ids, center, aruco_centers)
                 if angle is not None:
-                    # print(f"Orientation angle: {angle}°")  # Debug print statement
+
+                    end_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(angle))),
+                                       round(center[1] - 50 * math.sin(np.deg2rad(angle))))
+                    end_des_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(des_oreientation))),
+                                       round(center[1] - 50 * math.sin(np.deg2rad(des_oreientation))))
+
                     cv2.putText(frame, f"Orientation: {angle}", (10, 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                else:
-                    print("Failed to calculate orientation angle")  # Debug print statement
 
+                    cv2.putText(frame, f"Orientation_error: {abs(angle-des_oreientation)}", (10, 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
+
+                    cv2.arrowedLine(frame,  center, end_orientation, (255, 255, 0), 2)
+                    cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
+
+                else:
+                    print("Failed to calculate orientation angle")
+
+        # Draw the motor angle on the frame
         if len(motor_angle_list) > 0:
-            tip_pos = (323, 150)
+            # tip_pos = (323, 150)
             start_point = tip_pos
             end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
                          round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
+
+
+
             rotated_end_point = algo.rotate_point(start_point, end_point, 90)
 
             # Draw the rotated arrow
             cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
 
-        out.write(frame)  # Write the frame to the video file
+        # Write the frame to the video file
+        out.write(frame)
+        # Display the frame
         cv2.imshow("Camera", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             root.quit()
             return
 
-        root.after(10, update_frame)  # Schedule the next update
+        # Schedule the next update
+        root.after(10, update_frame)
 
+    # Start updating frames
     root.after(10, update_frame)
     root.protocol("WM_DELETE_WINDOW", root.quit)
     root.mainloop()
 
+    # Release resources
     cap.release()
     out.release()  # Release the VideoWriter object
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

@@ -331,24 +331,27 @@ class card_algorithms:
         angle = round(np.degrees(np.arctan2(dy, dx)))
 
         return angle
-    def ids_to_angle(self, ids, circle_center, aruco_centers):
+    def ids_to_angle(self, img, ids, circle_center, aruco_centers):
         last_aruco_center = aruco_centers[-1]
+        # print(last_aruco_center)
         angle = self.calculate_angle(circle_center, last_aruco_center)
         if ids is not None:
             if ids[-1] == 43:
-                # angle = calculate_angle(circle_center, last_aruco_center)
+
                 angle = angle
+
             elif ids[-1] == 44:
                 angle += 180
-                # angle = calculate_angle(circle_center, last_aruco_center) + 180
+
             elif ids[-1] == 45:
                 angle += 90
-                # angle = calculate_angle(circle_center, last_aruco_center) +90
+
             elif ids[-1] == 46:
                 angle -= 90
-                # angle = calculate_angle(circle_center, last_aruco_center) -90
+
             if angle < 0:
                 angle += 360
+
             # print('The orientation is:', angle)
             return angle
 
@@ -359,6 +362,17 @@ class card_algorithms:
         plt.ylim([0, 360])
         plt.title('Angle vs. Frame')
         plt.show()
+
+    def arrow_coordinate_sys_motor(self, img, tip):
+        scale = 20
+        # Define the endpoints of the X-axis and Y-axis relative to the origin
+        x_axis_end = (tip[0] + int(scale), tip[1])
+        y_axis_end = (tip[0], tip[1] + int(scale))
+
+        # Draw coordinate system
+        cv2.arrowedLine(img, tip, x_axis_end, (0, 0, 0), 2)  # X-axis (black)
+        cv2.arrowedLine(img, tip, y_axis_end, (0, 0, 0), 2)  # Y- axis (black)
+
 
     def detect_circles_and_get_centers(self,frame):
         tip_pos = (323, 150)
