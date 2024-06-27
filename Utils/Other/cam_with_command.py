@@ -155,7 +155,7 @@ def main():
 
         frame_copy = frame.copy()
 
-        frame, centers = algo.detect_circles_and_get_centers(frame_copy)
+        frame, centers = algo.detect_circles_and_get_centers(frame_copy) # if not circle build anothe function for rectangles
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
         algo.arrow_coordinate_sys_motor(frame, tip_pos)
 
