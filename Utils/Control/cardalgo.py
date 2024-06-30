@@ -40,6 +40,9 @@ class card_algorithms:
         self.markers = None
         self.rec_path = None
         self.stop_trigger = False # this is for the stop trigger
+        # self.flag = 0  # this is for the stop trigger
+        self.orientation_achieved = False
+
 
 
     def update(self,center):
@@ -92,7 +95,7 @@ class card_algorithms:
     def plot_desired_position(self,img):
 
         """ plot a circle point in the desired position"""
-        cv2.circle(img, (round(self.x_d), round(self.y_d)), radius=5, color=(255, 0, 0), thickness=3)
+        cv2.circle(img, (round(self.x_d), round(self.y_d)), radius=5, color=(0, 255, 0), thickness=2)
 
     def filter(self,prev,new,weight=0.5):
 

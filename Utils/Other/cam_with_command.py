@@ -61,7 +61,9 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             motor_angle_list.append(encoder_difference + motor_angle_list[-1])
             last_encoder_value = current_encoder_value  # Update the last encoder value
 
+
         time.sleep(0.1)
+
 
 def main():
     """
@@ -76,6 +78,7 @@ def main():
 
     tip_pos = (323, 150)
     des_orientation = random.randint(0, 359)
+    (algo.x_d, algo.y_d) = (300, 100)
 
     root = tk.Tk()
     root.title("Hardware Control")
@@ -85,6 +88,9 @@ def main():
     calibrate_btn_var = tk.IntVar()
     start_btn_var = tk.IntVar()
     stop_btn_var = tk.IntVar()
+
+
+    # algo.orientation_achieved = False
 
     def update_vibration_label(*args):
         vibration_label_var.set(f"Vibration: {vibration_var.get()}%")
@@ -158,6 +164,8 @@ def main():
         frame, centers = algo.detect_circles_and_get_centers(frame_copy) # if not circle build anothe function for rectangles
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
         algo.arrow_coordinate_sys_motor(frame, tip_pos)
+        algo.plot_desired_position(frame)
+
 
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
@@ -179,12 +187,26 @@ def main():
                     cv2.arrowedLine(frame, center, end_orientation, (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
 
-                    if orientation_error < 5 and not algo.stop_trigger:
-                        print("Orientation error is less than 5 degrees")
-                        stop_btn_var.set(1)
-                        calibrate_btn_var.set(1)
-                        algo.stop_trigger = True
+                    distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
+                    if not algo.orientation_achieved:
+                        if orientation_error < 5:
+                            algo.flag = 1
+                            print("Orientation error is less than 5 degrees")
+                            stop_btn_var.set(1)
+                            calibrate_btn_var.set(1)
+                            algo.stop_trigger = True
+                            algo.orientation_achieved = True
 
+                        else:
+                            print('orientation error is big')
+
+                    if algo.orientation_achieved:
+
+                        if distance < 5:
+                            stop_btn_var.set(1)
+                            print('arrival')
+                        else:
+                            print(2)
 
                 else:
                     print("Failed to calculate orientation angle")
