@@ -13,7 +13,7 @@ from Utils.Control.cardalgo import *
 from Utils.Hardware.package import *
 
 # Global constants
-VIDEO_DIR = "/home/roblab20/Desktop/experiments"
+VIDEO_DIR = "/home/roblab20/Desktop/gui_exp"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
