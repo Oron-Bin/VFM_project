@@ -108,7 +108,7 @@ def main():
     update_encoder_label()
 
     ttk.Label(root, text="Vibration (%)").grid(column=0, row=0, padx=10, pady=10)
-    vibration_slider = ttk.Scale(root, from_=0, to=100, orient='horizontal', variable=vibration_var)
+    vibration_slider = ttk.Scale(root, from_=100, to=0, orient='vertical', variable=vibration_var)
     vibration_slider.grid(column=1, row=0, padx=10, pady=10)
     ttk.Label(root, textvariable=vibration_label_var).grid(column=2, row=0, padx=10, pady=10)
 
