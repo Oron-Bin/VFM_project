@@ -113,12 +113,8 @@ class card_algorithms:
             dx = self.filter(self.last_dx, self.x_d - self.center[0])
             dy = self.filter(self.last_dy, self.y_d - self.center[1])
 
-        # print(self.last_dx,self.x_d,self.center[0])
-        # print('dx',dx)
-        # print('dy',dy)
         new_angle = round(np.degrees(np.arctan2(dx,dy)))
-        # print(new_angle)
-        # print("New :{} Last is:{}".format(new_angle, self.last_angle))
+
         self.last_dx = dx
         self.last_dy = dy
 
@@ -323,12 +319,7 @@ class card_algorithms:
         # print(ids,aruco_centers)
         return aruco_centers, ids
 
-    # def calculate_angle(self,circle_center, aruco_center):
-    #     dx = circle_center[0] - aruco_center[0]
-    #     dy = circle_center[1] - aruco_center[1]
-    #     angle = np.degrees(np.arctan2(dy, dx))
-    #
-    #     return angle
+
     def calculate_angle(self,point1,point2):
         dx = point1[0] - point2[0]
         dy = point1[1] - point2[1]
@@ -379,7 +370,7 @@ class card_algorithms:
 
 
     def detect_circles_and_get_centers(self,frame):
-        tip_pos = (323, 150)
+        tip_pos = (345, 150)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 21)
         circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)

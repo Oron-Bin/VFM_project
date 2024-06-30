@@ -76,9 +76,9 @@ def main():
         print(f"Error initializing hardware: {e}")
         return
 
-    tip_pos = (323, 150)
+    tip_pos = (345, 150)
     des_orientation = random.randint(0, 359)
-    (algo.x_d, algo.y_d) = (300, 100)
+    (algo.x_d, algo.y_d) = (350, 120)
 
     root = tk.Tk()
     root.title("Hardware Control")
