@@ -203,10 +203,11 @@ def main():
                     if algo.orientation_achieved:
 
                         if distance < 5:
+                            print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
-                            print('arrival')
+
                         else:
-                            print(2)
+                            print('the distance is big')
 
                 else:
                     print("Failed to calculate orientation angle")
