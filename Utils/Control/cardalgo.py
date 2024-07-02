@@ -359,7 +359,7 @@ class card_algorithms:
         plt.show()
 
     def arrow_coordinate_sys_motor(self, img, tip):
-        scale = 21
+        scale = 20
         # Define the endpoints of the X-axis and Y-axis relative to the origin
         x_axis_end = (tip[0] + int(scale), tip[1])
         y_axis_end = (tip[0], tip[1] + int(scale))
