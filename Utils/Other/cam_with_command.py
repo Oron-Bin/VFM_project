@@ -187,7 +187,8 @@ def main():
 
                     cv2.arrowedLine(frame, center, end_orientation, (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
-
+                    rad_angle =  round(np.degrees(np.arctan2(tip_pos[0]-center[0],tip_pos[1]-center[1]))) - 180
+                    print(rad_angle)
                     algo.plot_path(frame)
                     distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
                     if not algo.orientation_achieved:
