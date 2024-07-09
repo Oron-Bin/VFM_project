@@ -207,6 +207,7 @@ def main():
                         if distance < 5:
                             print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
+                            algo.clear()
 
                         else:
                             print('the distance is big')
