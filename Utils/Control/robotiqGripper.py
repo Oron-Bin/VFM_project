@@ -609,7 +609,7 @@ if True:
     # grip.resetActivate()
 # # #     # grip.calibrate(0,85)
 # #     print("fsdsfsf")
-    grip.reset()
+#     grip.reset()
 
 #     # grip.resetActivate()
 #     # # grip.printInfo()

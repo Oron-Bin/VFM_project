@@ -134,9 +134,9 @@ def main():
 
     def adjust_encoder(event):
         if event.keysym == "Right":
-            encoder_var.set(min(encoder_var.get() + 1, 360))
+            encoder_var.set(min(encoder_var.get() + 1, 180))
         elif event.keysym == "Left":
-            encoder_var.set(max(encoder_var.get() - 1, 0))
+            encoder_var.set(max(encoder_var.get() - 1, -180))
 
     root.bind("<Up>", adjust_vibration)
     root.bind("<Down>", adjust_vibration)
@@ -162,10 +162,11 @@ def main():
         frame_copy = frame.copy()
 
         frame, centers = algo.detect_circles_and_get_centers(frame_copy) # if not circle build anothe function for rectangles
+        algo.path.extend(centers)
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
         algo.arrow_coordinate_sys_motor(frame, tip_pos)
         algo.plot_desired_position(frame)
-
+        algo.plot_path(frame)
 
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
@@ -187,6 +188,7 @@ def main():
                     cv2.arrowedLine(frame, center, end_orientation, (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
 
+                    algo.plot_path(frame)
                     distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
                     if not algo.orientation_achieved:
                         if orientation_error < 5:

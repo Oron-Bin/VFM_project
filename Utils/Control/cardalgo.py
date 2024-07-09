@@ -232,7 +232,7 @@ class card_algorithms:
         color = (255,0,0)
         cv2.rectangle(img, start, end,color,1)
 
-    def plot_path(self,img,thickness = 3, indices = 1):
+    def plot_path(self,img,thickness = 1, indices = 1):
 
         """ Plot the card total path every iteration"""
         # loop over the set of tracked points
