@@ -19,23 +19,28 @@ teta = 40
 def forces(t):
     f_c = (m*l*(w**2))/1000.0*np.cos(np.deg2rad(w*t))*lamda
     F_N = M*g*np.cos(np.deg2rad(beta)) -((m*l*(w**2))*np.sin(np.deg2rad(w*t))*lamda_2/1000.0)
-    F_k = miu_k*F_N + fb*t
+    F_k = miu_k*F_N + fb*10*t
     F_g = M * g * np.sin(np.deg2rad(beta))
     F_s = miu_s * (M * g + (m*l*(w**2))*lamda_2/1000.0)
     return f_c, F_k, F_s
 
-t_values = np.linspace(0, 50, 500)
-f_c_values, F_k_values, F_s_values = [], [], []
+t_values = np.linspace(0, 10, 500)
+f_c_values, F_k_values, F_s_values , F_tot =[], [], [], []
 
 for t in t_values:
     f_c, F_k, F_s = forces(t)
     f_c_values.append(f_c)
     F_k_values.append(F_k)
     F_s_values.append(F_s)
+    if f_c >= F_k :
+        F_tot.append(f_c - F_k)
+    else:
+        F_tot.append(F_s)
 
-plt.plot(t_values, f_c_values, label='$f_c$')
-plt.plot(t_values, F_k_values, label='$F_N$')
-plt.plot(t_values, F_s_values, label='$F_s$')
+
+plt.plot(t_values, F_tot, label='$f_c$')
+# plt.plot(t_values, F_k_values, label='$F_N$')
+# plt.plot(t_values, F_s_values, label='$F_s$')
 plt.xlabel('Time')
 plt.ylabel('Force')
 plt.title('Forces vs Time')
