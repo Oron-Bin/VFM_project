@@ -194,6 +194,7 @@ def main():
                     if not algo.orientation_achieved:
                         if orientation_error < 5:
                             algo.flag = 1
+
                             print("Orientation error is less than 5 degrees")
                             stop_btn_var.set(1)
                             calibrate_btn_var.set(1)
@@ -201,6 +202,8 @@ def main():
                             algo.orientation_achieved = True
                             algo.clear()
                         else:
+                            vibration_var.set(60)  # Set vibration to 60%
+                            card.vibrate_hardware(60)
                             print('orientation error is big')
 
                     if algo.orientation_achieved:
