@@ -198,7 +198,7 @@ def main():
                             calibrate_btn_var.set(1)
                             algo.stop_trigger = True
                             algo.orientation_achieved = True
-
+                            algo.clear()
                         else:
                             print('orientation error is big')
 
