@@ -81,7 +81,8 @@ def main():
     # tip_pos = (345, 120)
     tip_pos = (345, 150)
     des_orientation = random.randint(0, 359)
-    (algo.x_d, algo.y_d) = (370, 120)
+    # (algo.x_d, algo.y_d) = (370, 120)
+    (algo.x_d, algo.y_d) = (350, 150)
     # print('now the angle to the goal from the tip is', round(np.rad2deg(np.arctan2(algo.y_d-120,algo.x_d - 345))))
     root = tk.Tk()
     root.title("Hardware Control")
@@ -157,6 +158,7 @@ def main():
     out = cv2.VideoWriter(video_path, VIDEO_FOURCC, 20.0, (640, 480))
 
     angle_to_goal_list = [0]
+    smooth_list = [0]
     delta_angle_list = []
     def update_frame():
         ret, frame = cap.read()
@@ -176,6 +178,7 @@ def main():
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
 
+                print(center)
                 cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 angle = algo.ids_to_angle(frame, ids, center, aruco_centers)
@@ -227,32 +230,23 @@ def main():
                             algo.clear()
 
                         else:
-                            vibration_var.set(90)  # Set vibration to 60%
-                            card.vibrate_hardware(90)
+                            vibration_var.set(100)  # Set vibration to 60%
+                            card.vibrate_hardware(100)
                             # start_btn_var.set(1)
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
                             rotate_center = algo.rotate_point(tip_pos, center, 180)
                             rad_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
-                            # rad_angle = algo.law_2(center)
-                            print(rad_angle)
-                            # if rad_angle > 180 :
-                            #     rad_angle -= 360
-                            # elif rad_angle < - 180:
-                            #     rad_angle +=360
-                            #
                             angle_to_goal_list.append(rad_angle)
-                            # # print('angle_to_goal', rad_angle)
-                            delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
-                            print(delta_angle)
-                            # # print('delta angle is',delta_angle)
-                            # # start_btn_var.set(1)
-                            encoder_var.set(delta_angle)
-                            card.set_encoder_angle(delta_angle)
-                            # vibration_var.set(90)  # Set vibration to 60%
-                            # card.vibrate_hardware(90)
+                            smooth_angle = round(0.05 * angle_to_goal_list[-1] + 0.95 * angle_to_goal_list[-2])
+                            smooth_list.append(smooth_angle)
+                            smooth_delta = smooth_list[-1] - smooth_list[-2]
+                            # delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
 
-                            print('The distance is big, angle to goal:', rad_angle)
-                            # print('The distance is big, angle to goal:')
+                            encoder_var.set(smooth_delta)
+                            card.set_encoder_angle(smooth_delta)
+
+                            # print('The distance is big, angle to goal:', rad_angle)
+
 
                 else:
                     print("Failed to calculate orientation angle")
