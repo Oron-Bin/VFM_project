@@ -476,7 +476,7 @@ class card_algorithms:
 
         y = q2[1] - q1[1]
         x = q2[0] - q1[0]
-        return math.atan2(y, x)
+        return math.atan2(x, y)
     def check_distance(self,epsilon):
         """ Check the Distance between the Center of card to destination point
         epslion is the resolution mistake allowed"""

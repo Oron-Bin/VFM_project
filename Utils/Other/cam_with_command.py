@@ -19,6 +19,8 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 # Global variables
 motor_angle_list = [0]
 
+
+
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     """
     Thread function to listen for commands and control hardware accordingly.
@@ -76,10 +78,11 @@ def main():
         print(f"Error initializing hardware: {e}")
         return
 
+    # tip_pos = (345, 120)
     tip_pos = (345, 150)
     des_orientation = random.randint(0, 359)
-    (algo.x_d, algo.y_d) = (350, 120)
-
+    (algo.x_d, algo.y_d) = (370, 120)
+    # print('now the angle to the goal from the tip is', round(np.rad2deg(np.arctan2(algo.y_d-120,algo.x_d - 345))))
     root = tk.Tk()
     root.title("Hardware Control")
 
@@ -153,6 +156,8 @@ def main():
     video_path = os.path.join(VIDEO_DIR, f"output_{timestamp}.avi")
     out = cv2.VideoWriter(video_path, VIDEO_FOURCC, 20.0, (640, 480))
 
+    angle_to_goal_list = [0]
+    delta_angle_list = []
     def update_frame():
         ret, frame = cap.read()
         if not ret:
@@ -170,10 +175,12 @@ def main():
 
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
+
                 cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 angle = algo.ids_to_angle(frame, ids, center, aruco_centers)
                 if angle is not None:
+
                     orientation_error = abs(des_orientation - angle)
                     end_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(angle))),
                                        round(center[1] - 50 * math.sin(np.deg2rad(angle))))
@@ -187,10 +194,11 @@ def main():
 
                     cv2.arrowedLine(frame, center, end_orientation, (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
-                    rad_angle =  round(np.degrees(np.arctan2(tip_pos[0]-center[0],tip_pos[1]-center[1]))) - 180
-                    print(rad_angle)
+
+                    # print(rad_angle)
                     algo.plot_path(frame)
                     distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
+
                     if not algo.orientation_achieved:
                         if orientation_error < 5:
                             algo.flag = 1
@@ -198,23 +206,53 @@ def main():
                             print("Orientation error is less than 5 degrees")
                             stop_btn_var.set(1)
                             calibrate_btn_var.set(1)
+                            cv2.waitKey(2000)
                             algo.stop_trigger = True
                             algo.orientation_achieved = True
                             algo.clear()
                         else:
-                            vibration_var.set(60)  # Set vibration to 60%
-                            card.vibrate_hardware(60)
+                            # vibration_var.set(70)  # Set vibration to 60%
+                            # card.vibrate_hardware(70)
+
+                            # encoder_var.set()
+                            # card.set_encoder_angle(50)
                             print('orientation error is big')
 
                     if algo.orientation_achieved:
-
+                        start_btn_var.set(1)
                         if distance < 5:
+                            # angle_to_goal_list = []
                             print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
                             algo.clear()
 
                         else:
-                            print('the distance is big')
+                            vibration_var.set(90)  # Set vibration to 60%
+                            card.vibrate_hardware(90)
+                            # start_btn_var.set(1)
+                            rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
+                            rotate_center = algo.rotate_point(tip_pos, center, 180)
+                            rad_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
+                            # rad_angle = algo.law_2(center)
+                            print(rad_angle)
+                            # if rad_angle > 180 :
+                            #     rad_angle -= 360
+                            # elif rad_angle < - 180:
+                            #     rad_angle +=360
+                            #
+                            angle_to_goal_list.append(rad_angle)
+                            # # print('angle_to_goal', rad_angle)
+                            delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
+                            print(delta_angle)
+                            # # print('delta angle is',delta_angle)
+                            # # start_btn_var.set(1)
+                            encoder_var.set(delta_angle)
+                            card.set_encoder_angle(delta_angle)
+                            # vibration_var.set(90)  # Set vibration to 60%
+                            # card.vibrate_hardware(90)
+
+                            print('The distance is big, angle to goal:', rad_angle)
+                            # print('The distance is big, angle to goal:')
 
                 else:
                     print("Failed to calculate orientation angle")
@@ -223,6 +261,7 @@ def main():
             start_point = tip_pos
             end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
                          round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
+            # print(motor_angle_list)
             rotated_end_point = algo.rotate_point(start_point, end_point, 90)
             cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
 

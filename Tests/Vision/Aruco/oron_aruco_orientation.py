@@ -86,7 +86,7 @@ while cam.isOpened():
 
     aruco_centers, ids = algo.detect_aruco_centers(img)
     if ids is not None and len(ids) > 0 and state == 'after_calibrate':
-        orientation_angle = algo.ids_to_angle(ids, circle_center, aruco_centers)
+        orientation_angle = algo.ids_to_angle(img,ids, circle_center, aruco_centers)
         orientation_error = abs(algo.shortest_way(orientation_angle, algo.orientation))
         cv2.putText(img, f"error: {round(orientation_error, 1)}", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)

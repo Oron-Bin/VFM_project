@@ -609,19 +609,17 @@ if True:
     # grip.resetActivate()
 # # #     # grip.calibrate(0,85)
 # #     print("fsdsfsf")
-#     grip.reset()
+    grip.reset()
 
 #     # grip.resetActivate()
 #     # # grip.printInfo()
 #     # grip.activate()
 #     # grip.printInfo()
 # #
-    grip.goTo(15)
+#     grip.goTo(15)
     # print("")
 
     # grip.goTo(0)
-
-
 
 
 # grab, pose = grip.goTo(0,255,1)
