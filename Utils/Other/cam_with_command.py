@@ -233,7 +233,7 @@ def main():
                             print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
                             algo.clear()
-
+                            break
                         else:
                             # vibration_var.set(100)  # Set vibration to 60%
                             # card.vibrate_hardware(100)
@@ -252,12 +252,16 @@ def main():
                             delta_angle_list.append(delta_angle)
                             print(delta_angle_list[-1])
 
-                            if len(delta_angle_list) == 1:
+                            if len(delta_angle_list) <= 1:
                                 encoder_var.set(delta_angle_list[-1])
                                 card.set_encoder_angle(delta_angle_list[-1])
+                                vibration_var.set(100)  # Set vibration to 60%
+                                card.vibrate_hardware(100)
                             else:
                                 encoder_var.set(delta_angle_list[-1])
                                 card.set_encoder_angle(delta_angle_list[-1])
+                                vibration_var.set(100)  # Set vibration to 60%
+                                card.vibrate_hardware(100)
 
                             # print('The distance is big, angle to goal:', rad_angle)
 
