@@ -186,17 +186,22 @@ def main():
 
                     orientation_error = abs(des_orientation - angle)
                     end_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(angle))),
-                                       round(center[1] - 50 * math.sin(np.deg2rad(angle))))
+                                       round(center[1] + 50 * math.sin(np.deg2rad(angle))))
+                    # print('end =',end_orientation)
+                    # print(center)
+                    end = algo.rotate_point(center,end_orientation,180)
+                    # print('end =',end)
                     end_des_orientation = (round(center[0] + 50 * math.cos(np.deg2rad(des_orientation))),
-                                           round(center[1] - 50 * math.sin(np.deg2rad(des_orientation))))
+                                           round(center[1] + 50 * math.sin(np.deg2rad(des_orientation))))
+                    end_des = algo.rotate_point(center,end_des_orientation,180)
 
                     cv2.putText(frame, f"Orientation: {angle}", (10, 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                     cv2.putText(frame, f"Orientation_error: {orientation_error}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-                    cv2.arrowedLine(frame, center, end_orientation, (255, 255, 0), 2)
-                    cv2.arrowedLine(frame, center, end_des_orientation, (255, 0, 0), 2)
+                    cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
+                    cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
 
                     # print(rad_angle)
                     algo.plot_path(frame)
@@ -230,20 +235,29 @@ def main():
                             algo.clear()
 
                         else:
-                            vibration_var.set(100)  # Set vibration to 60%
-                            card.vibrate_hardware(100)
+                            # vibration_var.set(100)  # Set vibration to 60%
+                            # card.vibrate_hardware(100)
                             # start_btn_var.set(1)
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
                             rotate_center = algo.rotate_point(tip_pos, center, 180)
                             rad_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                             angle_to_goal_list.append(rad_angle)
-                            smooth_angle = round(0.05 * angle_to_goal_list[-1] + 0.95 * angle_to_goal_list[-2])
+                            print('want', rad_angle)
+                            smooth_angle = round(0.1 * angle_to_goal_list[-1] + 0.9 * angle_to_goal_list[-2])
+                            # print(smooth_angle)
                             smooth_list.append(smooth_angle)
                             smooth_delta = smooth_list[-1] - smooth_list[-2]
-                            # delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
+                            delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
 
-                            encoder_var.set(smooth_delta)
-                            card.set_encoder_angle(smooth_delta)
+                            delta_angle_list.append(delta_angle)
+                            print(delta_angle_list[-1])
+
+                            if len(delta_angle_list) == 1:
+                                encoder_var.set(delta_angle_list[-1])
+                                card.set_encoder_angle(delta_angle_list[-1])
+                            else:
+                                encoder_var.set(delta_angle_list[-1])
+                                card.set_encoder_angle(delta_angle_list[-1])
 
                             # print('The distance is big, angle to goal:', rad_angle)
 
