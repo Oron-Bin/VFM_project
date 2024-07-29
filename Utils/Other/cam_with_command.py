@@ -265,15 +265,21 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
+
                                 start_btn_var.set(1)
+                                # vibration_var.set(0)
+                                # cv2.waitKey(2000)
                                 encoder_var.set(smooth_delta)
                                 card.set_encoder_angle(smooth_delta)
-                                # vibration_var.set(100)  # Set vibration to 60%
+
+
+                                 # Set vibration to 60%
                                 # card.vibrate_hardware(100)
                             else:
+                                vibration_var.set(60)
                                 encoder_var.set(smooth_delta)
                                 card.set_encoder_angle(smooth_delta)
-                                # vibration_var.set(100)  # Set vibration to 60%
+                                # vibration_var.set(50)  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
 
                     percent = vibration_var.get()  # Example: get the current vibration percentage
