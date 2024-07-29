@@ -156,10 +156,10 @@ def main():
     smooth_list = [0]
     delta_angle_list = []
 
-    CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui/data_2.csv"
-
+    CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui"
+    csv_file_path = os.path.join(CSV_FILE_PATH,f"data_{timestamp}.csv")
     # Create CSV file and write headers
-    with open(CSV_FILE_PATH, mode='w', newline='') as file:
+    with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Center', 'Orientation Angle', 'Percent', 'Rad Angle'])
     def update_frame():
@@ -275,7 +275,7 @@ def main():
                     control_angle = encoder_var.get() # Example: get the current
                     radius = round(np.sqrt((center[0] - algo.path[0][0]) ** 2 + (center[1] - algo.path[0][1]) ** 2))
 
-                    with open(CSV_FILE_PATH, mode='a', newline='') as file:
+                    with open(csv_file_path, mode='a', newline='') as file:
                         writer = csv.writer(file)
                         writer.writerow([radius, angle, percent, control_angle])
                 else:
