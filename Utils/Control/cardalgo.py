@@ -58,7 +58,7 @@ class card_algorithms:
 
     def clear(self):
         self.path.clear() ## Clear path list
-        self.time_list.clear() ## Clear time list
+        # self.time_list.clear() ## Clear time list
         self.orientation_list.clear() ## Clear Orientation list
 
     def card_initialize(self, card_center): ## Use to intialize position for the first iteration

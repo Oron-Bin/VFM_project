@@ -16,7 +16,7 @@ from Utils.Hardware.package import *
 # Global constants
 VIDEO_DIR = "/home/roblab20/Desktop/gui_exp"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
-
+# VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'X264')
 # Global variables
 motor_angle_list = [0]
 
@@ -180,7 +180,7 @@ def main():
         if aruco_centers and ids is not None:
             for idx, center in enumerate(centers):
 
-                print(center)
+                # print(center)
                 cv2.putText(frame, f"Center:{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 angle = algo.ids_to_angle(frame, ids, center, aruco_centers) #the orientation angle
@@ -219,14 +219,17 @@ def main():
                             # vibration_var.set(0)
                             # card.vibrate_hardware(0)
                             stop_btn_var.set(1)
-                            # card.stop_hardware()
-                            calibrate_btn_var.set(1)
-                            cv2.waitKey(2000)
                             algo.stop_trigger = True
+                            # card.stop_hardware()
+                            # calibrate_btn_var.set(1)
+                            # cv2.waitKey(2000)
+                            # algo.stop_trigger = True
+
                             algo.orientation_achieved = True
-                            algo.clear()
+                            # algo.clear()
                         else:
-                            # vibration_var.set(70)  # Set vibration to 60%
+                            # start_btn_var.set(1)
+                            vibration_var.set(50)  # Set vibration to 60%
                             # card.vibrate_hardware(70)
 
                             # encoder_var.set()
@@ -235,13 +238,14 @@ def main():
 
                     if algo.orientation_achieved:
 
-                        start_btn_var.set(1)
+                        # start_btn_var.set(1)
                         if distance < 5:
                             # angle_to_goal_list = []
                             print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
-                            algo.clear()
-                            break
+                            # cv2.waitKey(2000)
+                            # algo.clear()
+                            # break
                         else:
                             # vibration_var.set(100)  # Set vibration to 60%
                             # card.vibrate_hardware(100)
@@ -261,6 +265,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
+                                start_btn_var.set(1)
                                 encoder_var.set(delta_angle_list[-1])
                                 card.set_encoder_angle(delta_angle_list[-1])
                                 # vibration_var.set(100)  # Set vibration to 60%

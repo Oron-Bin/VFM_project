@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Path to the CSV file
-CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui/data_2024-07-29-12-53-43.csv"
+CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui/rotation_with_change_angle.csv"
 
 # Load the data from the CSV file
 data = pd.read_csv(CSV_FILE_PATH)
@@ -17,10 +17,10 @@ plt.figure(figsize=(12, 8))
 
 # Plot each parameter
 plt.subplot(4, 1, 1)
-plt.plot(time_values, data['Center'] , label='Radial_pos', color='b')
+plt.plot(time_values, data['Center'] , label='pixels', color='b')
 plt.title('Center Over Time')
 plt.xlabel('Time (s)')
-plt.ylabel('Center')
+plt.ylabel('Radial_pos')
 plt.grid()
 plt.legend()
 
@@ -42,7 +42,7 @@ plt.legend()
 
 plt.subplot(4, 1, 4)
 plt.plot(time_values, data['Rad Angle'], label='Rad Angle', color='m')
-plt.title('Rad Angle Over Time')
+plt.title('Control Angle Over Time')
 plt.xlabel('Time (s)')
 plt.ylabel('Control Angle (deg)')
 plt.grid()
