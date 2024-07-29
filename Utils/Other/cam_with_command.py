@@ -212,7 +212,10 @@ def main():
                             algo.flag = 1
 
                             print("Orientation error is less than 5 degrees")
+                            # vibration_var.set(0)
+                            # card.vibrate_hardware(0)
                             stop_btn_var.set(1)
+                            # card.stop_hardware()
                             calibrate_btn_var.set(1)
                             cv2.waitKey(2000)
                             algo.stop_trigger = True
@@ -227,6 +230,7 @@ def main():
                             print('orientation error is big')
 
                     if algo.orientation_achieved:
+
                         start_btn_var.set(1)
                         if distance < 5:
                             # angle_to_goal_list = []
@@ -255,16 +259,13 @@ def main():
                             if len(delta_angle_list) <= 1:
                                 encoder_var.set(delta_angle_list[-1])
                                 card.set_encoder_angle(delta_angle_list[-1])
-                                vibration_var.set(100)  # Set vibration to 60%
-                                card.vibrate_hardware(100)
+                                # vibration_var.set(100)  # Set vibration to 60%
+                                # card.vibrate_hardware(100)
                             else:
                                 encoder_var.set(delta_angle_list[-1])
                                 card.set_encoder_angle(delta_angle_list[-1])
-                                vibration_var.set(100)  # Set vibration to 60%
-                                card.vibrate_hardware(100)
-
-                            # print('The distance is big, angle to goal:', rad_angle)
-
+                                # vibration_var.set(100)  # Set vibration to 60%
+                                # card.vibrate_hardware(100)
 
                 else:
                     print("Failed to calculate orientation angle")
