@@ -6,6 +6,7 @@ import random
 import datetime
 import threading
 import numpy as np
+import csv
 import tkinter as tk
 from tkinter import ttk
 
@@ -18,8 +19,6 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
 motor_angle_list = [0]
-
-
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
     """
@@ -66,7 +65,6 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
 
         time.sleep(0.1)
 
-
 def main():
     """
     Main function to initialize the GUI and start the hardware control and video processing.
@@ -92,9 +90,6 @@ def main():
     calibrate_btn_var = tk.IntVar()
     start_btn_var = tk.IntVar()
     stop_btn_var = tk.IntVar()
-
-
-    # algo.orientation_achieved = False
 
     def update_vibration_label(*args):
         vibration_label_var.set(f"Vibration: {vibration_var.get()}%")
@@ -160,6 +155,13 @@ def main():
     angle_to_goal_list = [0]
     smooth_list = [0]
     delta_angle_list = []
+
+    CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui/data_2.csv"
+
+    # Create CSV file and write headers
+    with open(CSV_FILE_PATH, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Center', 'Orientation Angle', 'Percent', 'Rad Angle'])
     def update_frame():
         ret, frame = cap.read()
         if not ret:
@@ -179,9 +181,9 @@ def main():
             for idx, center in enumerate(centers):
 
                 print(center)
-                cv2.putText(frame, f"{(center[0], center[1])}", (10, 20),
+                cv2.putText(frame, f"Center:{(center[0], center[1])}", (10, 20),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                angle = algo.ids_to_angle(frame, ids, center, aruco_centers)
+                angle = algo.ids_to_angle(frame, ids, center, aruco_centers) #the orientation angle
                 if angle is not None:
 
                     orientation_error = abs(des_orientation - angle)
@@ -195,9 +197,11 @@ def main():
                                            round(center[1] + 50 * math.sin(np.deg2rad(des_orientation))))
                     end_des = algo.rotate_point(center,end_des_orientation,180)
 
-                    cv2.putText(frame, f"Orientation: {angle}", (10, 40),
+                    cv2.putText(frame, f"Orientation Angle: {angle}", (10, 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                    cv2.putText(frame, f"Orientation_error: {orientation_error}", (10, 60),
+                    # cv2.putText(frame, f"Orientation_error: {orientation_error}", (10, 60),
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.putText(frame, f"control_angle: {encoder_var.get()}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
                     cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
@@ -267,6 +271,13 @@ def main():
                                 # vibration_var.set(100)  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
 
+                    percent = vibration_var.get()  # Example: get the current vibration percentage
+                    control_angle = encoder_var.get() # Example: get the current
+                    radius = round(np.sqrt((center[0] - algo.path[0][0]) ** 2 + (center[1] - algo.path[0][1]) ** 2))
+
+                    with open(CSV_FILE_PATH, mode='a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([radius, angle, percent, control_angle])
                 else:
                     print("Failed to calculate orientation angle")
 
