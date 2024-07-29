@@ -255,8 +255,8 @@ def main():
                             rad_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                             angle_to_goal_list.append(rad_angle)
                             print('want', rad_angle)
-                            smooth_angle = round(0.1 * angle_to_goal_list[-1] + 0.9 * angle_to_goal_list[-2])
-                            # print(smooth_angle)
+                            smooth_angle = round(0.1 * float(angle_to_goal_list[-1]) + 0.9 * float(angle_to_goal_list[-2]))
+                            print(smooth_angle)
                             smooth_list.append(smooth_angle)
                             smooth_delta = smooth_list[-1] - smooth_list[-2]
                             delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
@@ -266,13 +266,13 @@ def main():
 
                             if len(delta_angle_list) <= 1:
                                 start_btn_var.set(1)
-                                encoder_var.set(delta_angle_list[-1])
-                                card.set_encoder_angle(delta_angle_list[-1])
+                                encoder_var.set(smooth_delta)
+                                card.set_encoder_angle(smooth_delta)
                                 # vibration_var.set(100)  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
                             else:
-                                encoder_var.set(delta_angle_list[-1])
-                                card.set_encoder_angle(delta_angle_list[-1])
+                                encoder_var.set(smooth_delta)
+                                card.set_encoder_angle(smooth_delta)
                                 # vibration_var.set(100)  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
 
