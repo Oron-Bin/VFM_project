@@ -16,7 +16,7 @@ from Utils.Hardware.package import *
 # Global constants
 VIDEO_DIR = "/home/roblab20/Desktop/gui_exp"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
-# VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'X264')
+# VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'MJPG')
 # Global variables
 motor_angle_list = [0]
 
@@ -169,7 +169,6 @@ def main():
             return
 
         frame_copy = frame.copy()
-
         frame, centers = algo.detect_circles_and_get_centers(frame_copy) # if not circle build anothe function for rectangles
         algo.path.extend(centers)
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
@@ -182,7 +181,7 @@ def main():
 
                 # print(center)
                 cv2.putText(frame, f"Center:{(center[0], center[1])}", (10, 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                 angle = algo.ids_to_angle(frame, ids, center, aruco_centers) #the orientation angle
                 if angle is not None:
 
@@ -198,11 +197,11 @@ def main():
                     end_des = algo.rotate_point(center,end_des_orientation,180)
 
                     cv2.putText(frame, f"Orientation Angle: {angle}", (10, 40),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                     # cv2.putText(frame, f"Orientation_error: {orientation_error}", (10, 60),
                     #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                     cv2.putText(frame, f"control_angle: {encoder_var.get()}", (10, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
                     cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
@@ -229,7 +228,7 @@ def main():
                             # algo.clear()
                         else:
                             # start_btn_var.set(1)
-                            vibration_var.set(50)  # Set vibration to 60%
+                            vibration_var.set(60)  # Set vibration to 60%
                             # card.vibrate_hardware(70)
 
                             # encoder_var.set()
@@ -242,12 +241,13 @@ def main():
                         if distance < 5:
                             # angle_to_goal_list = []
                             print('arrive with final orientation error of', orientation_error)
+                            vibration_var.set(0)
                             stop_btn_var.set(1)
                             # cv2.waitKey(2000)
                             # algo.clear()
-                            # break
+                            break
                         else:
-                            # vibration_var.set(100)  # Set vibration to 60%
+                            # vibration_var.set(0)  # Set vibration to 60%
                             # card.vibrate_hardware(100)
                             # start_btn_var.set(1)
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
@@ -265,20 +265,22 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-
+                                vibration_var.set(0)
                                 start_btn_var.set(1)
                                 # vibration_var.set(0)
                                 # cv2.waitKey(2000)
-                                encoder_var.set(smooth_delta)
-                                card.set_encoder_angle(smooth_delta)
+                                encoder_var.set(delta_angle)
+                                card.set_encoder_angle(delta_angle)
 
 
                                  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
                             else:
-                                vibration_var.set(60)
-                                encoder_var.set(smooth_delta)
-                                card.set_encoder_angle(smooth_delta)
+                                print(distance)
+                                # vibration_var.set(45)
+                                encoder_var.set(delta_angle)
+                                card.set_encoder_angle(delta_angle)
+                                # vibration_var.set(round(distance*0.7) + 50)
                                 # vibration_var.set(50)  # Set vibration to 60%
                                 # card.vibrate_hardware(100)
 
