@@ -282,7 +282,11 @@ def main():
                             stop_btn_var.set(1)
                             algo.stop_trigger = True
                             print('enough_2')
-                            #break - to the next level
+                            algo.flag = 3
+
+                        if algo.flag == 3:
+                            print('finish')
+                            
 
 
                         # if distance_to_goal < 5:
