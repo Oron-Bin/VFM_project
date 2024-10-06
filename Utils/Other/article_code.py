@@ -11,7 +11,7 @@ from Utils.Control.cardalgo import *
 from Utils.Hardware.package import *
 
 # Global constants
-VIDEO_DIR = "/home/roblab20/Desktop/article_videos/pure_circles"
+VIDEO_DIR = "/home/roblab20/Desktop/article_videos/full_algo"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
@@ -69,9 +69,9 @@ def main():
     try:
         card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
         algo = card_algorithms(x_d=0, y_d=0)
-        tip_pos = (330, 150)
+        tip_pos = (325, 155)
         des_orientation = random.randint(0, 359)
-        (algo.x_d, algo.y_d) = (360, 120)
+        (algo.x_d, algo.y_d) = (325, 100)
 
     except Exception as e:
         print(f"Error initializing hardware: {e}")
@@ -151,12 +151,13 @@ def main():
     final_list = [0]
     delta_final_list = []
 
-    # CSV_FILE_PATH = "/home/roblab20/Desktop/data_from_gui"
-    # csv_file_path = os.path.join(CSV_FILE_PATH,f"data_{timestamp}.csv")
+    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo"
+    csv_file_path = os.path.join(CSV_FILE_PATH,f"data_{timestamp}.csv")
     # Create CSV file and write headers
-    # with open(csv_file_path, mode='w', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow(['Center', 'Orientation Angle', 'Percent', 'Rad Angle'])
+    with open(csv_file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Control angle', 'Orientation Angle','Radius'])
+
     def update_frame():
         ret, frame = cap.read()
         if not ret:
@@ -191,12 +192,15 @@ def main():
                     cv2.putText(frame, f"Orientation Angle: {angle}", (10, 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
-                    # cv2.putText(frame, f"control_angle: {encoder_var.get()}", (10, 60),
-                    #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-
+                    rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
+                    rotate_center = algo.rotate_point(tip_pos, center, 180)
+                    command_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
+                    # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
+                    control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                     cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
-
+                    cv2.putText(frame, f"control_angle: {control_angle}", (10, 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
                     algo.plot_path(frame)
                     distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
@@ -208,12 +212,16 @@ def main():
                             stop_btn_var.set(1)
                             algo.stop_trigger = True
                             algo.orientation_achieved = True
-                            break
+
                         else:
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
                             rotate_center = algo.rotate_point(tip_pos, center, 180)
                             command_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
-                            command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
+                            # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
+                            control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
+
+                            tip_pos_2 = (338, 135)
+                            command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos_2)))
                             angle_to_goal_list.append(command_angle)
                             print('want', command_angle)
 
@@ -222,37 +230,18 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(50)
-                                # start_btn_var.set(1)
-                                encoder_var.set(command_angle)
-
-                                card.set_encoder_angle(command_angle)
+                                vibration_var.set(70)
+                                encoder_var.set(50)
+                                card.set_encoder_angle(50)
+                                # encoder_var.set(command_angle)
+                                # card.set_encoder_angle(command_angle)
                             else:
                                 print(distance)
-                                # encoder_var.set(1)
 
-                                # card.set_encoder_angle(0.5)
                                 if distance < 5 :
 
                                     print('enough')
-                                    vibration_var.set(0)
-                                    stop_btn_var.set(1)
-                                    algo.orientation_achieved = True
-                                    # calibrate_btn_var.set(1)
-                                    # card.set_encoder_angle(0)
-                                    # stop_btn_var.set(1)
-                                    # algo.stop_trigger = True
-                                    # algo.orientation_achieved = True
-                                    # break
 
-
-                                # encoder_var.set(delta_angle)
-                                # card.set_encoder_angle(delta_angle)
-                            # vibration_var.set(60)  # Set vibration to 60%
-                            # circle_angle =
-                            # encoder_var.set(0)
-
-                            # card.set_encoder_angle(1)
                             print('orientation error is big')
 
                     if algo.orientation_achieved:
@@ -261,34 +250,26 @@ def main():
                             print('arrive with final orientation error of', orientation_error)
                             stop_btn_var.set(1)
                             algo.stop_trigger = True
-                            break
+
                         else:
-                            # rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
-                            # rotate_center = algo.rotate_point(tip_pos, center, 180)
-                            # final_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
-                            # final_list.append(final_angle)
-                            # print('want', final_angle)
-                            #
-                            # final_delta = final_list[-1] - final_list[-2]
-                            # delta_final_list.append(final_delta)
-                            # print(delta_final_list[-1])
-                            # encoder_var.set(final_angle)
-                            #
-                            # card.set_encoder_angle(final_delta)
+
+                            # start_btn_var.set(1)
+                            start_point = tip_pos
+                            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
+                                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
+
+                            rotated_end_point = algo.rotate_point(start_point, end_point, 90)
+                            cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
                             print('waiting for order')
 
-
+                    radius = round(np.sqrt((center[0] - algo.path[0][0]) ** 2 + (center[1] - algo.path[0][1]) ** 2))
+                    with open(csv_file_path, mode='a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([control_angle ,center, angle])
 
                 else:
                     print("Failed to calculate orientation angle")
 
-        if len(motor_angle_list) > 0:
-            start_point = tip_pos
-            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
-                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
-            # print(motor_angle_list)
-            rotated_end_point = algo.rotate_point(start_point, end_point, 90)
-            cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
 
         out.write(frame)
         cv2.imshow("Camera", frame)
