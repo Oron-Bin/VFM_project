@@ -203,8 +203,8 @@ def main():
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
                     algo.plot_path(frame)
-                    distance = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
-
+                    distance_to_goal = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
+                    distance_to_tip = np.sqrt((center[0] - tip_pos[0]) ** 2 + (center[1] - tip_pos[1]) ** 2)
                     if not algo.orientation_achieved:
                         if orientation_error < 5:
                             algo.flag = 1
@@ -217,11 +217,11 @@ def main():
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
                             rotate_center = algo.rotate_point(tip_pos, center, 180)
                             command_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
-                            # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
+                            command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
                             control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
 
-                            tip_pos_2 = (338, 135)
-                            command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos_2)))
+                            # tip_pos_2 = (338, 135)
+                            # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos_2)))
                             angle_to_goal_list.append(command_angle)
                             print('want', command_angle)
 
@@ -230,37 +230,76 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(70)
-                                encoder_var.set(50)
-                                card.set_encoder_angle(50)
-                                # encoder_var.set(command_angle)
-                                # card.set_encoder_angle(command_angle)
+                                vibration_var.set(60)
+                                # encoder_var.set(50)
+                                # card.set_encoder_angle(50)
+                                encoder_var.set(command_angle)
+                                card.set_encoder_angle(command_angle)
                             else:
-                                print(distance)
+                                print(distance_to_goal)
 
-                                if distance < 5 :
+                                if distance_to_goal < 5 :
 
                                     print('enough')
 
                             print('orientation error is big')
 
-                    if algo.orientation_achieved:
+                    if algo.orientation_achieved :
+                        if algo.flag == 1:
+                            calibrate_btn_var.set(1)
+                            algo.flag = 2
+                            print(algo.flag)
 
-                        if distance < 5:
-                            print('arrive with final orientation error of', orientation_error)
+                        if distance_to_tip >5 :
+
+                            angle_to_tip = round(np.rad2deg(algo.find_dev(center, tip_pos)))
+                            print('angle_to_tip',angle_to_tip)
+                            final_list.append(angle_to_tip)
+                            # print('want 2', angle_to_tip)
+
+                            delta_final = final_list[-1] - final_list[-2]
+                            delta_final_list.append(delta_final)
+
+                            if len(delta_final_list) <= 1:
+                                start_btn_var.set(1)
+
+                                print('modifyyyyyyyyyyyyyyyyyyyyyyy')
+                                # vibration_var.set(100)
+                                # encoder_var.set(50)
+                                # card.set_encoder_angle(50)
+                                encoder_var.set(delta_final)
+                                card.set_encoder_angle(delta_final)
+
+                            else:
+
+                                encoder_var.set(delta_final_list[-1])
+                                card.set_encoder_angle(delta_final_list[-1])
+
+                                print('distance to tip',distance_to_tip)
+
+
+                        if distance_to_tip <= 5 :
                             stop_btn_var.set(1)
                             algo.stop_trigger = True
+                            print('enough_2')
+                            #break - to the next level
 
-                        else:
 
-                            # start_btn_var.set(1)
-                            start_point = tip_pos
-                            end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
-                                         round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
+                        # if distance_to_goal < 5:
+                        #     print('arrive with final orientation error of', orientation_error)
+                        #
+                        # else:
+                        #
+                        #     # start_btn_var.set(1)
+                        #     start_point = tip_pos
+                        #     end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
+                        #                  round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
+                        #
+                        #     rotated_end_point = algo.rotate_point(start_point, end_point, 90)
+                        #     cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
+                        #     print('waiting for order')
 
-                            rotated_end_point = algo.rotate_point(start_point, end_point, 90)
-                            cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
-                            print('waiting for order')
+
 
                     radius = round(np.sqrt((center[0] - algo.path[0][0]) ** 2 + (center[1] - algo.path[0][1]) ** 2))
                     with open(csv_file_path, mode='a', newline='') as file:
