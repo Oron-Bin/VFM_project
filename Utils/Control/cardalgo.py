@@ -19,6 +19,7 @@ class card_algorithms:
         self.x_d = x_d ## Card desired x value - int
         self.y_d = y_d ## Card desitred y value - int
         self.center = None ## Card center - list after using update function
+        self.last_center = None
         self.orientation = 0
         self.last_orientation = None
         self.first_orientation = None
@@ -330,6 +331,7 @@ class card_algorithms:
         last_aruco_center = aruco_centers[-1]
         # print(last_aruco_center)
         angle = self.calculate_angle(circle_center, last_aruco_center)
+
         if ids is not None:
             if ids[-1] == 43:
 
@@ -370,7 +372,7 @@ class card_algorithms:
 
 
     def detect_circles_and_get_centers(self,frame):
-        tip_pos = (325, 155)
+        tip_pos = (340, 155)
         # tip_pos = (330, 150)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 21)
