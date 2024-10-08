@@ -5,6 +5,7 @@ import csv
 import tkinter as tk
 from tkinter import ttk
 
+import cv2
 import numpy as np
 
 from Utils.Control.cardalgo import *
@@ -16,7 +17,6 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
 motor_angle_list = [0]
-
 
 
 def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
@@ -71,7 +71,7 @@ def main():
     try:
         card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
         algo = card_algorithms(x_d=0, y_d=0)
-        tip_pos = (340, 155)
+        tip_pos = (340, 146)
         des_orientation = random.randint(0, 359)
         (algo.x_d, algo.y_d) = (340, 100)
 
@@ -181,16 +181,16 @@ def main():
 
         if isinstance(center, tuple) and len(center) > 0:
 
-            cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
+            # cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=1)
 
-            cv2.circle(frame, (center[0], center[1]), 90, (0, 255, 0), 2)
+            cv2.circle(frame, (center[0], center[1]), 90, (0, 255, 0), 1)
             # cv2.circle(frame, (center[0], center[1]), radius=50, color=(255, 255, 0), thickness=2)
 
         print(f"Center: {center}")
         algo.path.extend(centers)
         aruco_centers, ids = algo.detect_aruco_centers(frame_copy)
         algo.arrow_coordinate_sys_motor(frame, tip_pos)
-        algo.plot_desired_position(frame)
+        # algo.plot_desired_position(frame)
         algo.plot_path(frame)
 
         if (aruco_centers and ids is not None):
@@ -222,8 +222,14 @@ def main():
                     # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
                     # control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                     control_angle = round(np.rad2deg(algo.find_dev(tip_pos, rotate_center)))
-                    cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
-                    cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
+                    rotate_control_angle = algo.rotate_point(((round(tip_pos[0] + 50 * math.cos(np.deg2rad(control_angle)))),
+                                                             round(tip_pos[1] - 50 * math.sin(np.deg2rad(control_angle)))),center ,0)
+
+
+                    cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
+                                    (255, 255, 0), 2)
+                    # cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
+                    # cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
                     cv2.putText(frame, f"control_angle: {control_angle}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
@@ -255,7 +261,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(50)
+                                vibration_var.set(60)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
