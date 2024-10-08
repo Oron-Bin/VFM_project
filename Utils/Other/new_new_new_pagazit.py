@@ -152,7 +152,7 @@ def main():
     final_list = [0]
     delta_final_list = []
 
-    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo"
+    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_pure_circles"
     csv_file_path = os.path.join(CSV_FILE_PATH, f"data_{timestamp}.csv")
     # Create CSV file and write headers
     with open(csv_file_path, mode='w', newline='') as file:
@@ -261,13 +261,15 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(60)
+                                vibration_var.set(70)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
                                 card.set_encoder_angle(command_angle)
                             else:
                                 print(distance_to_goal)
+                                # encoder_var.set(1)
+                                # card.set_encoder_angle(1)
 
                                 if distance_to_goal < 5:
                                     print('enough')
