@@ -228,8 +228,8 @@ def main():
 
                     cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
                                     (255, 255, 0), 2)
-                    # cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
-                    # cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
+                    cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
+                    cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
                     cv2.putText(frame, f"control_angle: {control_angle}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
