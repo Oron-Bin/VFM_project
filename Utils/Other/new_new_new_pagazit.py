@@ -12,7 +12,7 @@ from Utils.Control.cardalgo import *
 from Utils.Hardware.package import *
 
 # Global constants
-VIDEO_DIR = "/home/roblab20/Desktop/article_videos/pure_circles"
+VIDEO_DIR = "/home/roblab20/Desktop/article_videos/full_algo"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
@@ -224,7 +224,7 @@ def main():
     final_list = [0]
     delta_final_list = []
 
-    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_pure_circles"
+    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo"
     csv_file_path = os.path.join(CSV_FILE_PATH, f"data_{timestamp}.csv")
     # Create CSV file and write headers
     with open(csv_file_path, mode='w', newline='') as file:
