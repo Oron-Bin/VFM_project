@@ -19,11 +19,13 @@ VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 motor_angle_list = [0]
 
 
-def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var):
+def command_listener(
+        card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var , vibration_var_2 , calibrate_btn_var_2, stop_btn_var_2, start_btn_var_2):
     """
     Thread function to listen for commands and control hardware accordingly.
     """
     hardware_started = False
+    hardware_started_2 = False
     last_encoder_value = 0  # Track the last encoder value
 
     while True:
@@ -61,6 +63,40 @@ def command_listener(card, vibration_var, encoder_var, calibrate_btn_var, start_
             motor_angle_list.append(encoder_difference + motor_angle_list[-1])
             last_encoder_value = current_encoder_value  # Update the last encoder value
 
+        if stop_btn_var_2.get() == 1:
+            print("Stopping hardware 2...")
+            card.stop_hardware_2()
+            hardware_started_2 = False
+            vibration_var_2.set(0)
+            encoder_var.set(0)
+            stop_btn_var_2.set(0)
+            last_encoder_value = 0  # Reset the last encoder value on stop
+            print("Hardware stopped and sliders reset.")
+
+        if calibrate_btn_var_2.get() == 1:
+            print("Calibrating 2...")
+            card.calibrate_2()
+            calibrate_btn_var_2.set(0)
+            last_encoder_value = 0  # Reset the last encoder value on calibration
+            motor_angle_list.clear()  # Clear angle list
+            motor_angle_list.append(0)  # Start angle list with zero after calibration
+            print("Calibration done.")
+
+        if start_btn_var_2.get() == 1:
+            print("Starting hardware 2...")
+            card.start_hardware_2()
+            hardware_started_2 = True
+            start_btn_var_2.set(0)
+            print("Hardware started.")
+
+        if hardware_started_2:
+            card.vibrate_hardware_2(vibration_var_2.get())
+            current_encoder_value = encoder_var.get()
+            encoder_difference = current_encoder_value - last_encoder_value
+            card.set_encoder_angle(encoder_difference)
+            motor_angle_list.append(encoder_difference + motor_angle_list[-1])
+            last_encoder_value = current_encoder_value  # Update the last encoder value
+
         time.sleep(0.1)
 
 
@@ -86,45 +122,79 @@ def main():
     start_btn_var = tk.IntVar()
     stop_btn_var = tk.IntVar()
 
+    vibration_var_2 = tk.IntVar()
+    calibrate_btn_var_2 = tk.IntVar()
+    start_btn_var_2 = tk.IntVar()
+    stop_btn_var_2 = tk.IntVar()
+
     def update_vibration_label(*args):
         vibration_label_var.set(f"Vibration: {vibration_var.get()}%")
+
+    def update_vibration_label_2(*args):
+        vibration_label_var_2.set(f"Vibration: {vibration_var_2.get()}%")
 
     def update_encoder_label(*args):
         encoder_label_var.set(f"Encoder: {encoder_var.get()}°")
 
+
     vibration_var.trace_add("write", update_vibration_label)
+    vibration_var_2.trace_add("write", update_vibration_label_2)
     encoder_var.trace_add("write", update_encoder_label)
 
     vibration_label_var = tk.StringVar()
+    vibration_label_var_2 = tk.StringVar()
     encoder_label_var = tk.StringVar()
 
     update_vibration_label()
+    update_vibration_label_2()
     update_encoder_label()
 
+    # Add widgets with appropriate row/column positions and spacing
     ttk.Label(root, text="Vibration (%)").grid(column=0, row=0, padx=10, pady=10)
     vibration_slider = ttk.Scale(root, from_=100, to=0, orient='vertical', variable=vibration_var)
     vibration_slider.grid(column=1, row=0, padx=10, pady=10)
     ttk.Label(root, textvariable=vibration_label_var).grid(column=2, row=0, padx=10, pady=10)
 
-    ttk.Label(root, text="Encoder (°)").grid(column=0, row=1, padx=10, pady=10)
-    encoder_slider = ttk.Scale(root, from_=-180, to=180, orient='horizontal', variable=encoder_var)
-    encoder_slider.grid(column=1, row=1, padx=10, pady=10)
-    ttk.Label(root, textvariable=encoder_label_var).grid(column=2, row=1, padx=10, pady=10)
+    ttk.Label(root, text="Vibration 2 (%)").grid(column=0, row=1, padx=10, pady=10)
+    vibration_slider_2 = ttk.Scale(root, from_=100, to=0, orient='vertical', variable=vibration_var_2)
+    vibration_slider_2.grid(column=1, row=1, padx=10, pady=10)
+    ttk.Label(root, textvariable=vibration_label_var_2).grid(column=2, row=1, padx=10, pady=10)
 
+    ttk.Label(root, text="Encoder (°)").grid(column=0, row=2, padx=10, pady=10)
+    encoder_slider = ttk.Scale(root, from_=-180, to=180, orient='horizontal', variable=encoder_var)
+    encoder_slider.grid(column=1, row=2, padx=10, pady=10)
+    ttk.Label(root, textvariable=encoder_label_var).grid(column=2, row=2, padx=10, pady=10)
+
+    # Place calibrate, start, and stop buttons with correct spacing
     calibrate_btn = ttk.Button(root, text="Calibrate", command=lambda: calibrate_btn_var.set(1))
-    calibrate_btn.grid(column=0, row=2, columnspan=2, padx=10, pady=10)
+    calibrate_btn.grid(column=0, row=3, columnspan=2, padx=10, pady=10)
+
+    calibrate_btn_2 = ttk.Button(root, text="Calibrate 2", command=lambda: calibrate_btn_var_2.set(1))
+    calibrate_btn_2.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
 
     start_btn = ttk.Button(root, text="Start", command=lambda: start_btn_var.set(1))
-    start_btn.grid(column=0, row=3, columnspan=2, padx=10, pady=10)
+    start_btn.grid(column=0, row=5, columnspan=2, padx=10, pady=10)
+
+    start_btn_2 = ttk.Button(root, text="Start 2", command=lambda: start_btn_var_2.set(1))
+    start_btn_2.grid(column=0, row=6, columnspan=2, padx=10, pady=10)
 
     stop_btn = ttk.Button(root, text="Stop", command=lambda: stop_btn_var.set(1))
-    stop_btn.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
+    stop_btn.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
+
+    stop_btn_2 = ttk.Button(root, text="Stop 2", command=lambda: stop_btn_var_2.set(1))
+    stop_btn_2.grid(column=0, row=8, columnspan=2, padx=10, pady=10)
 
     def adjust_vibration(event):
         if event.keysym == "Up":
             vibration_var.set(min(vibration_var.get() + 1, 100))
         elif event.keysym == "Down":
             vibration_var.set(max(vibration_var.get() - 1, 0))
+
+    def adjust_vibration_2(event):
+        if event.keysym == "Up":
+            vibration_var_2.set(min(vibration_var_2.get() + 1, 100))
+        elif event.keysym == "Down":
+            vibration_var_2.set(max(vibration_var_2.get() - 1, 0))
 
     def adjust_encoder(event):
         if event.keysym == "Right":
@@ -138,7 +208,7 @@ def main():
     root.bind("<Left>", adjust_encoder)
 
     command_thread = threading.Thread(target=command_listener, args=(
-        card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var))
+        card, vibration_var, encoder_var, calibrate_btn_var, start_btn_var, stop_btn_var , vibration_var_2 , calibrate_btn_var_2, stop_btn_var_2, start_btn_var_2))
     command_thread.daemon = True
     command_thread.start()
 

@@ -109,6 +109,10 @@ class Card:
         self.key_dict['calibrate'] = 1
         self.send_data(key='calibrate')
 
+    def calibrate_2(self):
+        self.key_dict['calibrate_2'] = 1
+        self.send_data(key='calibrate_2')
+
     def start_hardware(self):
         self.key_dict['start'] = 1
         self.send_data(key='start')
@@ -117,50 +121,49 @@ class Card:
         self.key_dict['stop'] = 1
         self.send_data(key='stop')
 
+    def start_hardware_2(self):
+        self.key_dict['start_2'] = 1
+        self.send_data(key='start_2')
+
+    def stop_hardware_2(self):
+        self.key_dict['stop_2'] = 1
+        self.send_data(key='stop_2')
+
     def vibrate_hardware(self,precent=0):
         self.key_dict['vibrate'] = precent
         self.send_data('vibrate')
 
 
+    def vibrate_hardware_2(self,precent=100):
+        self.key_dict['vibrate_2'] = precent
+        self.send_data('vibrate_2')
+
     def vibrate_rate(self,ms=0):
         self.key_dict['vibrate_rate'] = ms
         self.send_data('vibrate_rate')
 
-    def vibrate_hardware_2(self,precent=0):
-        self.key_dict['vibrate_2'] = precent
-        self.send_data(key ='vibrate_2')
+
 #
 # # grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
 # grip.goTo(12)
-# mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
+mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
 # # # # # # # # # # # # # # # # # # #
+# mycard.calibrate_2()
+# mycard.start_hardware_2()
+# # # mycard.set_encoder_angle(120)
+# # #
+# mycard.vibrate_hardware_2(100)
+# # #
+# #
+# mycard.stop_hardware_2()
+#
 # mycard.calibrate()
 # mycard.start_hardware()
-# # mycard.set_encoder_angle(120)
-# # # # mycard.start_hardware()
-# # mycard.vibrate_hardware_2(100)
-# # mycard.stop_hardware()
-# # mycard.start_hardware()
 # mycard.vibrate_hardware(100)
-# mycard.set_encoder_angle(120)
-# # mycard.start_hardware()
-# # mycard.vibrate_hardware(100)
-# # mycard.vibrate_hardware(70)
-# # mycard.set_encoder_angle(120)
-# # mycard.stop_hardware()
 # #
-# # mycard.calibrate()
-# # mycard.start_hardware()
-# # mycard.set_encoder_angle(30)
-# # # # time.sleep(3)
-# # mycard.vibrate_hardware(70)
-# # # mycard.vibrate_rate(300)
-# # # #
+#
 # mycard.stop_hardware()
-
-
-
-
+#
 
 
 
