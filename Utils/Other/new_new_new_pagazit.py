@@ -204,8 +204,8 @@ def main():
         elif event.keysym == "Left":
             encoder_var.set(max(encoder_var.get() - 1, -180))
 
-    root.bind("<Up>", adjust_vibration)
-    root.bind("<Down>", adjust_vibration)
+    root.bind("<Up>", adjust_vibration_2)
+    root.bind("<Down>", adjust_vibration_2)
     root.bind("<Right>", adjust_encoder)
     root.bind("<Left>", adjust_encoder)
 
