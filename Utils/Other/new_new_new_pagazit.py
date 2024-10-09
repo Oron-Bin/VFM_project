@@ -166,23 +166,25 @@ def main():
     ttk.Label(root, textvariable=encoder_label_var).grid(column=2, row=2, padx=10, pady=10)
 
     # Place calibrate, start, and stop buttons with correct spacing
+    # Place calibrate, start, and stop buttons in the same horizontal row
     calibrate_btn = ttk.Button(root, text="Calibrate", command=lambda: calibrate_btn_var.set(1))
-    calibrate_btn.grid(column=0, row=3, columnspan=2, padx=10, pady=10)
-
-    calibrate_btn_2 = ttk.Button(root, text="Calibrate 2", command=lambda: calibrate_btn_var_2.set(1))
-    calibrate_btn_2.grid(column=0, row=4, columnspan=2, padx=10, pady=10)
+    calibrate_btn.grid(column=0, row=3, padx=10, pady=10)
 
     start_btn = ttk.Button(root, text="Start", command=lambda: start_btn_var.set(1))
-    start_btn.grid(column=0, row=5, columnspan=2, padx=10, pady=10)
-
-    start_btn_2 = ttk.Button(root, text="Start 2", command=lambda: start_btn_var_2.set(1))
-    start_btn_2.grid(column=0, row=6, columnspan=2, padx=10, pady=10)
+    start_btn.grid(column=1, row=3, padx=10, pady=10)
 
     stop_btn = ttk.Button(root, text="Stop", command=lambda: stop_btn_var.set(1))
-    stop_btn.grid(column=0, row=7, columnspan=2, padx=10, pady=10)
+    stop_btn.grid(column=2, row=3, padx=10, pady=10)
+
+    # Place second set of calibrate, start, and stop buttons in the same horizontal row
+    calibrate_btn_2 = ttk.Button(root, text="Calibrate 2", command=lambda: calibrate_btn_var_2.set(1))
+    calibrate_btn_2.grid(column=0, row=4, padx=10, pady=10)
+
+    start_btn_2 = ttk.Button(root, text="Start 2", command=lambda: start_btn_var_2.set(1))
+    start_btn_2.grid(column=1, row=4, padx=10, pady=10)
 
     stop_btn_2 = ttk.Button(root, text="Stop 2", command=lambda: stop_btn_var_2.set(1))
-    stop_btn_2.grid(column=0, row=8, columnspan=2, padx=10, pady=10)
+    stop_btn_2.grid(column=2, row=4, padx=10, pady=10)
 
     def adjust_vibration(event):
         if event.keysym == "Up":
