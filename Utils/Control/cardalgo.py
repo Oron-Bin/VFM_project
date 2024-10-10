@@ -43,6 +43,8 @@ class card_algorithms:
         self.stop_trigger = False # this is for the stop trigger
         # self.flag = 0  # this is for the stop trigger
         self.orientation_achieved = False
+        self.dis_to_tip_achieved = False
+
 
 
 
@@ -349,7 +351,7 @@ class card_algorithms:
             if angle < 0:
                 angle += 360
 
-            # print('The orientation is:', angle)
+            print(ids[-1])
             return angle
 
     def plot_angles(self,frame_numbers, angles):
@@ -361,18 +363,18 @@ class card_algorithms:
         plt.show()
 
     def arrow_coordinate_sys_motor(self, img, tip):
-        scale = 20
+        scale = 30
         # Define the endpoints of the X-axis and Y-axis relative to the origin
         x_axis_end = (tip[0] + int(scale), tip[1])
-        y_axis_end = (tip[0], tip[1] + int(scale))
+        y_axis_end = (tip[0], tip[1] - int(scale))
 
         # Draw coordinate system
-        cv2.arrowedLine(img, tip, x_axis_end, (0, 0, 0), 2)  # X-axis (black)
-        cv2.arrowedLine(img, tip, y_axis_end, (0, 0, 0), 2)  # Y- axis (black)
+        cv2.arrowedLine(img, tip, x_axis_end, (0, 0, 0), 1)  # X-axis (black)
+        cv2.arrowedLine(img, tip, y_axis_end, (0, 0, 0), 1)  # Y- axis (black)
 
 
     def detect_circles_and_get_centers(self,frame):
-        tip_pos = (340, 155)
+        tip_pos = (340, 146)
         # tip_pos = (330, 150)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 21)
@@ -384,8 +386,8 @@ class card_algorithms:
             circles = np.round(circles[0, :]).astype("int")
             for (x, y, r) in circles:
                 centers.append((x, y))
-                cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
-                cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
+                # cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
+                # cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
         return frame, centers
 
     def rotate_point(self,center, point, angle):
