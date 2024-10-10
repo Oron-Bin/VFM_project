@@ -336,7 +336,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(70)
+                                vibration_var.set(60)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
@@ -353,7 +353,7 @@ def main():
 
                     if algo.orientation_achieved:
                         if algo.flag == 1:
-                            calibrate_btn_var_2.set(1)
+                            # calibrate_btn_var_2.set(1)
                             algo.flag = 2
                             print('ffffffffffffffffffffffffffffffffffffffffffffffffffffffff',algo.flag)
 
@@ -374,8 +374,23 @@ def main():
                                 # vibration_var.set(100)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
-                                encoder_var.set(delta_final)
-                                card.set_encoder_angle(delta_final)
+                                # if len(delta_final_list) > 0:
+                                added_angle = delta_final_list[0] - angle_to_goal_list[1]
+
+                                if added_angle < 0:
+                                    added_angle +=360
+
+                                else:
+                                    added_angle = added_angle
+
+                                encoder_var.set(added_angle)
+                                card.set_encoder_angle(added_angle)
+                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
+                                #       angle_to_goal_list[1])
+                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
+                                #       delta_final_list[0] )
+                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ', delta_final_list[0] - angle_to_goal_list[1])
+
 
                             else:
 
