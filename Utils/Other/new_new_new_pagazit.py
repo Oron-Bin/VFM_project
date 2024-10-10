@@ -257,7 +257,7 @@ def main():
             # cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=1)
 
             cv2.circle(frame, (center[0], center[1]), 90, (0, 255, 0), 1)
-            # cv2.circle(frame, (center[0], center[1]), radius=50, color=(255, 255, 0), thickness=2)
+            cv2.circle(frame, (algo.x_d, algo.y_d), radius=5, color=(0, 0, 255), thickness=2)
 
         print(f"Center: {center}")
         algo.path.extend(centers)
@@ -313,9 +313,11 @@ def main():
                         if orientation_error < 5:
                             algo.flag = 1
                             print("Orientation error is less than 5 degrees")
-                            # stop_btn_var.set(1)
-                            # algo.stop_trigger = True
-                            # algo.orientation_achieved = True
+                            stop_btn_var.set(1)
+                            algo.stop_trigger = True
+                            algo.orientation_achieved = True
+
+
 
                         else:
                             rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
@@ -334,7 +336,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(100)
+                                vibration_var.set(70)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
@@ -351,12 +353,12 @@ def main():
 
                     if algo.orientation_achieved:
                         if algo.flag == 1:
-                            calibrate_btn_var.set(1)
+                            calibrate_btn_var_2.set(1)
                             algo.flag = 2
-                            print(algo.flag)
+                            print('ffffffffffffffffffffffffffffffffffffffffffffffffffffffff',algo.flag)
 
-                        if distance_to_tip > 5:
-
+                        if distance_to_tip > 5 and algo.dis_to_tip_achieved == False :
+                            # print(algo.dis_to_tip_achieved)
                             angle_to_tip = round(np.rad2deg(algo.find_dev(center, tip_pos)))
                             print('angle_to_tip', angle_to_tip)
                             final_list.append(angle_to_tip)
@@ -366,7 +368,7 @@ def main():
                             delta_final_list.append(delta_final)
 
                             if len(delta_final_list) <= 1:
-                                start_btn_var.set(1)
+                                start_btn_var_2.set(1)
 
                                 print('modifyyyyyyyyyyyyyyyyyyyyyyy')
                                 # vibration_var.set(100)
@@ -377,19 +379,19 @@ def main():
 
                             else:
 
-                                encoder_var.set(delta_final_list[-1])
-                                card.set_encoder_angle(delta_final_list[-1])
+                                # encoder_var.set(delta_final_list[-1])
+                                # card.set_encoder_angle(delta_final_list[-1])
 
                                 print('distance to tip', distance_to_tip)
 
-                        if distance_to_tip <= 5:
-                            stop_btn_var.set(1)
+                        if distance_to_tip <= 5 and algo.dis_to_tip_achieved == False:
+                            algo.dis_to_tip_achieved = True
+                            stop_btn_var_2.set(1)
                             algo.stop_trigger = True
                             print('enough_2')
-                            algo.flag = 3
+                            # algo.flag = 3
 
-                        if algo.flag == 3:
-                            print('finish')
+
 
                         # if distance_to_goal < 5:
                         #     print('arrive with final orientation error of', orientation_error)
