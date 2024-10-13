@@ -419,7 +419,7 @@ def main():
                             start_btn_var_2.set(1)
                             algo.go_to_goal = True
 
-                        elif distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.dis_to_goal_achieved == False and algo.go_to_goal == True:
+                        elif distance_to_goal >= 5 and algo.dis_to_tip_achieved == True and algo.dis_to_goal_achieved == False and algo.go_to_goal == True:
 
                             final_angle =  180 -(goal_list[1] + angle_to_goal_list[1]) - np.sum(np.diff(delta_final_list[1:]))
 
@@ -450,7 +450,7 @@ def main():
                                 # card.set_encoder_angle(law_angle)
                                 encoder_var.set(delta_target_list[-1])
                                 card.set_encoder_angle(delta_target_list[-1])
-                                vibration_var_2.set(100)
+                                # vibration_var_2.set(100)
                                 print('wating for youuuuuuuu')
                                 # algo.go_to_goal = True
 
