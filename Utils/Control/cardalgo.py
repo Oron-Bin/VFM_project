@@ -44,7 +44,10 @@ class card_algorithms:
         # self.flag = 0  # this is for the stop trigger
         self.orientation_achieved = False
         self.dis_to_tip_achieved = False
-
+        self.dis_to_goal_achieved = False
+        self.go_to_goal = False
+        self.fix = False
+        self.fix2 = False
 
 
 

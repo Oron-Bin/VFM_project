@@ -224,6 +224,9 @@ def main():
     delta_angle_list = []
     final_list = [0]
     delta_final_list = []
+    goal_list = [0]
+    delta_target_list = []
+    target_list = [0]
 
     CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo"
     csv_file_path = os.path.join(CSV_FILE_PATH, f"data_{timestamp}.csv")
@@ -336,7 +339,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(60)
+                                vibration_var.set(70)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
@@ -385,34 +388,87 @@ def main():
 
                                 encoder_var.set(added_angle)
                                 card.set_encoder_angle(added_angle)
-                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
-                                #       angle_to_goal_list[1])
+                                goal_list.append(added_angle)
+
+                                print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
+                                      angle_to_goal_list[1] + added_angle)
                                 # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
                                 #       delta_final_list[0] )
                                 # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ', delta_final_list[0] - angle_to_goal_list[1])
 
 
                             else:
-
-                                # encoder_var.set(delta_final_list[-1])
-                                # card.set_encoder_angle(delta_final_list[-1])
+                                vibration_var_2.set(100)
+                                encoder_var.set(delta_final_list[-1])
+                                card.set_encoder_angle(delta_final_list[-1])
 
                                 print('distance to tip', distance_to_tip)
 
                         if distance_to_tip <= 5 and algo.dis_to_tip_achieved == False:
-                            algo.dis_to_tip_achieved = True
+                            # vibration_var_2.set(0)
                             stop_btn_var_2.set(1)
                             algo.stop_trigger = True
                             print('enough_2')
+                            algo.dis_to_tip_achieved = True
                             # algo.flag = 3
 
 
 
-                        # if distance_to_goal < 5:
+                        if distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.dis_to_goal_achieved == False and algo.go_to_goal == False:
+                            # card.calibrate_2()
+                            start_btn_var_2.set(1)
+                            algo.go_to_goal = True
+
+                        elif distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.dis_to_goal_achieved == False and algo.go_to_goal == True:
+
+                            final_angle =  180 -(goal_list[1] + angle_to_goal_list[1]) - np.sum(np.diff(delta_final_list[1:]))
+
+                            if final_angle < 0:
+                                final_angle +=360
+                            elif final_angle > 360:
+                                final_angle -= 360
+
+                            # encoder_var.set(final_angle)
+                            # card.set_encoder_angle(final_angle)
+                            print(final_angle,'ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
+                            # print(angle_to_goal_list[1])
+                            phi_desire = round(np.rad2deg(algo.find_dev((algo.x_d, algo.y_d), tip_pos)))
+                            actual_phi = round(np.rad2deg(algo.find_dev((algo.x_d, algo.y_d), center)))
+                            error_1 = phi_desire - actual_phi
+                            target_list.append(error_1)
+                            delta_target =target_list[-1] - target_list[-2]
+                            delta_target_list.append(delta_target)
+                            # algo.go_to_goal = True
+                            if len(delta_target_list) <= 1:
+                                encoder_var.set(final_angle)
+                                card.set_encoder_angle(final_angle)
+                            else:
+                                print(delta_target_list)
+                                # vibration_var_2.set(100)
+                                # law_angle = algo.law_1(first= True)
+                                # encoder_var.set(law_angle)
+                                # card.set_encoder_angle(law_angle)
+                                encoder_var.set(delta_target_list[-1])
+                                card.set_encoder_angle(delta_target_list[-1])
+                                vibration_var_2.set(100)
+                                print('wating for youuuuuuuu')
+                                # algo.go_to_goal = True
+
+                        # if distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.go_to_goal == True:
+                        #     vibration_var_2.set(100)
+                        #     # print(delta_target_list)
+                        #     # print(delta_target_list[-1])
+                        #     # encoder_var.set(delta_target_list[-1])
+                        #     # card.set_encoder_angle(delta_target_list[-1])
+                        #     print('wating for youuuuuuuu')
+
+                        # if distance_to_goal < 5 and algo.dis_to_tip_achieved == True and algo.go_to_goal == True:
+                        if distance_to_goal < 5 and algo.dis_to_tip_achieved == True:
+                            algo.dis_to_goal_achieved = True
+                            stop_btn_var_2.set(1)
+                            algo.stop_trigger = True
+                        #
                         #     print('arrive with final orientation error of', orientation_error)
-                        #
-                        # else:
-                        #
                         #     # start_btn_var.set(1)
                         #     start_point = tip_pos
                         #     end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
@@ -436,6 +492,7 @@ def main():
                 else:
                     print("Failed to calculate orientation angle")
         else:
+
             print("aruco not exists")
 
         out.write(frame)
