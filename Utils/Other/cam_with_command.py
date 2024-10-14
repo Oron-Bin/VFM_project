@@ -233,7 +233,7 @@ def main():
     # Create CSV file and write headers
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Control angle', 'Orientation Angle', 'Radius', 'Time', 'Desire_Orientation','Orientation Error', '(x_d,y_d)','Goal_Distance','Distance Error','Phi_Desire' ,'Phi_Error','Vibration Amp (%)'])
+        writer.writerow(['Control angle', 'Orientation Angle', 'Radius', 'Time', 'Desire_Orientation','Orientation Error', 'R_Desire','Actual_R','Phi_Desire' ,'Actual_Phi','Vibration Amp (%)'])
         # writer.writerow(['Control angle', 'Orientation Angle', 'Radius'])
 
     def update_frame():
@@ -513,7 +513,7 @@ def main():
                     with open(csv_file_path, mode='a', newline='') as file:
                         writer = csv.writer(file)
                         # 'Orientation Error', 'Distance Error', 'Vibration Amp (%)'
-                        writer.writerow([control_angle, angle, radius, elapsed_time, des_orientation,orientation_error,(algo.x_d,algo.y_d),goal_distance,distance_to_goal, phi_desire,phi_error,vibration_var_2.get()])
+                        writer.writerow([control_angle, angle, radius, elapsed_time,des_orientation,orientation_error,goal_distance,0.5*distance_to_tip, phi_desire,actual_phi,vibration_var_2.get()])
 
                 else:
                     print("Failed to calculate orientation angle")

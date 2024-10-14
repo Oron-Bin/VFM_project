@@ -46,8 +46,9 @@ class card_algorithms:
         self.dis_to_tip_achieved = False
         self.dis_to_goal_achieved = False
         self.go_to_goal = False
-        self.fix = False
-        self.fix2 = False
+        self.start_done = False
+        # self.fix = False
+        # self.fix2 = False
 
 
 
