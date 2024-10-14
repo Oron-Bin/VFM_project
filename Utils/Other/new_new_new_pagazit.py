@@ -302,8 +302,8 @@ def main():
                                                              round(tip_pos[1] - 50 * math.sin(np.deg2rad(control_angle)))),center ,0)
 
 
-                    cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
-                                    (255, 255, 0), 2)
+                    # cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
+                                    # (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
                     cv2.putText(frame, f"control_angle: {control_angle}", (10, 60),
@@ -313,6 +313,8 @@ def main():
                     distance_to_goal = np.sqrt((center[0] - algo.x_d) ** 2 + (center[1] - algo.y_d) ** 2)
                     distance_to_tip = np.sqrt((center[0] - tip_pos[0]) ** 2 + (center[1] - tip_pos[1]) ** 2)
                     if not algo.orientation_achieved:
+                        cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
+                        (0, 255, 0), 2)
                         if orientation_error < 5:
                             algo.flag = 1
                             print("Orientation error is less than 5 degrees")
@@ -355,6 +357,8 @@ def main():
                             print('orientation error is big')
 
                     if algo.orientation_achieved:
+                        cv2.arrowedLine(frame, center ,(algo.x_d,algo.y_d),
+                        (0, 0, 255), 1)
                         if algo.flag == 1:
                             # calibrate_btn_var_2.set(1)
                             algo.flag = 2
@@ -444,7 +448,7 @@ def main():
                                 card.set_encoder_angle(final_angle)
                             else:
                                 print(delta_target_list)
-                                # vibration_var_2.set(100)
+
                                 # law_angle = algo.law_1(first= True)
                                 # encoder_var.set(law_angle)
                                 # card.set_encoder_angle(law_angle)
@@ -452,6 +456,7 @@ def main():
                                 card.set_encoder_angle(delta_target_list[-1])
                                 # vibration_var_2.set(100)
                                 print('wating for youuuuuuuu')
+                                vibration_var_2.set(100)
                                 # algo.go_to_goal = True
 
                         # if distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.go_to_goal == True:
