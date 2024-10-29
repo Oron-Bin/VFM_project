@@ -3,6 +3,7 @@ import sys
 import datetime
 import time
 import cv2
+import csv
 
 sys.path.insert(1, r'/')
 
@@ -12,9 +13,19 @@ from Utils.Control.cardalgo import *
 
 # This code is used to record a video
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-filename = f"/home/roblab20/Desktop/videos/oron_videos/oron_{timestamp}.avi"
+# filename = f"/home/roblab20/Desktop/article_videos/full_vibration/oron_{timestamp}.XVID"
+VIDEO_DIR = "/home/roblab20/Desktop/article_videos/full_vibration"
+VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
+
 start_time = time.time()
 
+CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_vibration"
+csv_file_path = os.path.join(CSV_FILE_PATH, f"data_{timestamp}.csv")
+# Create CSV file and write headers
+with open(csv_file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(
+        ['angle'])
 # Define video resolution
 res = '720p'
 # data_list = []
@@ -34,7 +45,7 @@ STD_DIMENSIONS = {
 }
 
 # Get the dimensions for the requested resolution
-def get_dims(cap, res='1080p'):
+def get_dims(cap, res='480p'):
     width, height = STD_DIMENSIONS["480p"]
     if res in STD_DIMENSIONS:
         width, height = STD_DIMENSIONS[res]
@@ -56,9 +67,11 @@ def get_video_type(filename):
 
 # Initialize camera parameters and video writer
 cam = cv2.VideoCapture(0)
-out = cv2.VideoWriter(filename, get_video_type(filename), 7, get_dims(cam, res))
-cam.set(3, 1280)
-cam.set(4, 720)
+# out = cv2.VideoWriter(filename, get_video_type(filename), 7, get_dims(cam, res))
+video_path = os.path.join(VIDEO_DIR, f"output_{timestamp}.avi")
+out = cv2.VideoWriter(video_path, VIDEO_FOURCC, 20.0, (640, 480))
+cam.set(3, 640)
+cam.set(4, 480)
 
 # Set the card class and open the serial communication
 mycard = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
@@ -74,8 +87,8 @@ motor_flag  = 0
 vib_flag = True
 
 start = time.perf_counter()
-algo.x_d = 600  # set a random value of the goal x position
-algo.y_d = 210  # set a random value of the goal y position
+algo.x_d = random.randint(300, 360)  # set a random value of the goal x position
+algo.y_d = random.randint(90, 140)  # set a random value of the goal y position
 goal_position = [algo.x_d,algo.y_d]
 algo.orientation = random.randint(0,359)
 angle_teta = 0
@@ -84,7 +97,7 @@ oron = True
 if state == 'calibrate' :
     mycard.calibrate()
     print('the system is ready to vibrate')
-    time.sleep(3)
+    # time.sleep(3)
     state = 'after_calibrate'
 
 
@@ -100,6 +113,7 @@ while cam.isOpened():
         aruco_centers, ids = algo.detect_aruco_centers(img)
         start = time.perf_counter()
 
+
         if motor_flag == 0:
             motor_flag = 2
 
@@ -113,7 +127,7 @@ while cam.isOpened():
           # now the vibration is continuous.
         if circle_radius is not None and state == 'vibrating' and motor_flag ==2:
             mycard.start_hardware()
-            mycard.vibrate_hardware(62)
+            mycard.vibrate_hardware(100)
             algo.update(circle_center)
             algo.plot_desired_position(img)
             algo.plot_path(img)
@@ -130,23 +144,26 @@ while cam.isOpened():
                 # mycard.send_data('encoder') ## still dont sure if its necessary
                 # time.sleep(0.001)
 
-            if algo.check_distance(epsilon=10) is True:
+            if algo.check_distance(epsilon=10) is True and motor_flag == 2:
                 state = 'stop_vibrating'
                 if state == 'stop_vibrating':
+                    # mycard.vibrate_hardware(0)
                     mycard.stop_hardware()
                     print('arrive')
-                    algo.next_iteration()
-                    j = j + 1
-                    algo.package_data()
-                    algo.clear()
-                    algo.random_input()
+
+                    # algo.next_iteration()
+                    # j = j + 1
+                    # algo.package_data()
+                    # algo.clear()
+                    # algo.random_input()
                     state = 'vibrating'
-                    motor_flag = 0
+                    motor_flag = 2
 
-
-
-        cv2.putText(img, f"motor_angle: {angle_teta}", (10, 150),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        with open(csv_file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            # 'Orientation Error', 'Distance Error', 'Vibration Amp (%)'
+            writer.writerow(
+                [angle_teta])
 
         out.write(img)  # Saves the current frame to the video file.
         algo.display_image(img, circle_center,circle_radius)  # shows the marker circle center and circle shape in red color

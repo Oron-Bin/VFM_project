@@ -107,9 +107,9 @@ def main():
     try:
         card = Card(x_d=0, y_d=0, a_d=-1, x=-1, y=-1, a=-1, baud=115200, port='/dev/ttyACM0')
         algo = card_algorithms(x_d=0, y_d=0)
-        tip_pos = (340, 146)
+        tip_pos = (300, 148)
         des_orientation = random.randint(0, 359)
-        (algo.x_d, algo.y_d) = (333, 100)
+        (algo.x_d, algo.y_d) = (290, 100)
 
 
     except Exception as e:
@@ -233,7 +233,7 @@ def main():
     # Create CSV file and write headers
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Control angle', 'Orientation Angle', 'Radius', 'Time', 'Desire_Orientation','Orientation Error', 'R_Desire','Actual_R','Phi_Desire' ,'Actual_Phi','Vibration Amp (%)'])
+        writer.writerow(['Control angle', 'Orientation Angle', 'Radius', 'Time', 'Desire_Orientation','Orientation Error', 'R_Desire','Actual_R','Distance_Error','Phi_Desire' ,'Actual_Phi','Vibration Amp (%)'])
         # writer.writerow(['Control angle', 'Orientation Angle', 'Radius'])
 
     def update_frame():
@@ -341,7 +341,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(70)
+                                vibration_var.set(80)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
@@ -509,11 +509,12 @@ def main():
                     phi_desire = round(np.rad2deg(algo.find_dev((algo.x_d,algo.y_d), tip_pos)))
                     actual_phi = round(np.rad2deg(algo.find_dev(center, tip_pos)))
                     phi_error = np.abs(phi_desire- actual_phi)
+                    R_Error = np.abs(goal_distance -0.5*distance_to_tip )
 
                     with open(csv_file_path, mode='a', newline='') as file:
                         writer = csv.writer(file)
                         # 'Orientation Error', 'Distance Error', 'Vibration Amp (%)'
-                        writer.writerow([control_angle, angle, radius, elapsed_time,des_orientation,orientation_error,goal_distance,0.5*distance_to_tip, phi_desire,actual_phi,vibration_var_2.get()])
+                        writer.writerow([control_angle, angle, radius, elapsed_time,des_orientation,orientation_error,goal_distance,0.5*distance_to_tip, R_Error,phi_desire,actual_phi,vibration_var_2.get()])
 
                 else:
                     print("Failed to calculate orientation angle")

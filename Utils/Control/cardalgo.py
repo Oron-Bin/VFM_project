@@ -143,8 +143,8 @@ class card_algorithms:
         if calibration == True:
             self.tip_position = self.point_calibration(img) #return the x,y of the function below
         else:
-            self.tip_position = (644,185) #the center of the top
-            cv2.circle(img, self.tip_position, radius=5, color=(0, 255, 0), thickness=3)
+            self.tip_position = (340, 146) #the center of the top
+            cv2.circle(img, self.tip_position, radius=5, color=(0, 0, 0), thickness=2)
         return self.tip_position
 
     def point_calibration(self,img):
@@ -378,7 +378,7 @@ class card_algorithms:
 
 
     def detect_circles_and_get_centers(self,frame):
-        tip_pos = (340, 146)
+        tip_pos = (300, 148)
         # tip_pos = (330, 150)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 21)
