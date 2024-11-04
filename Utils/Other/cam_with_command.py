@@ -12,7 +12,7 @@ from Utils.Control.cardalgo import *
 from Utils.Hardware.package import *
 
 # Global constants
-VIDEO_DIR = "/home/roblab20/Desktop/article_videos/full_algo"
+VIDEO_DIR = "/home/roblab20/Desktop/article_videos/full_algo_rec"
 VIDEO_FOURCC = cv2.VideoWriter_fourcc(*'XVID')
 
 # Global variables
@@ -109,6 +109,7 @@ def main():
         algo = card_algorithms(x_d=0, y_d=0)
         tip_pos = (300, 148)
         des_orientation = random.randint(0, 359)
+        # des_orientation = 180
         (algo.x_d, algo.y_d) = (290, 100)
 
 
@@ -228,7 +229,7 @@ def main():
     delta_target_list = []
     target_list = [0]
 
-    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo"
+    CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/full_rec_data"
     csv_file_path = os.path.join(CSV_FILE_PATH, f"data_{timestamp}.csv")
     # Create CSV file and write headers
     with open(csv_file_path, mode='w', newline='') as file:
@@ -245,7 +246,7 @@ def main():
         elapsed_time = round(time.time() - start_time, 2)
 
         frame_copy = frame.copy()
-        frame, centers = algo.detect_circles_and_get_centers(
+        frame, centers = algo.detect_circles_and_get_centers_2(
             frame_copy)  # if not circle build anothe function for rectangles
 
         if len(centers) > 0:
@@ -259,7 +260,7 @@ def main():
 
             # cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=1)
 
-            cv2.circle(frame, (center[0], center[1]), 90, (0, 255, 0), 1)
+            # cv2.circle(frame, (center[0], center[1]), 90, (0, 255, 0), 1)
             cv2.circle(frame, (algo.x_d, algo.y_d), radius=5, color=(0, 0, 255), thickness=2)
 
         print(f"Center: {center}")
@@ -315,7 +316,7 @@ def main():
                     if not algo.orientation_achieved:
                         cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
                         (0, 255, 0), 2)
-                        if orientation_error < 5:
+                        if orientation_error < 10:
                             algo.flag = 1
                             print("Orientation error is less than 5 degrees")
                             stop_btn_var.set(1)
@@ -341,7 +342,7 @@ def main():
                             print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
-                                vibration_var.set(80)
+                                vibration_var.set(62)
                                 # encoder_var.set(50)
                                 # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)

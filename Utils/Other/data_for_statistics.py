@@ -5,7 +5,8 @@ import numpy as np
 # from Tests.Vision.circledetection import distance
 
 # Define the path to the folder containing the CSV files
-folder_path = '/home/roblab20/Desktop/article_videos/data_full_algo'
+# folder_path = '/home/roblab20/Desktop/article_videos/data_full_algo'
+folder_path = '/home/roblab20/Desktop/article_videos/full_rec_data'
 
 # Initialize empty lists to store the errors
 orientation_errors = []
@@ -21,12 +22,13 @@ for filename in os.listdir(folder_path):
 
         # Get the last value from the 'Orientation Error' and 'Distance Error' columns
         last_orientation_error = df['Orientation Error'].iloc[-1]
-        last_distance_error = df['Distance Error'].iloc[-1]
+        last_distance_error = np.abs(df['R_Desire'].iloc[-1] - df['Actual_R'].iloc[-1])
+        # last_distance_error = df['Distance_Error'].iloc[-1]
 
         # Append the errors to the respective lists
         orientation_errors.append(last_orientation_error)
-        distance_errors.append(last_distance_error/2)
-
+        distance_errors.append(last_distance_error)
+    # distance_errors.append(last_distance_error/2)
 # The lists 'orientation_errors' and 'distance_errors' now contain the last values from each file
 print("Orientation Errors:", orientation_errors)
 print("Distance Errors:", distance_errors)

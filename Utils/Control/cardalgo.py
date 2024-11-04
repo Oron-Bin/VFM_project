@@ -382,7 +382,8 @@ class card_algorithms:
         # tip_pos = (330, 150)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 21)
-        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=50, maxRadius=300)
+        circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 1.5, 1000, minRadius=100, maxRadius=100)
+
         cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
 
         centers = []
@@ -390,6 +391,32 @@ class card_algorithms:
             circles = np.round(circles[0, :]).astype("int")
             for (x, y, r) in circles:
                 centers.append((x, y))
+                # cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
+                # cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
+        return frame, centers
+
+    def detect_circles_and_get_centers_2(self,frame):
+        tip_pos = (300, 148)
+        # tip_pos = (330, 150)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # gray = cv2.medianBlur(gray, 21)
+        blurred = cv2.GaussianBlur(gray, (9, 9), 2)
+        # circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, 1.5, 20, minRadius=40, maxRadius=60)
+        circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=1, minDist=20,
+                                   param1=50, param2=30, minRadius=40, maxRadius=50)
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=20,
+                                   param1=50, param2=30, minRadius=40, maxRadius=50)
+        cv2.circle(frame, tip_pos, radius=5, color=(0, 0, 0), thickness=2)
+
+        centers = []
+        if circles is not None:
+            circles = np.uint16(np.around(circles))
+            for i in circles[0, :]:
+                # Draw the outer circle
+                # cv2.circle(frame, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                # Draw the center of the circle
+                cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
+                centers.append((i[0], i[1]))
                 # cv2.circle(frame, (x, y), r, (0, 255, 0), 2)
                 # cv2.circle(frame, (x, y), radius=5, color=(255, 255, 0), thickness=2)
         return frame, centers
