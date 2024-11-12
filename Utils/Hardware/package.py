@@ -1,6 +1,9 @@
 import serial
 import time
-# from Utils.Control.robotiqGripper import *
+from Utils.Control.robotiqGripper import *
+
+
+
 
 def jsonize(key,data): #how the data is tansform in the packet
     packet = 'json:{"'+str(key)+'":'+str(data)+'}'+'\x0d'+'\x0a'
@@ -144,26 +147,30 @@ class Card:
 
 
 #
-# # grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
-# grip.goTo(12)
+grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
+
 mycard = Card(x_d=0,y_d=0,a_d=-1,x=-1,y=-1,a=-1,baud=115200,port='/dev/ttyACM0')
-# # # # # # # # # # # # # # # # # # #
+grip.goTo(0)
+mycard.calibrate()
+mycard.start_hardware()
+mycard.set_encoder_angle(35)
+mycard.vibrate_hardware(100)
+mycard.set_encoder_angle(10)
+mycard.set_encoder_angle(10)
+mycard.stop_hardware()
+# grip.goTo(19)
 # mycard.calibrate_2()
 # mycard.start_hardware_2()
-# # # mycard.set_encoder_angle(120)
-# # #
+# mycard.set_encoder_angle(90)
 # mycard.vibrate_hardware_2(100)
-# # #
-# #
+# # mycard.stop_hardware_2()
+# mycard.vibrate_hardware_2(0)
+#
+# # grip.goTo(19)
+# mycard.set_encoder_angle(-90)
+# mycard.vibrate_hardware_2(100)
 # mycard.stop_hardware_2()
-#
-# mycard.calibrate()
-# mycard.start_hardware()
-# mycard.vibrate_hardware(100)
-# #
-#
-# mycard.stop_hardware()
-#
+
 
 
 

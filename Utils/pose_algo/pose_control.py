@@ -4,7 +4,6 @@ import threading
 import csv
 import tkinter as tk
 from tkinter import ttk
-
 import cv2
 import numpy as np
 
@@ -296,15 +295,10 @@ def main():
                     rotate_point = algo.rotate_point(tip_pos, (algo.x_d, algo.y_d), -180)
                     rotate_center = algo.rotate_point(tip_pos, center, 180)
                     command_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
-                    # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
-                    # control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                     control_angle = round(np.rad2deg(algo.find_dev(tip_pos, rotate_center)))
                     rotate_control_angle = algo.rotate_point(((round(tip_pos[0] + 50 * math.cos(np.deg2rad(control_angle)))),
                                                              round(tip_pos[1] - 50 * math.sin(np.deg2rad(control_angle)))),center ,0)
 
-
-                    # cv2.arrowedLine(frame, tuple(rotate_control_angle),tip_pos,
-                                    # (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end), (255, 255, 0), 2)
                     cv2.arrowedLine(frame, center, tuple(end_des), (255, 0, 0), 2)
                     cv2.putText(frame, f"control_angle: {control_angle}", (10, 60),
@@ -330,31 +324,23 @@ def main():
                             rotate_center = algo.rotate_point(tip_pos, center, 180)
                             command_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                             command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos)))
-                            # control_angle = round(np.rad2deg(algo.find_dev(rotate_point, rotate_center)))
                             control_angle = round(np.rad2deg(algo.find_dev(tip_pos, rotate_center)))
-                            # tip_pos_2 = (338, 135)
-                            # command_angle = round(np.rad2deg(algo.find_dev(center, tip_pos_2)))
                             angle_to_goal_list.append(command_angle)
-                            print('want', command_angle)
+                            # print('want', command_angle)
 
                             delta_angle = angle_to_goal_list[-1] - angle_to_goal_list[-2]
                             delta_angle_list.append(delta_angle)
-                            print(delta_angle_list[-1])
+                            # print(delta_angle_list[-1])
 
                             if len(delta_angle_list) <= 1:
                                 vibration_var.set(62)
-                                # encoder_var.set(50)
-                                # card.set_encoder_angle(50)
                                 encoder_var.set(command_angle)
                                 card.set_encoder_angle(command_angle)
                             else:
                                 print(distance_to_goal)
 
-                                # encoder_var.set(1)
-                                # card.set_encoder_angle(1)
-
                                 if distance_to_goal < 5:
-                                    print('enough')
+                                    print('arrive')
 
                             print('orientation error is big')
 
@@ -362,28 +348,17 @@ def main():
                         cv2.arrowedLine(frame, center ,(algo.x_d,algo.y_d),
                         (0, 0, 255), 1)
                         if algo.flag == 1:
-                            # calibrate_btn_var_2.set(1)
                             algo.flag = 2
-                            print('ffffffffffffffffffffffffffffffffffffffffffffffffffffffff',algo.flag)
 
                         if distance_to_tip > 5 and algo.dis_to_tip_achieved == False :
-                            # print(algo.dis_to_tip_achieved)
                             angle_to_tip = round(np.rad2deg(algo.find_dev(center, tip_pos)))
                             print('angle_to_tip', angle_to_tip)
                             final_list.append(angle_to_tip)
-                            # print('want 2', angle_to_tip)
-
                             delta_final = final_list[-1] - final_list[-2]
                             delta_final_list.append(delta_final)
 
                             if len(delta_final_list) <= 1:
                                 start_btn_var_2.set(1)
-
-                                print('modifyyyyyyyyyyyyyyyyyyyyyyy')
-                                # vibration_var.set(100)
-                                # encoder_var.set(50)
-                                # card.set_encoder_angle(50)
-                                # if len(delta_final_list) > 0:
                                 added_angle = delta_final_list[0] - angle_to_goal_list[1]
 
                                 if added_angle < 0:
@@ -396,12 +371,6 @@ def main():
                                 card.set_encoder_angle(added_angle)
                                 goal_list.append(added_angle)
 
-                                print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
-                                      angle_to_goal_list[1] + added_angle)
-                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ',
-                                #       delta_final_list[0] )
-                                # print('dadadadadadadaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ', delta_final_list[0] - angle_to_goal_list[1])
-
 
                             else:
                                 vibration_var_2.set(100)
@@ -411,25 +380,12 @@ def main():
                                 print('distance to tip', distance_to_tip)
 
                         if distance_to_tip <= 5 and algo.dis_to_tip_achieved == False:
-                            # vibration_var_2.set(0)
                             stop_btn_var_2.set(1)
                             algo.stop_trigger = True
-                            print('enough_2')
                             algo.dis_to_tip_achieved = True
-
-                        # elif distance_to_tip <= 5 and algo.dis_to_tip_achieved == True:
-                        #     # vibration_var_2.set(0)
-                        #     # stop_btn_var_2.set(1)
-                        #     # algo.stop_trigger = True
-                        #     print('enough_3')
-                        #     # algo.dis_to_tip_achieved = True
-                        #     # algo.flag = 3
-                        #     # algo.flag = 3
-
 
 
                         if distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.dis_to_goal_achieved == False and algo.go_to_goal == False:
-                            # card.calibrate_2()
                             start_btn_var_2.set(1)
                             algo.go_to_goal = True
 
@@ -442,68 +398,25 @@ def main():
                             elif final_angle > 360:
                                 final_angle -= 360
 
-                            # encoder_var.set(final_angle)
-                            # card.set_encoder_angle(final_angle)
-                            print(final_angle,'ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
-                            # print(angle_to_goal_list[1])
+
                             phi_desire = round(np.rad2deg(algo.find_dev((algo.x_d, algo.y_d), tip_pos)))
                             actual_phi = round(np.rad2deg(algo.find_dev((algo.x_d, algo.y_d), center)))
                             error_1 = phi_desire - actual_phi
                             target_list.append(error_1)
                             delta_target =target_list[-1] - target_list[-2]
                             delta_target_list.append(delta_target)
-                            # algo.go_to_goal = True
+
                             if len(delta_target_list) <= 10:
                                 calibrate_btn_var_2.set(1)
-                                # encoder_var.set((int(input('please enter a number:'))))
-                                # card.set_encoder_angle(int(input('please enter a number:')))
-                                # start_btn_var_2.set(1)
-
 
                             else:
-                                # print(delta_target_list)
-                                # if algo.start_done == False:
-                                #    start_btn_var_2.set(1)
-                                #    algo.start_done = True
-                                # else:
-                                #     print('wating for youuuuuuuu_________________')
-                                    # encoder_var.set(delta_target_list[-1])
-                                    # card.set_encoder_angle(delta_target_list[-1])
-                                # law_angle = algo.law_1(first= True)
-                                # encoder_var.set(law_angle)
-                                # card.set_encoder_angle(law_angle)
+                                print('wait for commands from the gui')
 
-                                # encoder_var.set(delta_target_list[-1])
-                                # card.set_encoder_angle(delta_target_list[-1])
-
-                                # vibration_var_2.set(100)
-                                print('wating for youuuuuuuu')
-                                # vibration_var_2.set(100)
-                                # algo.go_to_goal = True
-
-                        # if distance_to_goal > 5 and algo.dis_to_tip_achieved == True and algo.go_to_goal == True:
-                        #     vibration_var_2.set(100)
-                        #     # print(delta_target_list)
-                        #     # print(delta_target_list[-1])
-                        #     # encoder_var.set(delta_target_list[-1])
-                        #     # card.set_encoder_angle(delta_target_list[-1])
-                        #     print('wating for youuuuuuuu')
-
-                        # if distance_to_goal < 5 and algo.dis_to_tip_achieved == True and algo.go_to_goal == True:
                         if distance_to_goal < 5 and algo.dis_to_tip_achieved == True:
                             algo.dis_to_goal_achieved = True
                             stop_btn_var_2.set(1)
                             algo.stop_trigger = True
-                        #
-                        #     print('arrive with final orientation error of', orientation_error)
-                        #     # start_btn_var.set(1)
-                        #     start_point = tip_pos
-                        #     end_point = (round(tip_pos[0] + 50 * math.cos(np.deg2rad(motor_angle_list[-1]))),
-                        #                  round(tip_pos[1] - 50 * math.sin(np.deg2rad(motor_angle_list[-1]))))
-                        #
-                        #     rotated_end_point = algo.rotate_point(start_point, end_point, 90)
-                        #     cv2.arrowedLine(frame, start_point, tuple(rotated_end_point), (0, 0, 255), 2)
-                        #     print('waiting for order')
+
 
                     radius = 0.5 * (round(np.sqrt((center[0] - tip_pos[0]) ** 2 + (center[1] - tip_pos[1]) ** 2)))
                     goal_distance = 0.5 * (round(np.sqrt((algo.x_d - tip_pos[0]) ** 2 + (algo.y_d - tip_pos[1]) ** 2)))
@@ -514,7 +427,6 @@ def main():
 
                     with open(csv_file_path, mode='a', newline='') as file:
                         writer = csv.writer(file)
-                        # 'Orientation Error', 'Distance Error', 'Vibration Amp (%)'
                         writer.writerow([control_angle, angle, radius, elapsed_time,des_orientation,orientation_error,goal_distance,0.5*distance_to_tip, R_Error,phi_desire,actual_phi,vibration_var_2.get()])
 
                 else:

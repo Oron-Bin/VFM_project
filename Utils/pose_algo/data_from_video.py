@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Path to the CSV file
-CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_full_algo/data_2024-10-07-18-59-32.csv"
+CSV_FILE_PATH = "/home/roblab20/Desktop/article_videos/data_rec/circles_2_rec.csv"
 
 # Load the data from the CSV file
 data = pd.read_csv(CSV_FILE_PATH)
@@ -10,8 +10,8 @@ data = pd.read_csv(CSV_FILE_PATH)
 # Calculate the time values
 # Assuming the length of the data corresponds to the number of frames
 num_frames = len(data)
-time_values = [i / 20 for i in range(num_frames)]
-
+# time_values = [i / 20 for i in range(num_frames)]
+time_values = data['Time']
 # Plot the parameters
 plt.figure(figsize=(12, 8))
 

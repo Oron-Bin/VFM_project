@@ -561,72 +561,17 @@ class RobotiqGripper(mm.Instrument):
             # print(self.registerDic[key][value])
 
 
-# Test
-# grip=RobotiqGripper('COM4')
-# if __name__ == "__main__":
 if True:
-    # import minimalmodbus
-    # import serial
-    # import binascii
-    # import time
-    # import robotiqGripper as rq
-    #
+
     instrument = mm.Instrument('/dev/ttyUSB0', 9, debug=True)
-    #
     # # instrument.serial.port                     # this is the serial port name
     instrument.serial.baudrate = 115200  # Baud
-    # # instrument.serial.bytesize = 8
-    # # instrument.serial.parity   = serial.PARITY_NONE
-    # # instrument.serial.stopbits = 1
-    # # instrument.serial.timeout  = 0.2          # seconds
-    # # instrument.address = 9                         # this is the slave address number
-    # # instrument.mode = minimalmodbus.MODE_RTU   # rtu or ascii mode
-    # # instrument.clear_buffers_before_each_transaction = True
-    # #
-    # # print(instrument)
-    #
-    # # instrument.write_registers(1000,[0,0,0]) # Reset the gripper
-    # # instrument.write_registers(1000,[256,0,0]) #Activate the gripper
-    #
-    # myGripper = rq.RobotiqGripper(portname='/dev/ttyUSB0', slaveaddress=9)
-    # myGripper.activate()
-    # myGripper.openGripper(1, 1)
-    # myGripper.closeGripper(1, 1)
-    # time.sleep(5)
-    # myGripper.openGripper(255, 255)
-    # myGripper.closeGripper(255, 255)
-    # time.sleep(2)
-    # myGripper.goTo(0)
-    # time.sleep(1)
-    # myGripper.goTo(125)
-    # time.sleep(1)
-    # myGripper.goTo(255)
-    #
+
 
 
     grip = RobotiqGripper(portname='/dev/ttyUSB0',slaveaddress=9)
-    # grip.serial.baudrate(115200)
-    # grip.resetActivate()
-# # #     # grip.calibrate(0,85)
-# #     print("fsdsfsf")
-#     grip.reset()
-
-#     # grip.resetActivate()
-#     # # grip.printInfo()
-#     # grip.activate()
-#     # grip.printInfo()
-# #
-#     grip.goTo(14)
-    # print("")
-
-    # grip.goTo(0)
+    grip.reset()
+    grip.goTo(18)
 
 
-# grab, pose = grip.goTo(0,255,1)
-# grip.calibrate(0,85)
-# grip.printInfo()
-# grip.goTomm(80)
-# grip.goTomm(20)
-# grip.calibrate(0,100)
-# grip.goTomm(10,255,255)
-# grip.goTomm(40,1,255)[
+
